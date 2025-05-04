@@ -75,5 +75,14 @@ payment_proof: (upload file .jpg/.png)
 
 /////////////////////////////////////////////////////
 
+REGISTRASI EVENT, QR CODE, STATUS KEHADIRAN
 
+| Fitur                             | Endpoint                 | Method |
+| --------------------------------- | ------------------------ | ------ |
+| Registrasi ke event (generate QR) | `/api/participants`      | POST   |
+| Lihat semua partisipasi           | `/api/participants`      | GET    |
+| Update status kehadiran           | `/api/participants/{id}` | PUT    |
+| Lihat detail 1 partisipasi        | `/api/participants/{id}` | GET    |
+
+/////////////////////////////////////////////////////////
 
