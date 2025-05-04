@@ -1,0 +1,79 @@
+POST api/register
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password",
+  "password_confirmation": "password",
+  "role": "admin" atau "participant"
+}
+
+////////////////////////
+
+POST api/login
+
+{
+  "email": "john@example.com",
+  "password": "password"
+}
+
+///////////////////////////
+
+POST api/logout
+
+header: Authorized (token)
+
+///////////////////////////
+
+Create Event
+
+POST api/events
+
+{
+  "title": "Webinar Laravel",
+  "description": "Belajar Laravel untuk Pemula",
+  "provides_certificate": true,
+  "price": 100000,
+  "location": "Zoom",
+  "status": "active",
+  "max_participants": 100,
+  "start_datetime": "2025-06-01 10:00:00",
+  "end_datetime": "2025-06-01 12:00:00",
+  "image_path": "storage/images/webinar.jpg"
+}
+
+///////////////////////////////////////////////
+
+| Fitur        | Endpoint           | Method |
+| ------------ | ------------------ | ------ |
+| Create Event | `/api/events`      | POST   |
+| List Events  | `/api/events`      | GET    |
+| View Detail  | `/api/events/{id}` | GET    |
+| Update Event | `/api/events/{id}` | PUT    |
+| Delete Event | `/api/events/{id}` | DELETE |
+
+////////////////////////////////////////////////
+
+PAYMENT
+
+| Fitur                    | Endpoint             | Method |
+| ------------------------ | -------------------- | ------ |
+| Buat pembayaran          | `/api/payments`      | POST   |
+| Lihat semua pembayaran   | `/api/payments`      | GET    |
+| Detail 1 pembayaran      | `/api/payments/{id}` | GET    |
+| Update status pembayaran | `/api/payments/{id}` | PUT    |
+
+///////////////////////////////////////////////////
+
+buat pembayaran pastikan form data
+
+event_id: 1
+amount: 100000
+payment_method: transfer
+payment_proof: (upload file .jpg/.png)
+
+
+/////////////////////////////////////////////////////
+
+
+
