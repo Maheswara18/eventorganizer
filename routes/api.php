@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ParticipantController;
+use App\Http\Controllers\CertificateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,3 +60,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/participants/{id}', [ParticipantController::class, 'show']);
     Route::put('/participants/{id}', [ParticipantController::class, 'update']);
 });
+
+
+//////////////CERTIFICATE//////////////
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/certificates', [CertificateController::class, 'index']);
+    Route::post('/certificates', [CertificateController::class, 'store']);
+    Route::get('/certificates/{id}', [CertificateController::class, 'show']);
+});
+
+// endpoint publik untuk verifikasi sertifikat
+Route::post('/certificates/verify', [CertificateController::class, 'verify']);

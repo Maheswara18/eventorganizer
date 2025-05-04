@@ -86,3 +86,45 @@ REGISTRASI EVENT, QR CODE, STATUS KEHADIRAN
 
 /////////////////////////////////////////////////////////
 
+POST api/participants
+
+header: Authorize (token)
+
+{
+  "event_id": 1,
+  "payment_id": 1
+}
+
+
+//////////////////////////////////////////////////////
+
+SERTIFIKAT
+
+| Fitur                      | Endpoint                   | Method |
+| -------------------------- | -------------------------- | ------ |
+| Buat sertifikat peserta    | `/api/certificates`        | POST   |
+| Lihat semua sertifikat     | `/api/certificates`        | GET    |
+| Detail sertifikat          | `/api/certificates/{id}`   | GET    |
+| Verifikasi kode sertifikat | `/api/certificates/verify` | POST   |
+
+/////////////////////////////////////////////////////////
+
+ POST /api/certificates (Admin generate)
+
+ {
+  "participant_id": 2,
+  "event_id": 1
+}
+
+pastikan peserta sebagai present
+///////////////////////////////////////////
+
+POST /api/certificates/verify (Publik)
+
+{
+  "verification_code": "ABCD123456"
+}
+
+file sertifikat nya di simpen di /storage/certificates/....
+
+///////////////////////////////////////////
