@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Create Event</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form (submit)="createEvent()">
+    <ion-item>
+      <ion-label position="floating">Title</ion-label>
+      <ion-input [(ngModel)]="event.title" name="title" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Description</ion-label>
+      <ion-input [(ngModel)]="event.description" name="description" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Location</ion-label>
+      <ion-input [(ngModel)]="event.location" name="location" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Price</ion-label>
+      <ion-input [(ngModel)]="event.price" name="price" type="number" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Max Participants</ion-label>
+      <ion-input [(ngModel)]="event.max_participants" name="max_participants" type="number" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Start Date and Time</ion-label>
+      <ion-datetime [(ngModel)]="event.start_datetime" name="start_datetime" required></ion-datetime>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">End Date and Time</ion-label>
+      <ion-datetime [(ngModel)]="event.end_datetime" name="end_datetime" required></ion-datetime>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Image Path</ion-label>
+      <ion-input [(ngModel)]="event.image_path" name="image_path" required></ion-input>
+    </ion-item>
+
+    <ion-button expand="full" type="submit" color="primary">Create Event</ion-button>
+  </form>
+</ion-content>

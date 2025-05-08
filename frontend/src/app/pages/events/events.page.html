@@ -1,0 +1,20 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Events</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="goToCreateEvent()">Create Event</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <!-- Menggunakan *ngFor untuk mengiterasi array events -->
+    <ion-item *ngFor="let event of events">
+      <ion-label>
+        <h2>{{ event.title }}</h2>
+        <p>{{ event.description }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
