@@ -1,66 +1,190 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Event Organizer App
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi Event Organizer ini dikembangkan menggunakan **Laravel (PHP)** sebagai backend dan **Ionic (Angular)** sebagai frontend. Aplikasi ini memungkinkan pengguna untuk mendaftar event, melakukan pembayaran, check-in melalui QR Code, dan mendapatkan sertifikat kehadiran.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ⚙️ Struktur Proyek
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+    ```
+    SistemEventOrganizer
+    ├── app/
+    ├── bootstrap/
+    ├── config/
+    ├── database/
+    ├── frontend/    # Ionic
+    ├── public/
+    ├── resources/
+    ├── routes/
+    ├── storage/
+    ├── test/
+    ├── .editorconfig
+    ├── .env
+    ├── .env.example
+    ├── .gitattributes
+    ├── .gitgore
+    ├── artisan
+    ├── composer.json
+    ├── composer.lock
+    ├── endpoint_baca.txt
+    ├── package-lock.json
+    ├── package.json
+    ├── phpunit.xml
+    ├── README.md
+    └── vite.config.js
+    ```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🚀 Instalasi
 
-## Learning Laravel
+### Backend (Laravel)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. Clone repositori ini:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+   ```bash
+   git clone https://github.com/Maheswara18/eventorganizer.git
+   cd eventorganizer
+   ```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. Install depedensi Laravel
 
-## Laravel Sponsors
+    ```bash
+    composer install
+    ```
+    Proses ini cukup lama dan memakan cukup banyak internet jadi pastikan siapkan internet yang baik.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+3. Duplikat file environment
 
-### Premium Partners
+    ```bash
+    cp .env.example .env
+    ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
 
-## Contributing
+4. Atur konfigurasi database di file .env
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    contoh
+    ```bash
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=(nama database)
+    DB_USERNAME=root
+    DB_PASSWORD=
+    ```
 
-## Code of Conduct
+5. Generate application key
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+    ```bash
+    php artisan key:generate
+    ```
 
-## Security Vulnerabilities
+6. Jalankan migrasi
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    ```bash
+    php artisan migrate
+    ```
 
-## License
+7. Jalankan server lokal
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+    ```bash
+    php artisan serve
+    ```
+
+### Frontend (Ionic + Angular)
+
+1. Buka file frontend di kode editor yang baru (jadi kita menjalankan vscode 2 sekaligus 1 untuk backend dan 1 untuk ionic)
+
+    ```bash
+    cd ../frontend
+    ```
+
+2. install dependensi
+
+    ```bash
+    npm install
+    ```
+
+3. Jalankan Ionic
+
+    ```bash
+    ionic serve
+    ```
+
+
+## 🔄 Alur Bekerjasama Menggunakan GitHub
+
+### 1. Masuk ke Folder Project
+
+Buka terminal dengan cara
+
+    klik kanan di folder SistemEventOrganizer lalu open terminal here
+
+atau
+
+    klik kanan dan Open Git Bash Here
+
+cara lain
+
+search cmd lalu jalankan perintah
+
+    cd C:/Path/SistemEventOrganizer
+
+
+### 2. Cek Status Project
+
+Gunakan perintah ini untuk melihat apakah ada file yang berubah atau update dari tim lain:
+
+    git status
+
+
+Jika muncul pesan seperti:
+
+    Your branch is behind 'origin/main' by 2 commits.
+
+Berarti ada perubahan terbaru dari tim yang belum kamu ambil.
+
+### 3. Ambil Update Terbaru dari GitHub
+
+Untuk menyinkronkan dengan versi terbaru di GitHub, jalankan:
+
+    git pull origin main
+
+## ✍️ Menyimpan dan Mengirim Perubahan ke GitHub
+
+Setelah kamu mengedit atau menambahkan file ke project, lakukan langkah-langkah berikut:
+
+### 1. Cek Perubahan
+
+    git status
+
+### 2. Tambahkan Semua Perubahan
+
+    git add .
+
+### 3. Commit Perubahan
+
+Buat commit dengan pesan yang jelas:
+
+    git commit -m "Deskripsikan perubahan yang kamu buat"
+
+Contoh:
+
+    git commit -m "Menambahkan fitur login di frontend dan API auth di backend"
+
+### 4. Push ke GitHub
+
+Kirim perubahan ke repository GitHub:
+
+    git push origin main
+
+    ---
+
+## 💡 Tips Kolaborasi Tim
+
+- ✅ Selalu jalankan `git pull origin main` sebelum memulai kerja.
+- ✅ Gunakan pesan commit yang jelas dan singkat.
+- ✅ Gunakan branch baru jika ingin mengerjakan fitur secara terpisah.
+- ✅ Gunakan `.gitignore` agar file yang tidak penting tidak ikut ke GitHub (misalnya: `node_modules`, `.env`, `vendor/`, dll).
+
+---
+
+Semoga panduan ini membantu semua anggota tim untuk bekerjasama dengan lancar dan rapi 🚀
