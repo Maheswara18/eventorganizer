@@ -11,8 +11,14 @@ class EventController extends Controller
     // ✅ List semua event
     public function index()
     {
-        return response()->json(Event::with('admin')->get());
+        $events = Event::with('admin')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $events
+        ]);
     }
+
 
     // ✅ Detail satu event
     public function show($id)
