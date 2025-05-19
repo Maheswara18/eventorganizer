@@ -44,8 +44,15 @@ class EventController extends Controller
             'max_participants' => 'nullable|integer|min:1',
             'start_datetime' => 'required|date',
             'end_datetime' => 'required|date|after_or_equal:start_datetime',
-            'image_path' => 'nullable|string'
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
+
+        // ✅ Upload gambar jika ada
+        if ($request->hasFile('image_path')) {
+            $imageName = time() . '_' . uniqid() . '.' . $request->file('image_path')->extension();
+            $request->file('image_path')->move(public_path('storage/images'), $imageName);
+            $validated['image_path'] = 'storage/images/' . $imageName;
+        }
 
         $validated['admin_id'] = Auth::id();
 
@@ -53,6 +60,7 @@ class EventController extends Controller
 
         return response()->json($event, 201);
     }
+
 
     // ✅ Update event (admin only)
     public function update(Request $request, $id)

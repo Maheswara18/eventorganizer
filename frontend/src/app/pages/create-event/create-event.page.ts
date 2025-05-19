@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 
@@ -18,8 +18,9 @@ export class CreateEventPage {
     max_participants: 0,
     start_datetime: '',
     end_datetime: '',
-    image_path: ''
   };
+
+  selectedImage: File | null = null;
 
   constructor(
     private http: HttpClient,
@@ -27,15 +28,34 @@ export class CreateEventPage {
     private toastController: ToastController
   ) {}
 
-  // Fungsi untuk membuat event baru
-  async createEvent() {
-    const token = localStorage.getItem('token'); // Token dari localStorage
-    const headers = { Authorization: `Bearer ${token}` };
+  onImageSelected(event: any) {
+    this.selectedImage = event.target.files[0];
+  }
 
-    this.http.post<any>('http://localhost:8000/api/events', this.event, { headers }).subscribe({
-      next: async (res) => {
+  async createEvent() {
+    const token = localStorage.getItem('token');
+
+    const formData = new FormData();
+    formData.append('title', this.event.title);
+    formData.append('description', this.event.description);
+    formData.append('location', this.event.location);
+    formData.append('price', this.event.price.toString());
+    formData.append('max_participants', this.event.max_participants.toString());
+    formData.append('start_datetime', this.event.start_datetime);
+    formData.append('end_datetime', this.event.end_datetime);
+
+    if (this.selectedImage) {
+      formData.append('image_path', this.selectedImage); // sesuai field backend
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    this.http.post('http://localhost:8000/api/events', formData, { headers }).subscribe({
+      next: async () => {
         await this.showToast('Event berhasil dibuat');
-        this.router.navigate(['/events']); // Navigasi kembali ke halaman events
+        this.router.navigate(['/events']);
       },
       error: async (err) => {
         await this.showToast('Gagal membuat event');

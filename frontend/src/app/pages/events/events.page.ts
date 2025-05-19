@@ -35,6 +35,10 @@ export class EventsPage {
     this.getEvents();
   }
 
+  goHome() {
+  this.router.navigate(['/home']);
+}
+
   async getEvents() {
     // Ambil token dari localStorage atau tempat Anda menyimpannya setelah login
     const token = 'Bearer ' + localStorage.getItem('token');

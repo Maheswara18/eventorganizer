@@ -39,7 +39,13 @@
         </ion-select>
       </ion-item>
 
-      <ion-button expand="block" class="ion-margin-top" (click)="register()">Register</ion-button>
+      <ion-button 
+        (click)="register()" 
+        expand="block" 
+        [disabled]="isLoading">
+        <ion-spinner *ngIf="isLoading"></ion-spinner>
+        <span *ngIf="!isLoading">Register</span>
+      </ion-button>
 
       <div class="ion-text-center ion-margin-top">
         <ion-button fill="clear" size="small" routerLink="/login">

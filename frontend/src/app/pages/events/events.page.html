@@ -1,6 +1,9 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Events</ion-title>
+    <ion-buttons slot="start">
+      <ion-button (click)="goHome()">Home</ion-button>
+    </ion-buttons>
     <ion-buttons slot="end">
       <ion-button (click)="goToCreateEvent()">Create Event</ion-button>
     </ion-buttons>
@@ -9,8 +12,10 @@
 
 <ion-content>
   <ion-list>
-    <!-- Menggunakan *ngFor untuk mengiterasi array events -->
     <ion-item *ngFor="let event of events">
+      <ion-thumbnail slot="start">
+        <img [src]="'http://localhost:8000/' + event.image_path" alt="Event Image" />
+      </ion-thumbnail>
       <ion-label>
         <h2>{{ event.title }}</h2>
         <p>{{ event.description }}</p>

@@ -1,8 +1,7 @@
-// src/app/pages/home/home.page.ts
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
-import { Storage } from '@ionic/storage-angular';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   standalone: false,
@@ -15,20 +14,29 @@ export class HomePage {
   constructor(
     private router: Router,
     private toastController: ToastController,
-    private storage: Storage
+    private authService: AuthService
   ) {}
 
   async logout() {
-    await this.storage.remove('token');
-    this.router.navigate(['/login']);
-    this.showToast('Anda berhasil logout');
+    try {
+      await this.authService.logout();
+      await this.showToast('Anda berhasil logout', 'success');
+      this.router.navigate(['/login']);
+    } catch (error) {
+      if (error instanceof Error) {
+        await this.showToast('Logout gagal: ' + error.message, 'danger');
+      } else {
+        await this.showToast('Logout gagal: Terjadi kesalahan.', 'danger');
+      }
+    }
   }
 
-  async showToast(message: string) {
+  async showToast(message: string, color: string = 'primary') {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
-      color: 'primary',
+      color,
+      position: 'top'
     });
     toast.present();
   }

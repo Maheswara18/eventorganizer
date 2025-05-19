@@ -2,12 +2,25 @@
   <ion-toolbar>
     <ion-title>Home</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="logout()">Logout</ion-button>
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
   <h2>Selamat Datang!</h2>
-  <ion-button expand="block" routerLink="/events">Lihat Event</ion-button>
+  
+  <div class="action-buttons">
+    <ion-button expand="block" routerLink="/events" class="ion-margin-bottom">
+      <ion-icon name="calendar-outline" slot="start"></ion-icon>
+      Lihat Event
+    </ion-button>
+    
+    <ion-button expand="block" routerLink="/profile" color="medium" fill="outline">
+      <ion-icon name="person-outline" slot="start"></ion-icon>
+      Profil Saya
+    </ion-button>
+  </div>
 </ion-content>

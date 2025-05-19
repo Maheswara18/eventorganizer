@@ -42,8 +42,8 @@
     </ion-item>
 
     <ion-item>
-      <ion-label position="floating">Image Path</ion-label>
-      <ion-input [(ngModel)]="event.image_path" name="image_path" required></ion-input>
+      <ion-label>Image</ion-label>
+      <input type="file" (change)="onImageSelected($event)" accept="image/*" />
     </ion-item>
 
     <ion-button expand="full" type="submit" color="primary">Create Event</ion-button>
