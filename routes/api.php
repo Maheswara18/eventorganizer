@@ -7,6 +7,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ParticipantController;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,3 +73,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // endpoint publik untuk verifikasi sertifikat
 Route::post('/certificates/verify', [CertificateController::class, 'verify']);
+
+
+///////////////////PRofile//////////////
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
+});
