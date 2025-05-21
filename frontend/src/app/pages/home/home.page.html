@@ -1,7 +1,15 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Home</ion-title>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button routerLink="/profile">
+        <ion-icon slot="icon-only" name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Beranda</ion-title>
     <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon slot="icon-only" name="search-outline"></ion-icon>
+      </ion-button>
       <ion-button (click)="logout()">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
@@ -10,17 +18,34 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <h2>Selamat Datang!</h2>
-  
-  <div class="action-buttons">
-    <ion-button expand="block" routerLink="/events" class="ion-margin-bottom">
-      <ion-icon name="calendar-outline" slot="start"></ion-icon>
-      Lihat Event
-    </ion-button>
-    
-    <ion-button expand="block" routerLink="/profile" color="medium" fill="outline">
-      <ion-icon name="person-outline" slot="start"></ion-icon>
-      Profil Saya
-    </ion-button>
+  <div class="welcome-card">
+    <h2>Selamat Datang 👋</h2>
+    <p>Siap menghadiri event menarik hari ini?</p>
+  </div>
+
+  <div class="action-grid">
+    <ion-card button routerLink="/events">
+      <ion-card-content>
+        <ion-icon name="calendar-outline"></ion-icon>
+        <span>Lihat Event</span>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card button routerLink="/profile">
+      <ion-card-content>
+        <ion-icon name="person-outline"></ion-icon>
+        <span>Profil Saya</span>
+      </ion-card-content>
+    </ion-card>
   </div>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/settings">
+        <ion-icon name="settings-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>
