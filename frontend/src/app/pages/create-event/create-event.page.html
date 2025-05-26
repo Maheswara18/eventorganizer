@@ -1,51 +1,73 @@
-<ion-header>
-  <ion-toolbar>
+<ion-header translucent>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button routerLink="/home">
+        <ion-icon slot="icon-only" name="home-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
     <ion-title>Create Event</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <form (submit)="createEvent()">
-    <ion-item>
-      <ion-label position="floating">Title</ion-label>
-      <ion-input [(ngModel)]="event.title" name="title" required></ion-input>
-    </ion-item>
+<ion-content class="ion-padding">
+  <ion-card class="shadow-sm rounded">
+    <ion-card-content>
+      <form (submit)="createEvent()" class="needs-validation" novalidate>
 
-    <ion-item>
-      <ion-label position="floating">Description</ion-label>
-      <ion-input [(ngModel)]="event.description" name="description" required></ion-input>
-    </ion-item>
+        <ion-item class="mb-3">
+          <ion-label position="floating">Title</ion-label>
+          <ion-input [(ngModel)]="event.title" name="title" required></ion-input>
+        </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">Location</ion-label>
-      <ion-input [(ngModel)]="event.location" name="location" required></ion-input>
-    </ion-item>
+        <ion-item class="mb-3">
+          <ion-label position="floating">Description</ion-label>
+          <ion-input [(ngModel)]="event.description" name="description" required></ion-input>
+        </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">Price</ion-label>
-      <ion-input [(ngModel)]="event.price" name="price" type="number" required></ion-input>
-    </ion-item>
+        <ion-item class="mb-3">
+          <ion-label position="floating">Location</ion-label>
+          <ion-input [(ngModel)]="event.location" name="location" required></ion-input>
+        </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">Max Participants</ion-label>
-      <ion-input [(ngModel)]="event.max_participants" name="max_participants" type="number" required></ion-input>
-    </ion-item>
+        <ion-item class="mb-3">
+          <ion-label position="floating">Price</ion-label>
+          <ion-input [(ngModel)]="event.price" name="price" type="number" required></ion-input>
+        </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">Start Date and Time</ion-label>
-      <ion-datetime [(ngModel)]="event.start_datetime" name="start_datetime" required></ion-datetime>
-    </ion-item>
+        <ion-item class="mb-3">
+          <ion-label position="floating">Max Participants</ion-label>
+          <ion-input [(ngModel)]="event.max_participants" name="max_participants" type="number" required></ion-input>
+        </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">End Date and Time</ion-label>
-      <ion-datetime [(ngModel)]="event.end_datetime" name="end_datetime" required></ion-datetime>
-    </ion-item>
+        <ion-item class="mb-3">
+          <ion-label position="stacked">Start Date and Time</ion-label><br>
+          <ion-datetime
+            display-format="MMM DD, YYYY HH:mm"
+            picker-format="MMMM D YYYY HH:mm"
+            [(ngModel)]="event.start_datetime"
+            name="start_datetime"
+            required>
+          </ion-datetime>
+        </ion-item>
 
-    <ion-item>
-      <ion-label>Image</ion-label>
-      <input type="file" (change)="onImageSelected($event)" accept="image/*" />
-    </ion-item>
+        <ion-item class="mb-3">
+          <ion-label position="stacked">End Date and Time</ion-label><br>
+          <ion-datetime
+            display-format="MMM DD, YYYY HH:mm"
+            picker-format="MMMM D YYYY HH:mm"
+            [(ngModel)]="event.end_datetime"
+            name="end_datetime"
+            required>
+          </ion-datetime>
+        </ion-item>
 
-    <ion-button expand="full" type="submit" color="primary">Create Event</ion-button>
-  </form>
+        <ion-item lines="none" class="mb-4">
+          <ion-label>Image</ion-label>
+          <input type="file" class="form-control" (change)="onImageSelected($event)" accept="image/*" />
+        </ion-item>
+
+        <ion-button expand="block" type="submit" color="success">Create Event</ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
 </ion-content>
