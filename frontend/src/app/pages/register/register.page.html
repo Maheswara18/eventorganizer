@@ -1,37 +1,39 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Register</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="register-background fullscreen-center">
+  <div class="register-container">
 
-<ion-content class="ion-padding">
-  <ion-card class="fade-in-card">
-    <ion-card-header>
-      <ion-card-title class="ion-text-center">Form Pendaftaran</ion-card-title>
-    </ion-card-header>
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-container">
+        <img src="assets/logo-rundexo.png" alt="Logo" class="logo-img" />
+        <h1 class="app-name">RUNDEXO</h1>
+      </div>
+      <p class="tagline">Run Your Event Like a Pro</p>
+    </div>
 
-    <ion-card-content>
-      <ion-item>
+    <!-- Form -->
+    <div class="form-section">
+
+      <ion-item lines="none" class="custom-input">
         <ion-label position="floating">Nama</ion-label>
         <ion-input [(ngModel)]="name"></ion-input>
       </ion-item>
 
-      <ion-item>
+      <ion-item lines="none" class="custom-input">
         <ion-label position="floating">Email</ion-label>
         <ion-input type="email" [(ngModel)]="email"></ion-input>
       </ion-item>
 
-      <ion-item>
+      <ion-item lines="none" class="custom-input">
         <ion-label position="floating">Password</ion-label>
         <ion-input type="password" [(ngModel)]="password"></ion-input>
       </ion-item>
 
-      <ion-item>
+      <ion-item lines="none" class="custom-input">
         <ion-label position="floating">Konfirmasi Password</ion-label>
         <ion-input type="password" [(ngModel)]="password_confirmation"></ion-input>
       </ion-item>
 
-      <ion-item>
+      <ion-item lines="none" class="custom-input">
         <ion-label>Role</ion-label>
         <ion-select [(ngModel)]="role">
           <ion-select-option value="admin">Admin</ion-select-option>
@@ -39,19 +41,13 @@
         </ion-select>
       </ion-item>
 
-      <ion-button 
-        (click)="register()" 
-        expand="block" 
-        [disabled]="isLoading">
-        <ion-spinner *ngIf="isLoading"></ion-spinner>
-        <span *ngIf="!isLoading">Register</span>
-      </ion-button>
+      <ion-button expand="block" class="register-button" (click)="register()">REGISTER</ion-button>
 
-      <div class="ion-text-center ion-margin-top">
-        <ion-button fill="clear" size="small" routerLink="/login">
-          Kembali ke Halaman Login
-        </ion-button>
-      </div>
-    </ion-card-content>
-  </ion-card>
+      <p class="login-link">Sudah punya akun? 
+        <a routerLink="/login">Kembali ke halaman login</a>
+      </p>
+
+    </div>
+
+  </div>
 </ion-content>

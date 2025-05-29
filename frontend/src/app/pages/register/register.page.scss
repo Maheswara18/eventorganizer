@@ -1,14 +1,102 @@
-.fade-in-card {
-  animation: fadeInUp 0.6s ease-out;
+@font-face {
+  font-family: 'Engebrechtre';
+  src: url('~src/assets/fonts/Engebrechtre Ex Bd It.otf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
+.register-background {
+  --background: url('/assets/bg-pattern.png') no-repeat center center / cover;
+}
+
+.fullscreen-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.register-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  text-align: center;
+  background: transparent;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+
+  .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .logo-img {
+    width: 60px;
+  }
+
+  .app-name {
+    font-family: 'Engebrechtre', sans-serif;
+    font-size: 24px;
+    font-weight: normal;
+    color: white;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .tagline {
+    font-size: 13px;
+    color: white;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+}
+
+.form-section {
+  width: 100%;
+}
+
+.custom-input {
+  --background: #ffffff30;
+  --color: white;
+  --border-radius: 12px;
+  margin-bottom: 16px;
+
+  ion-label {
+    color: #ffffffcc;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  ion-input,
+  ion-select {
+    color: white;
+    font-size: 14px;
+  }
+}
+
+.register-button {
+  --background: white;
+  --color: black;
+  border-radius: 24px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+}
+
+.login-link {
+  margin-top: 18px;
+  font-size: 14px;
+  color: white;
+
+  a {
+    color: white;
+    text-decoration: underline;
   }
 }
