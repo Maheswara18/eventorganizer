@@ -81,3 +81,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 });
+
+use App\Http\Controllers\AdminController;
+
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    Route::post('/scan-qr', [AdminController::class, 'scanQr']);
+});

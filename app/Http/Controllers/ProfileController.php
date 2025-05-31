@@ -52,5 +52,12 @@ class ProfileController extends Controller
 
         return response()->json(['message' => 'Password updated successfully']);
     }
+
+    public function profile(Request $request)
+{
+    return response()->json([
+        'user' => $request->user()
+    ]);
+}
 }
 

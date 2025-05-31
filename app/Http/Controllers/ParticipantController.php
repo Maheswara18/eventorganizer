@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Participant;
+use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -97,4 +98,39 @@ class ParticipantController extends Controller
 
         return response()->json($participant);
     }
+
+        public function registerToEvent($eventId)
+    {
+    $user = auth()->user();
+    $event = Event::findOrFail($eventId);
+
+    if (Participant::where('user_id', $user->id)->where('event_id', $eventId)->exists()) {
+        return response()->json(['message' => 'Sudah mendaftar'], 409);
+    }
+
+    $qrData = Str::uuid()->toString();
+    $qrPath = 'qrcodes/' . $qrData . '.png';
+    QrCode::format('png')->size(300)->generate($qrData, public_path('storage/' . $qrPath));
+
+    $participant = Participant::create([
+        'user_id' => $user->id,
+        'event_id' => $eventId,
+        'qr_code_data' => $qrData,
+        'qr_code_path' => $qrPath,
+    ]);
+
+    return response()->json(['participant' => $participant], 201);
+}
+
+        public function myEvents()
+    {
+    $user = auth()->user();
+
+    $participations = Participant::with('event')
+        ->where('user_id', $user->id)
+        ->get();
+
+    return response()->json($participations);
+    }
+
 }

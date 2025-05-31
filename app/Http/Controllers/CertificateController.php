@@ -96,4 +96,17 @@ class CertificateController extends Controller
             'certificate' => $certificate
         ]);
     }
+
+    public function myCertificates()
+{
+    $user = auth()->user();
+
+    $certificates = Certificate::with('event')
+        ->whereHas('participant', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->get();
+
+    return response()->json($certificates);
+}
+
 }

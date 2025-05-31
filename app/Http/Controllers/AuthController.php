@@ -11,25 +11,25 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $fields = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users,email',
-            'password' => 'required|string|confirmed',
-            'role' => 'required|in:admin,participant'
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|string|min:6|confirmed',
+        // 'role' => 'in:admin,participant' // HAPUS agar tidak bisa register jadi admin
         ]);
 
-        $user = User::create([
-            'name' => $fields['name'],
-            'email' => $fields['email'],
-            'password' => bcrypt($fields['password']),
-            'role' => $fields['role'],
+    $user = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+        'role' => 'participant' // default participant
         ]);
 
-        $token = $user->createToken('apitoken')->plainTextToken;
+    $token = $user->createToken('api_token')->plainTextToken;
 
-        return response()->json([
-            'user' => $user,
-            'token' => $token
+    return response()->json([
+        'user' => $user,
+        'token' => $token
         ], 201);
     }
 
