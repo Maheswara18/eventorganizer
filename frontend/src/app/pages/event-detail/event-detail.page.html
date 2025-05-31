@@ -1,0 +1,89 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/events" (click)="goBack()"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detail Event</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="isLoading" class="ion-text-center">
+    <ion-spinner></ion-spinner>
+  </div>
+
+  <div *ngIf="!isLoading && event">
+    <ion-card>
+      <img *ngIf="event.image_path" [src]="'http://localhost:8000/' + event.image_path" [alt]="event.title">
+      
+      <ion-card-header>
+        <ion-card-title>{{ event.title }}</ion-card-title>
+        <ion-chip *ngIf="isRegistered" color="success">
+          <ion-icon name="checkmark-circle"></ion-icon>
+          <ion-label>Sudah Terdaftar</ion-label>
+        </ion-chip>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-list>
+          <ion-item>
+            <ion-icon name="calendar-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h2>Waktu Mulai</h2>
+              <p>{{ formatDate(event.start_datetime) }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="time-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h2>Waktu Selesai</h2>
+              <p>{{ formatDate(event.end_datetime) }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="location-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h2>Lokasi</h2>
+              <p>{{ event.location }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="cash-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h2>Harga</h2>
+              <p>Rp {{ event.price.toLocaleString('id-ID') }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="people-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h2>Maksimal Peserta</h2>
+              <p>{{ event.max_participants }} orang</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item lines="none">
+            <ion-label>
+              <h2>Deskripsi</h2>
+              <p class="ion-text-wrap description">{{ event.description }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="ion-padding">
+      <ion-button expand="block" color="primary" (click)="registerEvent()" *ngIf="!isRegistered">
+        Daftar Event
+      </ion-button>
+      <ion-button expand="block" color="success" disabled *ngIf="isRegistered">
+        <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+        Sudah Terdaftar
+      </ion-button>
+    </div>
+  </div>
+</ion-content> 

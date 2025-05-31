@@ -1,54 +1,87 @@
-import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular';
+import { ToastController, LoadingController, IonicModule } from '@ionic/angular';
+import { AuthService } from '../../services/auth.service';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
+import { IonicStorageModule } from '@ionic/storage-angular';
 
 @Component({
-  standalone: false,
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    IonicModule,
+    ReactiveFormsModule,
+    RouterModule,
+    HttpClientModule,
+    IonicStorageModule
+  ],
+  providers: [AuthService]
 })
-export class LoginPage {
-  email = '';
-  password = '';
+export class LoginPage implements OnInit {
+  loginForm!: FormGroup;
 
   constructor(
-    private http: HttpClient,
+    private formBuilder: FormBuilder,
+    private authService: AuthService,
     private router: Router,
-    private toastController: ToastController
-  ) {}
+    private toastController: ToastController,
+    private loadingCtrl: LoadingController
+  ) {
+    this.initForm();
+  }
 
-  async login() {
-    const body = {
-      email: this.email,
-      password: this.password
-    };
+  ngOnInit() {
+    // Form sudah diinisialisasi di constructor
+  }
 
-    this.http.post<any>('http://localhost:8000/api/login', body).subscribe({
-      next: async (res) => {
-        localStorage.setItem('token', res.token);  // Menyimpan token setelah login sukses
-        await this.showToast('Login berhasil!');
-        this.router.navigate(['/home']);  // Navigasi ke halaman home
-      },
-      error: async (err) => {
-        await this.showToast('Login gagal! Cek email/password');
-        console.error(err);
-      }
+  private initForm() {
+    this.loginForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
-  // Fungsi untuk menampilkan toast message
-  async showToast(message: string) {
+  async login() {
+    if (this.loginForm.valid) {
+      const loading = await this.loadingCtrl.create({
+        message: 'Logging in...'
+      });
+      await loading.present();
+
+      try {
+        await this.authService.login(this.loginForm.value);
+        loading.dismiss();
+        await this.showToast('Login berhasil!', 'success');
+        this.router.navigate(['/home']);
+      } catch (err: any) {
+        loading.dismiss();
+        console.error('Login error:', err);
+        await this.showToast(
+          err?.error?.message || 'Login gagal! Cek email/password',
+          'danger'
+        );
+      }
+    } else {
+      await this.showToast('Mohon isi semua field dengan benar', 'warning');
+    }
+  }
+
+  async showToast(message: string, color: string = 'primary') {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
-      color: 'primary'
+      color
     });
-    toast.present();
+    await toast.present();
   }
 
-  // Fungsi untuk menavigasi ke halaman register
   goToRegister() {
     this.router.navigate(['/register']);
   }

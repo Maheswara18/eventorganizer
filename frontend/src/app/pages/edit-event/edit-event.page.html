@@ -1,0 +1,100 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/events"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Edit Event</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form (ngSubmit)="updateEvent()">
+    <ion-item>
+      <ion-label position="stacked">Judul Event</ion-label>
+      <ion-input type="text" [(ngModel)]="event.title" name="title" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Deskripsi</ion-label>
+      <ion-textarea [(ngModel)]="event.description" name="description" required></ion-textarea>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Lokasi</ion-label>
+      <ion-input type="text" [(ngModel)]="event.location" name="location" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Harga</ion-label>
+      <ion-input type="number" [(ngModel)]="event.price" name="price" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Maksimal Peserta</ion-label>
+      <ion-input type="number" [(ngModel)]="event.max_participants" name="max_participants" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Status Event</ion-label>
+      <ion-select [(ngModel)]="event.status" name="status">
+        <ion-select-option value="active">Active</ion-select-option>
+        <ion-select-option value="ended">Ended</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Menyediakan Sertifikat</ion-label>
+      <ion-toggle [(ngModel)]="event.provides_certificate" name="provides_certificate"></ion-toggle>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Tanggal & Waktu Mulai</ion-label>
+      <ion-datetime-button datetime="start"></ion-datetime-button>
+      <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime 
+            id="start" 
+            [(ngModel)]="event.start_datetime" 
+            name="start_datetime"
+            presentation="date-time"
+            [preferWheel]="true"
+            locale="id-ID"
+            [showDefaultButtons]="true"
+            doneText="Pilih"
+            cancelText="Batal"
+          ></ion-datetime>
+        </ng-template>
+      </ion-modal>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Tanggal & Waktu Selesai</ion-label>
+      <ion-datetime-button datetime="end"></ion-datetime-button>
+      <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime 
+            id="end" 
+            [(ngModel)]="event.end_datetime" 
+            name="end_datetime"
+            presentation="date-time"
+            [preferWheel]="true"
+            locale="id-ID"
+            [showDefaultButtons]="true"
+            doneText="Pilih"
+            cancelText="Batal"
+          ></ion-datetime>
+        </ng-template>
+      </ion-modal>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Gambar Event</ion-label>
+      <input type="file" (change)="onImageSelected($event)" accept="image/*">
+      <img *ngIf="event.image_path" [src]="'http://localhost:8000/' + event.image_path" class="preview-image">
+    </ion-item>
+
+    <ion-button expand="block" type="submit" class="ion-margin-top">
+      Update Event
+    </ion-button>
+  </form>
+</ion-content> 

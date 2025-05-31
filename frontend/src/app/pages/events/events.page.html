@@ -8,7 +8,7 @@
 
     <ion-title>Events</ion-title>
 
-    <ion-buttons slot="end">
+    <ion-buttons slot="end" *ngIf="isAdmin">
       <ion-button (click)="goToCreateEvent()">
         <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
       </ion-button>
@@ -17,15 +17,36 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-card *ngFor="let event of events" class="event-card shadow-sm mb-4">
-    <img [src]="'http://localhost:8000/' + event.image_path" alt="Event Image" />
+  <ion-list>
+    <ion-item-sliding *ngFor="let event of events">
+      <ion-item [routerLink]="['/event-detail', event.id]" detail>
+        <ion-thumbnail slot="start" *ngIf="event.image_path">
+          <img [src]="'http://localhost:8000/' + event.image_path" [alt]="event.title">
+        </ion-thumbnail>
+        <ion-label>
+          <h2>{{ event.title }}</h2>
+          <p>{{ event.location }}</p>
+          <p>{{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}</p>
+        </ion-label>
+        <ion-note slot="end" color="primary">
+          Rp {{ event.price.toLocaleString('id-ID') }}
+        </ion-note>
+      </ion-item>
 
-    <ion-card-header>
-      <ion-card-title class="text-lg fw-bold">{{ event.title }}</ion-card-title>
-    </ion-card-header>
+      <ion-item-options side="end" *ngIf="isAdmin">
+        <ion-item-option color="primary" (click)="editEvent(event.id)">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-item-option>
+        <ion-item-option color="danger" (click)="deleteEvent(event.id)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
 
-    <ion-card-content>
-      <p>{{ event.description }}</p>
-    </ion-card-content>
-  </ion-card>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="isAdmin">
+    <ion-fab-button routerLink="/create-event">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

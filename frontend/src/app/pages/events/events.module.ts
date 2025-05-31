@@ -1,20 +1,16 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
-import { EventsPageRoutingModule } from './events-routing.module';
-
+import { RouterModule, Routes } from '@angular/router';
 import { EventsPage } from './events.page';
 
+const routes: Routes = [
+  {
+    path: '',
+    component: EventsPage
+  }
+];
+
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    EventsPageRoutingModule
-  ],
-  declarations: [EventsPage]
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
 })
 export class EventsPageModule {}

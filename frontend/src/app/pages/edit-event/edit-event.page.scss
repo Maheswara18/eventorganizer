@@ -1,0 +1,20 @@
+.preview-image {
+  max-width: 100%;
+  height: auto;
+  margin-top: 1rem;
+  border-radius: 8px;
+}
+
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 1rem;
+}
+
+input[type="file"] {
+  margin: 1rem 0;
+}
+
+ion-datetime {
+  margin-top: 0.5rem;
+} 

@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { ToastController, LoadingController, AlertController, IonicModule } from '@ionic/angular';
+import { EventsService } from '../../services/events.service';
+import { AuthService } from '../../services/auth.service';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 // Mendefinisikan tipe data Event
 interface Event {
@@ -17,58 +20,124 @@ interface Event {
 }
 
 @Component({
-  standalone: false,
+  standalone: true,
   selector: 'app-events',
   templateUrl: './events.page.html',
   styleUrls: ['./events.page.scss'],
+  imports: [
+    CommonModule,
+    IonicModule,
+    RouterModule
+  ]
 })
-export class EventsPage {
-  events: Event[] = []; // Mendeklarasikan events dengan tipe yang benar
+export class EventsPage implements OnInit {
+  events: Event[] = [];
+  isAdmin = false;
 
   constructor(
-    private http: HttpClient,
     private router: Router,
-    private toastController: ToastController
+    private route: ActivatedRoute,
+    private toastController: ToastController,
+    private loadingCtrl: LoadingController,
+    private alertCtrl: AlertController,
+    private eventsService: EventsService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
-    this.getEvents();
+    this.isAdmin = this.authService.isAdmin();
+    
+    // Subscribe ke perubahan query params
+    this.route.queryParams.subscribe(params => {
+      if (params['refresh']) {
+        this.loadEvents();
+      }
+    });
+    
+    this.loadEvents();
+  }
+
+  ionViewWillEnter() {
+    // Reload events setiap kali halaman akan ditampilkan
+    this.loadEvents();
   }
 
   goHome() {
-  this.router.navigate(['/home']);
-}
+    this.router.navigate(['/home']);
+  }
 
-  async getEvents() {
-    // Ambil token dari localStorage atau tempat Anda menyimpannya setelah login
-    const token = 'Bearer ' + localStorage.getItem('token');
-    
-    this.http.get<any>('http://localhost:8000/api/events', {
-      headers: {
-        Authorization: token
-      }
-    }).subscribe({
-      next: (res) => {
-        console.log('API Response:', res);
-        if (res && res.data) {
-          this.events = res.data;
-        } else {
-          console.error('Format data tidak sesuai');
-          this.showToast('Format data tidak sesuai');
-        }
-      },
-      error: async (err) => {
-        console.error('Error fetching events:', err);
-        await this.showToast('Gagal mengambil data event');
-      }
+  async loadEvents() {
+    const loading = await this.loadingCtrl.create({
+      message: 'Loading events...'
     });
-  }  
-  
-  
-  
+    await loading.present();
+
+    try {
+      this.events = await this.eventsService.getAllEvents();
+      loading.dismiss();
+    } catch (error) {
+      console.error('Error loading events:', error);
+      loading.dismiss();
+      const toast = await this.toastController.create({
+        message: 'Gagal memuat daftar event',
+        duration: 2000,
+        color: 'danger'
+      });
+      await toast.present();
+    }
+  }
 
   goToCreateEvent() {
     this.router.navigate(['/create-event']);
+  }
+
+  editEvent(eventId: number) {
+    this.router.navigate(['/edit-event', eventId]);
+  }
+
+  async deleteEvent(eventId: number) {
+    const alert = await this.alertCtrl.create({
+      header: 'Konfirmasi',
+      message: 'Apakah Anda yakin ingin menghapus event ini?',
+      buttons: [
+        {
+          text: 'Batal',
+          role: 'cancel'
+        },
+        {
+          text: 'Hapus',
+          handler: async () => {
+            const loading = await this.loadingCtrl.create({
+              message: 'Menghapus event...'
+            });
+            await loading.present();
+
+            try {
+              await this.eventsService.deleteEvent(eventId);
+              loading.dismiss();
+              const toast = await this.toastController.create({
+                message: 'Event berhasil dihapus',
+                duration: 2000,
+                color: 'success'
+              });
+              await toast.present();
+              this.loadEvents(); // Reload daftar event
+            } catch (error) {
+              console.error('Error deleting event:', error);
+              loading.dismiss();
+              const toast = await this.toastController.create({
+                message: 'Gagal menghapus event',
+                duration: 2000,
+                color: 'danger'
+              });
+              await toast.present();
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   async showToast(message: string) {

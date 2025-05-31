@@ -1,3 +1,9 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
 <ion-content class="login-background">
   <div class="login-container">
 
@@ -10,28 +16,41 @@
       <p class="tagline">Run Your Event Like a Pro</p>
     </div>
 
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
+      <div class="form-section">
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="floating">EMAIL</ion-label>
+          <ion-input type="email" formControlName="email"></ion-input>
+        </ion-item>
+        <ion-text color="danger" *ngIf="loginForm?.get('email')?.touched && loginForm?.get('email')?.errors?.['required']">
+          <p class="ion-padding-start">Email wajib diisi</p>
+        </ion-text>
+        <ion-text color="danger" *ngIf="loginForm?.get('email')?.touched && loginForm?.get('email')?.errors?.['email']">
+          <p class="ion-padding-start">Format email tidak valid</p>
+        </ion-text>
 
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="floating">PASSWORD</ion-label>
+          <ion-input type="password" formControlName="password"></ion-input>
+        </ion-item>
+        <ion-text color="danger" *ngIf="loginForm?.get('password')?.touched && loginForm?.get('password')?.errors?.['required']">
+          <p class="ion-padding-start">Password wajib diisi</p>
+        </ion-text>
+        <ion-text color="danger" *ngIf="loginForm?.get('password')?.touched && loginForm?.get('password')?.errors?.['minlength']">
+          <p class="ion-padding-start">Password minimal 6 karakter</p>
+        </ion-text>
 
-    <!-- Form -->
-    <div class="form-section">
-      <ion-item lines="none" class="custom-input">
-        <ion-label position="floating">EMAIL</ion-label>
-        <ion-input [(ngModel)]="email" type="email"></ion-input>
-      </ion-item>
+        <p class="forgot-password">Lupa password?</p>
 
-      <ion-item lines="none" class="custom-input">
-        <ion-label position="floating">PASSWORD</ion-label>
-        <ion-input [(ngModel)]="password" type="password"></ion-input>
-      </ion-item>
+        <div class="ion-padding">
+          <ion-button expand="block" type="submit" [disabled]="!loginForm.valid" class="login-button">LOGIN</ion-button>
+        </div>
 
-      <p class="forgot-password">Lupa password?</p>
-
-      <ion-button expand="block" class="login-button" (click)="login()">LOGIN</ion-button>
-
-      <p class="register-link">Tidak punya akun? 
-        <a routerLink="/register">Register</a>
-      </p>
-    </div>
+        <p class="register-link">Tidak punya akun? 
+          <a routerLink="/register">Register</a>
+        </p>
+      </div>
+    </form>
 
   </div>
 </ion-content>
