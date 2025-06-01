@@ -1,0 +1,103 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button routerLink="/home">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Profil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="isLoading" class="ion-text-center">
+    <ion-spinner></ion-spinner>
+  </div>
+
+  <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" *ngIf="!isLoading">
+    <ion-list class="form-list">
+      <ion-item>
+        <ion-label position="stacked">Nama</ion-label>
+        <ion-input formControlName="name" type="text" class="custom-input"></ion-input>
+        <ion-note slot="error" *ngIf="profileForm.get('name')?.errors?.['required'] && profileForm.get('name')?.touched">
+          Nama wajib diisi
+        </ion-note>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Email</ion-label>
+        <ion-text color="medium" class="helper-text">
+          <small>Email</small>
+        </ion-text>
+        <ion-input formControlName="email" type="email" class="custom-input readonly-input" readonly></ion-input>
+      </ion-item>
+    </ion-list>
+
+    <div class="ion-padding">
+      <ion-button expand="block" type="submit" [disabled]="profileForm.invalid || isLoading">
+        Simpan Perubahan
+      </ion-button>
+    </div>
+  </form>
+
+  <div class="ion-padding-top">
+    <ion-button expand="block" fill="outline" (click)="togglePasswordForm()">
+      {{ showPasswordForm ? 'Batal Ubah Password' : 'Ubah Password' }}
+    </ion-button>
+  </div>
+
+  <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()" *ngIf="showPasswordForm">
+    <div class="password-info">
+      <ion-text color="medium">
+        <p>Untuk mengubah password, masukkan password lama Anda terlebih dahulu, kemudian masukkan password baru yang diinginkan.</p>
+      </ion-text>
+    </div>
+    
+    <ion-list class="form-list">
+      <ion-item>
+        <ion-label position="stacked">1. Password Lama</ion-label>
+        <ion-text color="medium" class="helper-text">
+          <small>Masukkan password yang sedang Anda gunakan saat ini</small>
+        </ion-text>
+        <ion-input formControlName="current_password" type="password" class="custom-input"></ion-input>
+        <ion-note slot="error" *ngIf="passwordForm.get('current_password')?.errors?.['required'] && passwordForm.get('current_password')?.touched">
+          Password saat ini wajib diisi
+        </ion-note>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">2. Password Baru</ion-label>
+        <ion-text color="medium" class="helper-text">
+          <small>Minimal 8 karakter</small>
+        </ion-text>
+        <ion-input formControlName="password" type="password" class="custom-input"></ion-input>
+        <ion-note slot="error" *ngIf="passwordForm.get('password')?.errors?.['required'] && passwordForm.get('password')?.touched">
+          Password baru wajib diisi
+        </ion-note>
+        <ion-note slot="error" *ngIf="passwordForm.get('password')?.errors?.['minlength'] && passwordForm.get('password')?.touched">
+          Password minimal 8 karakter
+        </ion-note>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">3. Konfirmasi Password Baru</ion-label>
+        <ion-text color="medium" class="helper-text">
+          <small>Masukkan ulang password baru Anda</small>
+        </ion-text>
+        <ion-input formControlName="password_confirmation" type="password" class="custom-input"></ion-input>
+        <ion-note slot="error" *ngIf="passwordForm.get('password_confirmation')?.errors?.['required'] && passwordForm.get('password_confirmation')?.touched">
+          Konfirmasi password wajib diisi
+        </ion-note>
+        <ion-note slot="error" *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('password_confirmation')?.touched">
+          Password tidak cocok
+        </ion-note>
+      </ion-item>
+    </ion-list>
+
+    <div class="ion-padding">
+      <ion-button expand="block" type="submit" [disabled]="passwordForm.invalid || isLoading">
+        Simpan Password Baru
+      </ion-button>
+    </div>
+  </form>
+</ion-content> 
