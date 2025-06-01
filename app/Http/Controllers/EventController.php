@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Participant;
+use App\Models\EventRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EventController extends Controller
 {
@@ -296,14 +298,98 @@ class EventController extends Controller
     public function getRegisteredEvents()
     {
         try {
+            \Log::info('Getting registered events for user: ' . Auth::id());
+            
             $user = Auth::user();
-            $registeredEvents = Event::whereHas('participants', function($query) use ($user) {
+            \Log::info('User found:', ['user_id' => $user->id, 'name' => $user->name]);
+
+            $registeredEvents = Event::with(['participants' => function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }, 'participants.payment'])
+            ->whereHas('participants', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->get();
 
-            return response()->json($registeredEvents);
+            \Log::info('Found registered events:', ['count' => $registeredEvents->count()]);
+
+            $events = $registeredEvents->map(function($event) use ($user) {
+                $participant = $event->participants->first();
+                \Log::info('Processing event:', [
+                    'event_id' => $event->id,
+                    'title' => $event->title,
+                    'participant_id' => $participant->id,
+                    'payment_status' => $participant->payment ? $participant->payment->status : 'unpaid'
+                ]);
+
+                return [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'description' => $event->description,
+                    'location' => $event->location,
+                    'price' => $event->price,
+                    'start_datetime' => $event->start_datetime,
+                    'end_datetime' => $event->end_datetime,
+                    'image_path' => $event->image_path,
+                    'payment_status' => $participant->payment ? $participant->payment->status : 'unpaid',
+                    'registration_date' => $participant->created_at
+                ];
+            });
+
+            \Log::info('Returning events data:', ['count' => $events->count()]);
+            return response()->json($events);
         } catch (\Exception $e) {
+            \Log::error('Error in getRegisteredEvents:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json(['message' => 'Error fetching registered events', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function cancelRegistration($id)
+    {
+        try {
+            $user = auth()->user();
+            $registration = Participant::where('user_id', $user->id)
+                ->where('event_id', $id)
+                ->firstOrFail();
+
+            // Cek apakah sudah dibayar
+            if ($registration->payment && $registration->payment->status === 'paid') {
+                return response()->json([
+                    'message' => 'Tidak dapat membatalkan registrasi yang sudah dibayar'
+                ], 400);
+            }
+
+            // Hapus payment jika ada
+            if ($registration->payment) {
+                $registration->payment->delete();
+            }
+
+            // Hapus QR code jika ada
+            if ($registration->qr_code_path) {
+                $qrPath = str_replace('storage/', 'public/', $registration->qr_code_path);
+                if (Storage::exists($qrPath)) {
+                    Storage::delete($qrPath);
+                }
+            }
+
+            $registration->delete();
+
+            return response()->json([
+                'message' => 'Registrasi berhasil dibatalkan'
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Registrasi tidak ditemukan'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error in cancelRegistration: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat membatalkan registrasi',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

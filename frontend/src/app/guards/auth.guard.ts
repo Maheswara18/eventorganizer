@@ -12,19 +12,19 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(): Promise<boolean> {
-    if (this.authService.isLoggedIn()) {
-      return true;
+    try {
+      const isLoggedIn = await this.authService.isLoggedIn();
+      
+      if (isLoggedIn) {
+        return true;
+      }
+
+      this.router.navigate(['/login'], { replaceUrl: true });
+      return false;
+    } catch (error) {
+      console.error('Auth guard error:', error);
+      this.router.navigate(['/login'], { replaceUrl: true });
+      return false;
     }
-
-    // Coba load stored user jika belum
-    await this.authService.initStorage();
-
-    if (this.authService.isLoggedIn()) {
-      return true;
-    }
-
-    // Redirect ke halaman login jika user belum login
-    this.router.navigate(['/login']);
-    return false;
   }
 } 

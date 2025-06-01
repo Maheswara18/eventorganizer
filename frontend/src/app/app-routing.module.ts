@@ -46,6 +46,11 @@ const routes: Routes = [
     path: 'edit-event/:id',
     loadComponent: () => import('./pages/edit-event/edit-event.page').then(m => m.EditEventPage),
     canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'registered-events',
+    loadComponent: () => import('./pages/registered-events/registered-events.page').then(m => m.RegisteredEventsPage),
+    canActivate: [AuthGuard]
   }
 ];
 

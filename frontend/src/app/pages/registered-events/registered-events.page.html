@@ -1,0 +1,118 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Event Saya</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="loadRegisteredEvents($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="registeredEvents.length === 0" class="ion-text-center ion-padding">
+    <ion-text color="medium">
+      <h5>Anda belum terdaftar di event apapun</h5>
+    </ion-text>
+  </div>
+
+  <ion-list>
+    <ion-item-sliding *ngFor="let event of registeredEvents" #slidingItem>
+      <ion-item class="event-item" (click)="showEventDetail(event)">
+        <ion-thumbnail slot="start" *ngIf="event.image_path">
+          <img [src]="'http://localhost:8000/' + event.image_path" [alt]="event.title">
+        </ion-thumbnail>
+        <ion-label>
+          <h2>{{ event.title }}</h2>
+          <p>{{ formatDate(event.start_datetime) }}</p>
+          <ion-chip [color]="getPaymentStatusColor(event.payment_status)" class="status-chip">
+            <ion-label>{{ event.payment_status | titlecase }}</ion-label>
+          </ion-chip>
+        </ion-label>
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-item>
+
+      <ion-item-options side="end" *ngIf="event.payment_status.toLowerCase() === 'unpaid'">
+        <ion-item-option color="danger" (click)="cancelRegistration(event.id, slidingItem)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          Batal
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+</ion-content>
+
+<!-- Modal Detail Event -->
+<ion-modal [isOpen]="selectedEvent !== null" (didDismiss)="closeEventDetail()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Detail Event</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeEventDetail()">
+            <ion-icon name="close"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding" *ngIf="selectedEvent">
+      <ion-card>
+        <img *ngIf="selectedEvent.image_path" [src]="'http://localhost:8000/' + selectedEvent.image_path" [alt]="selectedEvent.title">
+        
+        <ion-card-header>
+          <ion-card-title>{{ selectedEvent.title }}</ion-card-title>
+          <ion-chip [color]="getPaymentStatusColor(selectedEvent.payment_status)">
+            <ion-label>{{ selectedEvent.payment_status | titlecase }}</ion-label>
+          </ion-chip>
+        </ion-card-header>
+
+        <ion-card-content>
+          <p>{{ selectedEvent.description }}</p>
+          
+          <ion-list lines="none">
+            <ion-item>
+              <ion-icon name="location-outline" slot="start"></ion-icon>
+              <ion-label>{{ selectedEvent.location }}</ion-label>
+            </ion-item>
+
+            <ion-item>
+              <ion-icon name="calendar-outline" slot="start"></ion-icon>
+              <ion-label>
+                <p>Mulai: {{ formatDate(selectedEvent.start_datetime) }}</p>
+                <p>Selesai: {{ formatDate(selectedEvent.end_datetime) }}</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item>
+              <ion-icon name="cash-outline" slot="start"></ion-icon>
+              <ion-label>Rp {{ selectedEvent.price.toLocaleString('id-ID') }}</ion-label>
+            </ion-item>
+
+            <ion-item>
+              <ion-icon name="time-outline" slot="start"></ion-icon>
+              <ion-label>
+                <p>Terdaftar pada: {{ formatDate(selectedEvent.registration_date) }}</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <div class="ion-margin-top">
+            <ion-button expand="block" (click)="viewEventDetails(selectedEvent.id)">
+              Lihat di Halaman Event
+            </ion-button>
+            
+            <ion-button *ngIf="selectedEvent.payment_status.toLowerCase() === 'unpaid'"
+                      expand="block" 
+                      color="danger"
+                      (click)="cancelRegistrationFromModal(selectedEvent.id)">
+              Batalkan Pendaftaran
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </ion-content>
+  </ng-template>
+</ion-modal> 

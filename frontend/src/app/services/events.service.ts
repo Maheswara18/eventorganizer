@@ -107,14 +107,25 @@ export class EventsService {
     );
   }
 
-  async getRegisteredEvents(): Promise<any[]> {
+  async getRegisteredEvents(): Promise<any> {
+    console.log('Getting registered events from API...');
     const headers = await this.getHeaders();
-    return firstValueFrom(
-      this.http.get<any[]>(`${this.apiEndpoint}/events/registered`, {
-        headers,
-        withCredentials: true
-      })
-    );
+    console.log('Using headers:', headers);
+    console.log('API Endpoint:', `${this.apiEndpoint}/events/registered`);
+    
+    try {
+      const response = await firstValueFrom(
+        this.http.get<any>(`${this.apiEndpoint}/events/registered`, {
+          headers,
+          withCredentials: true
+        })
+      );
+      console.log('API Response:', response);
+      return response;
+    } catch (error) {
+      console.error('Error in getRegisteredEvents:', error);
+      throw error;
+    }
   }
 
   async isRegistered(eventId: number): Promise<boolean> {
@@ -129,6 +140,21 @@ export class EventsService {
       return response?.registered || false;
     } catch {
       return false;
+    }
+  }
+
+  async cancelEventRegistration(eventId: number): Promise<any> {
+    const headers = await this.getHeaders();
+    try {
+      return await firstValueFrom(
+        this.http.delete<any>(`${this.apiEndpoint}/events/${eventId}/registration`, {
+          headers,
+          withCredentials: true
+        })
+      );
+    } catch (error) {
+      console.error('Error canceling event registration:', error);
+      throw error;
     }
   }
 } 

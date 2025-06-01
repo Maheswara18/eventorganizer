@@ -21,11 +21,11 @@ import { IonicStorageModule } from '@ionic/storage-angular';
     RouterModule,
     HttpClientModule,
     IonicStorageModule
-  ],
-  providers: [AuthService]
+  ]
 })
 export class LoginPage implements OnInit {
   loginForm!: FormGroup;
+  isLoading = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -37,8 +37,16 @@ export class LoginPage implements OnInit {
     this.initForm();
   }
 
-  ngOnInit() {
-    // Form sudah diinisialisasi di constructor
+  async ngOnInit() {
+    try {
+      // Check if already logged in
+      const isLoggedIn = await this.authService.isLoggedIn();
+      if (isLoggedIn) {
+        this.router.navigate(['/home'], { replaceUrl: true });
+      }
+    } catch (error) {
+      console.error('Error checking login status:', error);
+    }
   }
 
   private initForm() {
@@ -49,27 +57,43 @@ export class LoginPage implements OnInit {
   }
 
   async login() {
-    if (this.loginForm.valid) {
-      const loading = await this.loadingCtrl.create({
-        message: 'Logging in...'
+    if (!this.loginForm.valid) {
+      await this.showToast('Mohon isi semua field dengan benar', 'warning');
+      return;
+    }
+
+    let loading;
+    try {
+      this.isLoading = true;
+      loading = await this.loadingCtrl.create({
+        message: 'Logging in...',
+        duration: 10000 // Timeout after 10 seconds
       });
       await loading.present();
 
-      try {
-        await this.authService.login(this.loginForm.value);
-        loading.dismiss();
+      const response = await this.authService.login(this.loginForm.value);
+      if (response && response.token) {
         await this.showToast('Login berhasil!', 'success');
-        this.router.navigate(['/home']);
-      } catch (err: any) {
-        loading.dismiss();
-        console.error('Login error:', err);
-        await this.showToast(
-          err?.error?.message || 'Login gagal! Cek email/password',
-          'danger'
-        );
+        this.router.navigate(['/home'], { replaceUrl: true });
+      } else {
+        throw new Error('Login gagal: Tidak ada token');
       }
-    } else {
-      await this.showToast('Mohon isi semua field dengan benar', 'warning');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      let errorMessage = 'Login gagal! Cek email/password';
+      
+      if (err?.error?.message) {
+        errorMessage = err.error.message;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+      
+      await this.showToast(errorMessage, 'danger');
+    } finally {
+      this.isLoading = false;
+      if (loading) {
+        await loading.dismiss();
+      }
     }
   }
 
@@ -77,7 +101,8 @@ export class LoginPage implements OnInit {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
-      color
+      color,
+      position: 'bottom'
     });
     await toast.present();
   }

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from './services/auth.service';
 import { Router } from '@angular/router';
+import { Platform } from '@ionic/angular';
 
 @Component({
   selector: 'app-root',
@@ -11,10 +12,19 @@ import { Router } from '@angular/router';
 export class AppComponent implements OnInit {
   constructor(
     private authService: AuthService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private platform: Platform
+  ) {
+    this.initializeApp();
+  }
+
+  private async initializeApp() {
+    this.platform.ready().then(async () => {
+      await this.authService.initialize();
+    });
+  }
 
   async ngOnInit() {
-    await this.authService.initStorage();
+    // Initialization is now handled in initializeApp
   }
 }
