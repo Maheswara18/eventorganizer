@@ -164,47 +164,45 @@ class EventController extends Controller
     public function destroy($id)
     {
         try {
-            \Log::info('Delete event request received for ID: ' . $id);
+            \Log::info('Starting event deletion for ID: ' . $id);
             
-            $event = Event::findOrFail($id);
-            \Log::info('Event found:', $event->toArray());
+            $event = Event::with('participants')->findOrFail($id);
 
+            // Cek apakah user adalah admin dari event ini
             if (Auth::user()->id !== $event->admin_id) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
 
-            // Gunakan transaction untuk memastikan semua operasi berhasil
-            DB::beginTransaction();
-            try {
-                // Hapus gambar jika ada
-                if ($event->image_path) {
-                    $imagePath = str_replace('storage/', '', $event->image_path);
-                    if (Storage::exists('public/' . $imagePath)) {
-                        Storage::delete('public/' . $imagePath);
+            // Hapus QR code untuk setiap participant
+            foreach ($event->participants as $participant) {
+                if ($participant->qr_code_path) {
+                    $qrPath = str_replace('storage/', 'public/', $participant->qr_code_path);
+                    if (Storage::exists($qrPath)) {
+                        Storage::delete($qrPath);
+                        \Log::info('Deleted QR code: ' . $qrPath);
                     }
                 }
-
-                // Hapus data terkait
-                $event->participants()->delete();
-                $event->payments()->delete();
-                $event->certificates()->delete();
-                
-                // Hapus event
-                $event->delete();
-                
-                DB::commit();
-                return response()->json(['message' => 'Event deleted successfully']);
-            } catch (\Exception $e) {
-                DB::rollback();
-                throw $e;
             }
+
+            // Hapus gambar event jika ada
+            if ($event->image_path && Storage::exists('public/' . str_replace('storage/', '', $event->image_path))) {
+                Storage::delete('public/' . str_replace('storage/', '', $event->image_path));
+                \Log::info('Deleted event image: ' . $event->image_path);
+            }
+
+            // Hapus event (akan menghapus participants dan payments karena cascade)
+            $event->delete();
+            \Log::info('Event deleted successfully');
+
+            return response()->json(['message' => 'Event berhasil dihapus']);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Event tidak ditemukan'], 404);
         } catch (\Exception $e) {
-            \Log::error('Error deleting event: ' . $e->getMessage());
+            \Log::error('Error in event deletion: ' . $e->getMessage());
             \Log::error($e->getTraceAsString());
             return response()->json([
-                'message' => 'Error deleting event',
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'message' => 'Terjadi kesalahan saat menghapus event',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

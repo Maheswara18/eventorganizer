@@ -90,4 +90,7 @@ use App\Http\Controllers\AdminController;
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::post('/scan-qr', [AdminController::class, 'scanQr']);
+    Route::post('/events', [EventController::class, 'store']);
+    Route::put('/events/{id}', [EventController::class, 'update']);
+    Route::delete('/events/{id}', [EventController::class, 'destroy']);
 });

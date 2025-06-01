@@ -51,6 +51,11 @@ const routes: Routes = [
     path: 'registered-events',
     loadComponent: () => import('./pages/registered-events/registered-events.page').then(m => m.RegisteredEventsPage),
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage),
+    canActivate: [AuthGuard]
   }
 ];
 

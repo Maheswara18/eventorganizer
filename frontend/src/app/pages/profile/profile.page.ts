@@ -53,11 +53,13 @@ export class ProfilePage implements OnInit {
     try {
       this.isLoading = true;
       const profile = await this.profileService.getProfile();
+      console.log('Profile loaded:', profile);
       this.profileForm.patchValue({
         name: profile.name,
         email: profile.email
       });
     } catch (error: any) {
+      console.error('Error loading profile:', error);
       this.showToast('Gagal memuat profil: ' + error.message, 'danger');
     } finally {
       this.isLoading = false;
@@ -72,13 +74,23 @@ export class ProfilePage implements OnInit {
 
     try {
       this.isLoading = true;
-      const profileData = {
-        name: this.profileForm.get('name')?.value
-      };
-      await this.profileService.updateProfile(profileData);
+      const name = this.profileForm.get('name')?.value;
+      const email = this.profileForm.getRawValue().email;
+      console.log('Sending update profile request with data:', { name, email });
+      
+      await this.profileService.updateProfile({ name, email });
       this.showToast('Profil berhasil diperbarui', 'success');
     } catch (error: any) {
-      this.showToast('Gagal memperbarui profil: ' + error.message, 'danger');
+      console.error('Error updating profile:', error);
+      let errorMessage = 'Gagal memperbarui profil';
+      
+      if (error.error?.message) {
+        errorMessage = error.error.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      this.showToast(errorMessage, 'danger');
     } finally {
       this.isLoading = false;
     }
@@ -97,6 +109,7 @@ export class ProfilePage implements OnInit {
       this.passwordForm.reset();
       this.showPasswordForm = false;
     } catch (error: any) {
+      console.error('Error updating password:', error);
       let errorMessage = 'Gagal memperbarui password';
       
       if (error.error?.message) {
