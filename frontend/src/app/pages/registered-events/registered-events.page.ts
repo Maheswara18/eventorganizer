@@ -3,19 +3,7 @@ import { Router } from '@angular/router';
 import { IonicModule, LoadingController, ToastController, AlertController, IonItemSliding } from '@ionic/angular';
 import { EventsService } from '../../services/events.service';
 import { CommonModule } from '@angular/common';
-
-interface RegisteredEvent {
-  id: number;
-  title: string;
-  description: string;
-  location: string;
-  price: number;
-  start_datetime: string;
-  end_datetime: string;
-  image_path: string;
-  payment_status: string;
-  registration_date: string;
-}
+import { RegisteredEvent } from '../../interfaces/registered-event';
 
 @Component({
   standalone: true,
@@ -27,7 +15,7 @@ interface RegisteredEvent {
 export class RegisteredEventsPage implements OnInit {
   registeredEvents: RegisteredEvent[] = [];
   selectedEvent: RegisteredEvent | null = null;
-  loading = false;
+  isLoading = false;
 
   constructor(
     private router: Router,
@@ -42,65 +30,33 @@ export class RegisteredEventsPage implements OnInit {
   }
 
   async loadRegisteredEvents(event?: any) {
+    let loading;
     if (!event) {
-      const loading = await this.loadingCtrl.create({
-        message: 'Loading events...',
-        spinner: 'crescent'
+      loading = await this.loadingCtrl.create({
+        message: 'Memuat daftar event...'
       });
       await loading.present();
     }
 
     try {
-      console.log('Fetching registered events...');
-      const events = await this.eventsService.getRegisteredEvents();
-      console.log('Received events:', events);
-      
-      if (!events || events.length === 0) {
-        console.log('No registered events found');
-      }
-      
-      this.registeredEvents = events;
+      this.registeredEvents = await this.eventsService.getRegisteredEvents();
     } catch (error) {
       console.error('Error loading registered events:', error);
-      await this.showToast('Gagal memuat event. Silakan coba lagi.', 'danger');
+      await this.showToast('Gagal memuat daftar event', 'danger');
     } finally {
+      if (loading) {
+        loading.dismiss();
+      }
       if (event) {
         event.target.complete();
-      } else {
-        this.loadingCtrl.dismiss();
       }
     }
   }
 
-  async cancelRegistration(eventId: number, slidingItem: IonItemSliding) {
+  async showCancelConfirmation(eventId: number) {
     const alert = await this.alertCtrl.create({
       header: 'Konfirmasi Pembatalan',
-      message: 'Apakah Anda yakin ingin membatalkan pendaftaran event ini?',
-      buttons: [
-        {
-          text: 'Tidak',
-          role: 'cancel',
-          handler: () => {
-            slidingItem.close();
-          }
-        },
-        {
-          text: 'Ya',
-          handler: async () => {
-            await this.processCancelRegistration(eventId);
-            slidingItem.close();
-          }
-        }
-      ]
-    });
-
-    await alert.present();
-  }
-
-  async cancelRegistrationFromModal(eventId: number) {
-    const alert = await this.alertCtrl.create({
-      header: 'Konfirmasi Pembatalan',
-      message: 'Apakah Anda yakin ingin membatalkan pendaftaran event ini?',
+      message: 'Anda yakin ingin membatalkan pendaftaran event ini?',
       buttons: [
         {
           text: 'Tidak',
@@ -108,10 +64,7 @@ export class RegisteredEventsPage implements OnInit {
         },
         {
           text: 'Ya',
-          handler: async () => {
-            await this.processCancelRegistration(eventId);
-            this.closeEventDetail();
-          }
+          handler: () => this.cancelRegistration(eventId)
         }
       ]
     });
@@ -119,21 +72,23 @@ export class RegisteredEventsPage implements OnInit {
     await alert.present();
   }
 
-  private async processCancelRegistration(eventId: number) {
+  async cancelRegistration(eventId: number) {
+    console.log('Starting registration cancellation for event:', eventId);
     const loading = await this.loadingCtrl.create({
       message: 'Membatalkan pendaftaran...'
     });
     await loading.present();
 
     try {
-      await this.eventsService.cancelEventRegistration(eventId);
+      await this.eventsService.cancelRegistration(eventId);
       await this.showToast('Pendaftaran event berhasil dibatalkan', 'success');
-      await this.loadRegisteredEvents();
-    } catch (error) {
+      this.registeredEvents = this.registeredEvents.filter(event => event.id !== eventId);
+    } catch (error: any) {
       console.error('Error canceling registration:', error);
-      await this.showToast('Gagal membatalkan pendaftaran', 'danger');
+      const message = error.error?.message || 'Gagal membatalkan pendaftaran';
+      await this.showToast(message, 'danger');
     } finally {
-      loading.dismiss();
+      await loading.dismiss();
     }
   }
 
@@ -158,13 +113,12 @@ export class RegisteredEventsPage implements OnInit {
     }
   }
 
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
     });
   }
 

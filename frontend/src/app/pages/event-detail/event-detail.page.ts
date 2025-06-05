@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { IonicModule, LoadingController, ToastController, AlertController } from '@ionic/angular';
+import { IonicModule, LoadingController, ToastController, AlertController, ModalController } from '@ionic/angular';
 import { EventsService } from '../../services/events.service';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { FormTemplateService } from '../../services/form-template.service';
+import { RegistrationFormComponent } from '../../components/registration-form/registration-form.component';
+import { firstValueFrom } from 'rxjs';
 
 interface Event {
   id: number;
@@ -21,12 +25,14 @@ interface Event {
   templateUrl: './event-detail.page.html',
   styleUrls: ['./event-detail.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, RouterModule]
+  imports: [IonicModule, CommonModule, RouterModule, FormsModule]
 })
 export class EventDetailPage implements OnInit {
-  event?: Event;
-  isLoading = true;
+  event: any;
   isRegistered = false;
+  isLoading = true;
+  formTemplate: any;
+  formData: any = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -34,100 +40,102 @@ export class EventDetailPage implements OnInit {
     private eventsService: EventsService,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private modalCtrl: ModalController,
+    private formTemplateService: FormTemplateService
   ) {}
 
-  ngOnInit() {
-    this.loadEvent();
+  async ngOnInit() {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (id) {
+      await this.loadEvent(id);
+    }
   }
 
-  async loadEvent() {
+  async loadEvent(id: number) {
     const loading = await this.loadingCtrl.create({
-      message: 'Loading event details...'
+      message: 'Memuat detail event...'
     });
     await loading.present();
 
     try {
-      const id = Number(this.route.snapshot.paramMap.get('id'));
-      if (!id) {
-        throw new Error('Invalid event ID');
-      }
-
       this.event = await this.eventsService.getEvent(id);
-      this.isRegistered = await this.eventsService.isRegistered(id);
+      await this.checkRegistrationStatus(id);
       this.isLoading = false;
       loading.dismiss();
     } catch (error) {
       console.error('Error loading event:', error);
-      const toast = await this.toastCtrl.create({
-        message: 'Gagal memuat detail event',
-        duration: 2000,
-        color: 'danger'
-      });
-      await toast.present();
-      this.router.navigate(['/events']);
       loading.dismiss();
+      await this.showToast('Gagal memuat detail event', 'danger');
     }
   }
 
-  async registerEvent() {
-    if (!this.event?.id) {
-      const toast = await this.toastCtrl.create({
-        message: 'Data event tidak valid',
-        duration: 2000,
-        color: 'danger'
-      });
-      await toast.present();
+  async checkRegistrationStatus(id: number) {
+    try {
+      this.isRegistered = await this.eventsService.checkRegistration(id);
+    } catch (error) {
+      console.error('Error checking registration status:', error);
+    }
+  }
+
+  async registerForEvent(eventId: number) {
+    if (!eventId) {
+      await this.showToast('ID event tidak valid', 'danger');
       return;
     }
 
-    const eventId = this.event.id;
-    const eventTitle = this.event.title;
-    const eventPrice = this.event.price;
+    try {
+      // Load form template first
+      const formTemplate = await firstValueFrom(this.formTemplateService.getFormTemplate(eventId));
+      
+      if (!formTemplate) {
+        await this.showToast('Form pendaftaran tidak tersedia', 'danger');
+        return;
+      }
 
-    const alert = await this.alertCtrl.create({
-      header: 'Konfirmasi Pendaftaran',
-      message: `Anda akan mendaftar untuk event "${eventTitle}". Biaya pendaftaran: Rp ${eventPrice.toLocaleString('id-ID')}. Lanjutkan?`,
-      buttons: [
-        {
-          text: 'Batal',
-          role: 'cancel'
-        },
-        {
-          text: 'Daftar',
-          handler: async () => {
-            const loading = await this.loadingCtrl.create({
-              message: 'Mendaftarkan event...'
-            });
-            await loading.present();
+      // Show registration form modal
+      const modal = await this.modalCtrl.create({
+        component: RegistrationFormComponent,
+        componentProps: {
+          event: this.event,
+          formTemplate: formTemplate
+        }
+      });
 
-            try {
-              await this.eventsService.registerEvent(eventId);
-              this.isRegistered = true;
-              
-              loading.dismiss();
-              const toast = await this.toastCtrl.create({
-                message: 'Berhasil mendaftar event',
-                duration: 2000,
-                color: 'success'
-              });
-              await toast.present();
-            } catch (error) {
-              console.error('Error registering for event:', error);
-              loading.dismiss();
-              const toast = await this.toastCtrl.create({
-                message: 'Gagal mendaftar event',
-                duration: 2000,
-                color: 'danger'
-              });
-              await toast.present();
-            }
+      modal.onDidDismiss().then(async (result) => {
+        if (result.data) {
+          const loading = await this.loadingCtrl.create({
+            message: 'Mendaftarkan event...'
+          });
+          await loading.present();
+
+          try {
+            await this.eventsService.registerForEvent(eventId, result.data);
+            this.isRegistered = true;
+            loading.dismiss();
+            await this.showToast('Berhasil mendaftar event', 'success');
+          } catch (error) {
+            console.error('Error registering for event:', error);
+            loading.dismiss();
+            await this.showToast('Gagal mendaftar event', 'danger');
           }
         }
-      ]
-    });
+      });
 
-    await alert.present();
+      await modal.present();
+    } catch (error) {
+      console.error('Error loading form template:', error);
+      await this.showToast('Gagal memuat form pendaftaran', 'danger');
+    }
+  }
+
+  private async showToast(message: string, color: string) {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2000,
+      color
+    });
+    await toast.present();
   }
 
   formatDate(dateString: string): string {

@@ -1,0 +1,36 @@
+ion-content {
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+}
+
+ion-card {
+  margin: 0;
+  box-shadow: none;
+}
+
+ion-list-header {
+  padding-left: 0;
+  margin-bottom: 8px;
+  
+  ion-text {
+    margin-left: 4px;
+  }
+}
+
+.required-field {
+  color: var(--ion-color-danger);
+  margin-left: 4px;
+}
+
+ion-item {
+  --padding-start: 0;
+  margin-bottom: 8px;
+}
+
+.checkbox-list {
+  margin-top: 8px;
+}
+
+.button-group {
+  margin-top: 24px;
+} 

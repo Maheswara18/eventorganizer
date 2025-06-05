@@ -1,0 +1,99 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Form Pendaftaran</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{ event.title }}</ion-card-title>
+      <ion-card-subtitle>{{ formTemplate.name }}</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <form (ngSubmit)="submitForm()">
+        <ion-list>
+          <ng-container *ngFor="let field of formTemplate.fields">
+            <!-- Text, Number, Email inputs -->
+            <ion-item *ngIf="['text', 'number', 'email'].includes(field.type)">
+              <ion-label position="stacked">
+                {{ field.label }}
+                <ion-text color="danger" *ngIf="field.required">*</ion-text>
+              </ion-label>
+              <ion-input
+                [type]="field.type"
+                [required]="field.required"
+                [(ngModel)]="formData[field.name]"
+                [name]="field.name"
+                [placeholder]="'Masukkan ' + field.label.toLowerCase()"
+              ></ion-input>
+            </ion-item>
+
+            <!-- Select dropdown -->
+            <ion-item *ngIf="field.type === 'select'">
+              <ion-label position="stacked">
+                {{ field.label }}
+                <ion-text color="danger" *ngIf="field.required">*</ion-text>
+              </ion-label>
+              <ion-select
+                [(ngModel)]="formData[field.name]"
+                [name]="field.name"
+                [required]="field.required"
+                [placeholder]="'Pilih ' + field.label.toLowerCase()"
+              >
+                <ion-select-option *ngFor="let option of field.options" [value]="option">
+                  {{ option }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <!-- Radio buttons -->
+            <ion-list *ngIf="field.type === 'radio'">
+              <ion-list-header>
+                {{ field.label }}
+                <ion-text color="danger" *ngIf="field.required">*</ion-text>
+              </ion-list-header>
+              <ion-radio-group [(ngModel)]="formData[field.name]" [name]="field.name">
+                <ion-item *ngFor="let option of field.options">
+                  <ion-label>{{ option }}</ion-label>
+                  <ion-radio [value]="option"></ion-radio>
+                </ion-item>
+              </ion-radio-group>
+            </ion-list>
+
+            <!-- Checkboxes -->
+            <ion-list *ngIf="field.type === 'checkbox'">
+              <ion-list-header>
+                {{ field.label }}
+                <ion-text color="danger" *ngIf="field.required">*</ion-text>
+              </ion-list-header>
+              <ion-item *ngFor="let option of field.options">
+                <ion-label>{{ option }}</ion-label>
+                <ion-checkbox
+                  slot="start"
+                  (ionChange)="handleCheckboxChange(field.name, option, $event)"
+                  [checked]="formData[field.name]?.includes(option)"
+                ></ion-checkbox>
+              </ion-item>
+            </ion-list>
+          </ng-container>
+        </ion-list>
+
+        <div class="ion-padding">
+          <ion-button expand="block" type="submit" color="primary">
+            Daftar Event
+          </ion-button>
+          <ion-button expand="block" color="medium" (click)="cancel()" class="ion-margin-top">
+            Batal
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content> 

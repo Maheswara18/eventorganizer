@@ -1,0 +1,31 @@
+.field-container {
+  border: 1px solid var(--ion-color-medium);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.field-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.options-container {
+  padding: 8px 16px;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+ion-button[type="submit"] {
+  margin-top: 24px;
+} 

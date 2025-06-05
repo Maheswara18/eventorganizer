@@ -97,4 +97,41 @@
       Update Event
     </ion-button>
   </form>
+
+  <!-- Form Template Section -->
+  <div class="form-template-section ion-margin-top">
+    <ion-item-divider>
+      <ion-label>
+        Form Pendaftaran
+      </ion-label>
+    </ion-item-divider>
+
+    <ion-card *ngIf="formTemplate">
+      <ion-card-header>
+        <ion-card-title>{{ formTemplate.name }}</ion-card-title>
+        <ion-card-subtitle>{{ formTemplate.description }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let field of formTemplate.fields">
+            <ion-label>
+              <h3>{{ field.label }}</h3>
+              <p>Tipe: {{ field.type }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+        <ion-button expand="block" color="primary" (click)="editFormTemplate()">
+          Edit Form Template
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <div *ngIf="!formTemplate" class="ion-text-center ion-padding">
+      <p>Event ini belum memiliki form pendaftaran</p>
+      <ion-button expand="block" color="primary" (click)="createFormTemplate()">
+        <ion-icon name="add" slot="start"></ion-icon>
+        Buat Form Pendaftaran
+      </ion-button>
+    </div>
+  </div>
 </ion-content> 

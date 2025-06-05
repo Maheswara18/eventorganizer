@@ -1,43 +1,50 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
+      <ion-back-button defaultHref="/events"></ion-back-button>
     </ion-buttons>
-    <ion-title>Event Saya</ion-title>
+    <ion-title>Event Terdaftar</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ion-refresher slot="fixed" (ionRefresh)="loadRegisteredEvents($event)">
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="loadRegisteredEvents()">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
   <div *ngIf="registeredEvents.length === 0" class="ion-text-center ion-padding">
-    <ion-text color="medium">
-      <h5>Anda belum terdaftar di event apapun</h5>
-    </ion-text>
+    <p>Anda belum terdaftar di event apapun</p>
   </div>
 
   <ion-list>
-    <ion-item-sliding *ngFor="let event of registeredEvents" #slidingItem>
-      <ion-item class="event-item" (click)="showEventDetail(event)">
+    <ion-item-sliding *ngFor="let event of registeredEvents">
+      <ion-item>
         <ion-thumbnail slot="start" *ngIf="event.image_path">
           <img [src]="'http://localhost:8000/' + event.image_path" [alt]="event.title">
         </ion-thumbnail>
         <ion-label>
           <h2>{{ event.title }}</h2>
-          <p>{{ formatDate(event.start_datetime) }}</p>
-          <ion-chip [color]="getPaymentStatusColor(event.payment_status)" class="status-chip">
-            <ion-label>{{ event.payment_status | titlecase }}</ion-label>
+          <p>{{ event.description }}</p>
+          <p>
+            <ion-text color="medium">
+              {{ formatDate(event.start_datetime) }} - {{ formatDate(event.end_datetime) }}
+            </ion-text>
+          </p>
+          <p>
+            <ion-text color="medium">
+              Terdaftar: {{ formatDate(event.registration_date) }}
+            </ion-text>
+          </p>
+          <ion-chip [color]="event.payment_status === 'paid' ? 'success' : 'warning'">
+            <ion-label>{{ event.payment_status === 'paid' ? 'Lunas' : 'Belum Lunas' }}</ion-label>
           </ion-chip>
         </ion-label>
-        <ion-icon name="chevron-forward" slot="end"></ion-icon>
       </ion-item>
 
-      <ion-item-options side="end" *ngIf="event.payment_status.toLowerCase() === 'unpaid'">
-        <ion-item-option color="danger" (click)="cancelRegistration(event.id, slidingItem)">
-          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-          Batal
+      <ion-item-options side="end">
+        <ion-item-option color="danger" (click)="showCancelConfirmation(event.id)">
+          <ion-icon slot="icon-only" name="trash"></ion-icon>
+          Batalkan
         </ion-item-option>
       </ion-item-options>
     </ion-item-sliding>
@@ -107,7 +114,7 @@
             <ion-button *ngIf="selectedEvent.payment_status.toLowerCase() === 'unpaid'"
                       expand="block" 
                       color="danger"
-                      (click)="cancelRegistrationFromModal(selectedEvent.id)">
+                      (click)="cancelRegistration(selectedEvent.id)">
               Batalkan Pendaftaran
             </ion-button>
           </div>

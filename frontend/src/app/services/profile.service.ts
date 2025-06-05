@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
-  private apiEndpoint = environment.apiEndpoint;
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private http: HttpClient,
@@ -28,7 +28,7 @@ export class ProfileService {
   async getProfile(): Promise<any> {
     const headers = await this.getHeaders();
     return firstValueFrom(
-      this.http.get<any>(`${this.apiEndpoint}/profile`, {
+      this.http.get<any>(`${this.apiUrl}/profile`, {
         headers,
         withCredentials: true
       })
@@ -38,7 +38,7 @@ export class ProfileService {
   async updateProfile(profileData: any): Promise<any> {
     const headers = await this.getHeaders();
     return firstValueFrom(
-      this.http.put<any>(`${this.apiEndpoint}/profile`, profileData, {
+      this.http.put<any>(`${this.apiUrl}/profile`, profileData, {
         headers,
         withCredentials: true
       })
@@ -57,7 +57,7 @@ export class ProfileService {
       new_password_confirmation: passwordData.password_confirmation
     };
     return firstValueFrom(
-      this.http.put<any>(`${this.apiEndpoint}/profile/password`, data, {
+      this.http.put<any>(`${this.apiUrl}/profile/password`, data, {
         headers,
         withCredentials: true
       })

@@ -1,10 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastController, LoadingController } from '@ionic/angular';
+import { ToastController, LoadingController, ModalController } from '@ionic/angular';
 import { EventsService } from '../../services/events.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
+import { FormTemplateService } from '../../services/form-template.service';
+import { FormTemplate, FormTemplateResponse } from '../../interfaces/form-template';
+import { firstValueFrom } from 'rxjs';
+import { FormBuilderComponent } from '../../components/form-builder/form-builder.component';
 
 interface EventData {
   id: number;
@@ -36,28 +40,31 @@ export class EditEventPage implements OnInit {
     location: '',
     price: 0,
     max_participants: 0,
-    start_datetime: '',
-    end_datetime: '',
+    start_datetime: new Date().toISOString(),
+    end_datetime: new Date().toISOString(),
     image_path: '',
-    status: 'active',
+    status: 'draft',
     provides_certificate: false
   };
 
   selectedImage: File | null = null;
+  formTemplate: FormTemplate | null = null;
+  eventId: number = 0;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private eventsService: EventsService,
     private toastController: ToastController,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private formTemplateService: FormTemplateService,
+    private modalCtrl: ModalController
   ) {}
 
   async ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await this.loadEvent(parseInt(id));
-    }
+    this.eventId = Number(this.route.snapshot.paramMap.get('id'));
+    await this.loadEvent(this.eventId);
+    await this.loadFormTemplate();
   }
 
   async loadEvent(id: number) {
@@ -154,6 +161,91 @@ export class EditEventPage implements OnInit {
     } catch (error: any) {
       console.error('Error updating event:', error);
       await this.showToast(error?.message || 'Gagal mengupdate event');
+    } finally {
+      loading.dismiss();
+    }
+  }
+
+  async loadFormTemplate() {
+    try {
+      const response = await firstValueFrom(this.formTemplateService.getFormTemplate(this.eventId));
+      if (response && response.template) {
+        this.formTemplate = response.template;
+      }
+    } catch (error) {
+      console.error('Error loading form template:', error);
+      // Don't show a toast here as this is not a critical error
+    }
+  }
+
+  async createFormTemplate() {
+    const modal = await this.modalCtrl.create({
+      component: FormBuilderComponent,
+      componentProps: {
+        eventId: this.eventId
+      },
+      cssClass: 'form-builder-modal'
+    });
+
+    modal.onDidDismiss().then(async (result) => {
+      if (result.data) {
+        await this.onFormTemplateSubmit(result.data);
+      }
+    });
+
+    return await modal.present();
+  }
+
+  async editFormTemplate() {
+    const modal = await this.modalCtrl.create({
+      component: FormBuilderComponent,
+      componentProps: {
+        eventId: this.eventId,
+        existingTemplate: this.formTemplate
+      },
+      cssClass: 'form-builder-modal'
+    });
+
+    modal.onDidDismiss().then(async (result) => {
+      if (result.data) {
+        await this.onFormTemplateSubmit(result.data);
+      }
+    });
+
+    return await modal.present();
+  }
+
+  async onFormTemplateSubmit(formData: Partial<FormTemplate>) {
+    const loading = await this.loadingCtrl.create({
+      message: 'Menyimpan form template...',
+      spinner: 'circular'
+    });
+    await loading.present();
+
+    try {
+      let response: FormTemplateResponse;
+      if (this.formTemplate?.id) {
+        // Update existing template
+        response = await firstValueFrom(
+          this.formTemplateService.updateFormTemplate(this.eventId, this.formTemplate.id, formData)
+        );
+      } else {
+        // Create new template
+        response = await firstValueFrom(
+          this.formTemplateService.createFormTemplate(this.eventId, formData)
+        );
+      }
+
+      if (response && response.template) {
+        this.formTemplate = response.template;
+        await this.showToast('Form template berhasil ' + (this.formTemplate.id ? 'diupdate' : 'dibuat'));
+        await this.loadFormTemplate(); // Reload the template to get fresh data
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('Error saving form template:', error);
+      await this.showToast('Gagal menyimpan form template');
     } finally {
       loading.dismiss();
     }

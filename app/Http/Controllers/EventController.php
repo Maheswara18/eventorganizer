@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
@@ -347,46 +348,89 @@ class EventController extends Controller
     public function cancelRegistration($id)
     {
         try {
+            Log::info('Starting registration cancellation', [
+                'event_id' => $id,
+                'user_id' => auth()->id()
+            ]);
+
             $user = auth()->user();
+            Log::info('User authenticated', [
+                'user_id' => $user->id,
+                'name' => $user->name
+            ]);
+
+            // Find the registration
             $registration = Participant::where('user_id', $user->id)
                 ->where('event_id', $id)
-                ->firstOrFail();
+                ->first();
 
-            // Cek apakah sudah dibayar
+            Log::info('Registration found', [
+                'registration' => $registration ? $registration->toArray() : null
+            ]);
+
+            if (!$registration) {
+                Log::warning('Registration not found', [
+                    'event_id' => $id,
+                    'user_id' => $user->id
+                ]);
+                return response()->json([
+                    'message' => 'Registrasi tidak ditemukan'
+                ], 404);
+            }
+
+            // Check if already paid
             if ($registration->payment && $registration->payment->status === 'paid') {
+                Log::warning('Cannot cancel paid registration', [
+                    'registration_id' => $registration->id,
+                    'payment_status' => $registration->payment->status
+                ]);
                 return response()->json([
                     'message' => 'Tidak dapat membatalkan registrasi yang sudah dibayar'
                 ], 400);
             }
 
-            // Hapus payment jika ada
+            // Delete payment if exists
             if ($registration->payment) {
+                Log::info('Deleting payment', [
+                    'payment_id' => $registration->payment->id
+                ]);
                 $registration->payment->delete();
             }
 
-            // Hapus QR code jika ada
+            // Delete QR code if exists
             if ($registration->qr_code_path) {
-                $qrPath = str_replace('storage/', 'public/', $registration->qr_code_path);
+                Log::info('Attempting to delete QR code', [
+                    'qr_path' => $registration->qr_code_path
+                ]);
+                $qrPath = 'public/' . $registration->qr_code_path;
                 if (Storage::exists($qrPath)) {
                     Storage::delete($qrPath);
+                    Log::info('QR code deleted successfully');
+                } else {
+                    Log::warning('QR code file not found', [
+                        'qr_path' => $qrPath
+                    ]);
                 }
             }
 
+            // Delete registration
             $registration->delete();
+            Log::info('Registration cancelled successfully', [
+                'registration_id' => $registration->id
+            ]);
 
             return response()->json([
                 'message' => 'Registrasi berhasil dibatalkan'
             ]);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Registrasi tidak ditemukan'
-            ], 404);
         } catch (\Exception $e) {
-            \Log::error('Error in cancelRegistration: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
+            Log::error('Error in cancelRegistration', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'event_id' => $id,
+                'user_id' => auth()->id()
+            ]);
             return response()->json([
-                'message' => 'Terjadi kesalahan saat membatalkan registrasi',
-                'error' => $e->getMessage()
+                'message' => 'Terjadi kesalahan saat membatalkan registrasi: ' . $e->getMessage()
             ], 500);
         }
     }

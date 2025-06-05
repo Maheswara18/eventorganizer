@@ -77,7 +77,7 @@
     </ion-card>
 
     <div class="ion-padding">
-      <ion-button expand="block" color="primary" (click)="registerEvent()" *ngIf="!isRegistered">
+      <ion-button expand="block" color="primary" (click)="registerForEvent(event.id)" *ngIf="!isRegistered && event">
         Daftar Event
       </ion-button>
       <ion-button expand="block" color="success" disabled *ngIf="isRegistered">

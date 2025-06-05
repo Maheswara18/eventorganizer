@@ -8,6 +8,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ParticipantController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FormTemplateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,16 +38,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events', [EventController::class, 'index']);
-    Route::post('/events', [EventController::class, 'store']);
     Route::get('/events/registered', [EventController::class, 'getRegisteredEvents']);
     Route::get('/events/{id}', [EventController::class, 'show']);
-    Route::put('/events/{id}', [EventController::class, 'update']);
-    Route::delete('/events/{id}', [EventController::class, 'destroy']);
     Route::post('/events/{event}/register', [EventController::class, 'register']);
     Route::get('/events/{event}/check-registration', [EventController::class, 'checkRegistration']);
     Route::delete('/events/{id}/registration', [EventController::class, 'cancelRegistration']);
 });
-
 
 ////////PAYMENT//////////
 
@@ -88,9 +85,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
 use App\Http\Controllers\AdminController;
 
+// Admin routes
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-    Route::post('/scan-qr', [AdminController::class, 'scanQr']);
     Route::post('/events', [EventController::class, 'store']);
     Route::put('/events/{id}', [EventController::class, 'update']);
     Route::delete('/events/{id}', [EventController::class, 'destroy']);
+    Route::post('/scan-qr', [AdminController::class, 'scanQr']);
+});
+
+////////FORM TEMPLATES//////////
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/events/{event}/form-template', [FormTemplateController::class, 'index']);
+    Route::post('/events/{event}/form-template', [FormTemplateController::class, 'store']);
+    Route::put('/events/{event}/form-template/{template}', [FormTemplateController::class, 'update']);
+    Route::delete('/events/{event}/form-template/{template}', [FormTemplateController::class, 'destroy']);
 });

@@ -1,0 +1,95 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ existingTemplate ? 'Edit Form Template' : 'Create Form Template' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="formBuilderForm" (ngSubmit)="onSubmit()" class="ion-padding">
+    <ion-item>
+      <ion-label position="floating">Form Name</ion-label>
+      <ion-input formControlName="name" type="text"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Description</ion-label>
+      <ion-textarea formControlName="description" rows="3"></ion-textarea>
+    </ion-item>
+
+    <div formArrayName="fields" class="ion-margin-vertical">
+      <div *ngFor="let field of fields.controls; let i=index" [formGroupName]="i" class="field-container ion-margin-vertical ion-padding border rounded">
+        <div class="field-header ion-justify-content-between ion-align-items-center ion-margin-bottom">
+          <h4>Field #{{i + 1}}</h4>
+          <div class="field-actions">
+            <ion-button fill="clear" (click)="moveField(i, 'up')" [disabled]="i === 0">
+              <ion-icon name="arrow-up"></ion-icon>
+            </ion-button>
+            <ion-button fill="clear" (click)="moveField(i, 'down')" [disabled]="i === fields.length - 1">
+              <ion-icon name="arrow-down"></ion-icon>
+            </ion-button>
+            <ion-button fill="clear" color="danger" (click)="removeField(i)">
+              <ion-icon name="trash"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+
+        <ion-item>
+          <ion-label position="floating">Label</ion-label>
+          <ion-input formControlName="label" type="text"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Field Type</ion-label>
+          <ion-select formControlName="type">
+            <ion-select-option *ngFor="let type of fieldTypes" [value]="type">
+              {{type | titlecase}}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Required</ion-label>
+          <ion-toggle formControlName="is_required"></ion-toggle>
+        </ion-item>
+
+        <div *ngIf="field.get('type')?.value === 'select' || field.get('type')?.value === 'radio' || field.get('type')?.value === 'checkbox'" class="options-container ion-margin-top">
+          <h5>Options</h5>
+          <div class="options-list">
+            <div *ngFor="let option of field.get('options')?.value; let j=index" class="option-item ion-margin-bottom">
+              <ion-item lines="none">
+                <ion-input [(ngModel)]="field.get('options')?.value[j]" [ngModelOptions]="{standalone: true}" placeholder="Option value"></ion-input>
+                <ion-button slot="end" fill="clear" color="danger" (click)="removeOption(i, j)">
+                  <ion-icon name="close-circle"></ion-icon>
+                </ion-button>
+              </ion-item>
+            </div>
+          </div>
+          <ion-button size="small" (click)="addOption(i)">
+            <ion-icon name="add" slot="start"></ion-icon>
+            Add Option
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ion-padding">
+      <ion-button expand="block" (click)="addField()" class="ion-margin-bottom">
+        <ion-icon name="add" slot="start"></ion-icon>
+        Add Field
+      </ion-button>
+
+      <ion-button expand="block" type="submit" color="primary" [disabled]="!formBuilderForm.valid">
+        Save Form Template
+      </ion-button>
+
+      <ion-button expand="block" color="medium" (click)="cancel()">
+        Cancel
+      </ion-button>
+    </div>
+  </form>
+</ion-content> 

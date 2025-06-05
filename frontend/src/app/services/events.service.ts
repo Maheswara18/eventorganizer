@@ -1,76 +1,79 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 import { Observable, firstValueFrom } from 'rxjs';
-import { environment } from 'src/environments/environment';
 import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EventsService {
-  private apiEndpoint = environment.apiEndpoint;
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private http: HttpClient,
     private authService: AuthService
-  ) {}
+  ) { }
 
-  private async getHeaders(): Promise<Record<string, string>> {
+  private async getHeaders(): Promise<HttpHeaders> {
     const token = await this.authService.getToken();
-    return {
-      'Accept': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
+    return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
-    };
+    });
   }
 
   async getAllEvents(): Promise<any[]> {
-    const headers = await this.getHeaders();
-    return firstValueFrom(
-      this.http.get<any[]>(`${this.apiEndpoint}/events`, {
-        headers,
-        withCredentials: true
-      })
-    );
+    try {
+      const headers = await this.getHeaders();
+      return firstValueFrom(
+        this.http.get<any[]>(`${this.apiUrl}/events`, {
+          headers,
+          withCredentials: true
+        })
+      );
+    } catch (error) {
+      console.error('Error getting all events:', error);
+      throw error;
+    }
   }
 
   async getEvent(id: number): Promise<any> {
-    const headers = await this.getHeaders();
-    return firstValueFrom(
-      this.http.get<any>(`${this.apiEndpoint}/events/${id}`, {
-        headers,
-        withCredentials: true
-      })
-    );
+    try {
+      const headers = await this.getHeaders();
+      return firstValueFrom(
+        this.http.get<any>(`${this.apiUrl}/events/${id}`, {
+          headers,
+          withCredentials: true
+        })
+      );
+    } catch (error) {
+      console.error('Error getting event:', error);
+      throw error;
+    }
   }
 
   async createEvent(eventData: any): Promise<any> {
-    const headers = await this.getHeaders();
-    return firstValueFrom(
-      this.http.post<any>(`${this.apiEndpoint}/events`, eventData, {
-        headers,
-        withCredentials: true
-      })
-    );
+    try {
+      const headers = await this.getHeaders();
+      return firstValueFrom(
+        this.http.post<any>(`${this.apiUrl}/events`, eventData, {
+          headers,
+          withCredentials: true
+        })
+      );
+    } catch (error) {
+      console.error('Error creating event:', error);
+      throw error;
+    }
   }
 
   async updateEvent(id: number, eventData: any): Promise<any> {
-    console.log('Updating event with ID:', id);
-    
-    let headers = await this.getHeaders();
-    
-    // Jika eventData adalah FormData, hapus Content-Type
-    if (eventData instanceof FormData) {
-      const { 'Content-Type': removed, ...headersCopy } = headers;
-      headers = headersCopy;
-    }
-
     try {
-      // Kirim request update
-      const response = await firstValueFrom(
-        this.http.post<any>(
-          `${this.apiEndpoint}/events/${id}`, 
+      const headers = await this.getHeaders();
+      return firstValueFrom(
+        this.http.put<any>(
+          `${this.apiUrl}/events/${id}`,
           eventData,
           {
             headers,
@@ -78,82 +81,89 @@ export class EventsService {
           }
         )
       );
-      
-      console.log('Update response:', response);
-      return response;
-    } catch (error: any) {
-      console.error('Update error:', error);
+    } catch (error) {
+      console.error('Error updating event:', error);
       throw error;
     }
   }
 
   async deleteEvent(id: number): Promise<any> {
-    const headers = await this.getHeaders();
-    return firstValueFrom(
-      this.http.delete<any>(`${this.apiEndpoint}/events/${id}`, {
-        headers,
-        withCredentials: true
-      })
-    );
-  }
-
-  async registerEvent(eventId: number): Promise<any> {
-    const headers = await this.getHeaders();
-    return firstValueFrom(
-      this.http.post<any>(`${this.apiEndpoint}/events/${eventId}/register`, {}, {
-        headers,
-        withCredentials: true
-      })
-    );
-  }
-
-  async getRegisteredEvents(): Promise<any> {
-    console.log('Getting registered events from API...');
-    const headers = await this.getHeaders();
-    console.log('Using headers:', headers);
-    console.log('API Endpoint:', `${this.apiEndpoint}/events/registered`);
-    
     try {
-      const response = await firstValueFrom(
-        this.http.get<any>(`${this.apiEndpoint}/events/registered`, {
+      const headers = await this.getHeaders();
+      return firstValueFrom(
+        this.http.delete<any>(`${this.apiUrl}/events/${id}`, {
           headers,
           withCredentials: true
         })
       );
-      console.log('API Response:', response);
-      return response;
     } catch (error) {
-      console.error('Error in getRegisteredEvents:', error);
+      console.error('Error deleting event:', error);
+      throw error;
+    }
+  }
+
+  async registerForEvent(eventId: number, formData?: any): Promise<any> {
+    try {
+      const headers = await this.getHeaders();
+      return firstValueFrom(
+        this.http.post<any>(`${this.apiUrl}/events/${eventId}/register`, formData || {}, {
+          headers,
+          withCredentials: true
+        })
+      );
+    } catch (error) {
+      console.error('Error registering for event:', error);
+      throw error;
+    }
+  }
+
+  async getRegisteredEvents(): Promise<any> {
+    try {
+      const headers = await this.getHeaders();
+      return firstValueFrom(
+        this.http.get<any>(`${this.apiUrl}/events/registered`, {
+          headers,
+          withCredentials: true
+        })
+      );
+    } catch (error) {
+      console.error('Error getting registered events:', error);
       throw error;
     }
   }
 
   async isRegistered(eventId: number): Promise<boolean> {
-    const headers = await this.getHeaders();
+    return this.checkRegistration(eventId);
+  }
+
+  async checkRegistration(eventId: number): Promise<boolean> {
     try {
+      const headers = await this.getHeaders();
       const response = await firstValueFrom(
-        this.http.get<{registered: boolean}>(`${this.apiEndpoint}/events/${eventId}/check-registration`, {
+        this.http.get<{registered: boolean}>(`${this.apiUrl}/events/${eventId}/check-registration`, {
           headers,
           withCredentials: true
         })
       );
-      return response?.registered || false;
-    } catch {
-      return false;
+      return response.registered;
+    } catch (error) {
+      console.error('Error checking registration:', error);
+      throw error;
     }
   }
 
-  async cancelEventRegistration(eventId: number): Promise<any> {
-    const headers = await this.getHeaders();
+  async cancelRegistration(eventId: number): Promise<any> {
     try {
-      return await firstValueFrom(
-        this.http.delete<any>(`${this.apiEndpoint}/events/${eventId}/registration`, {
+      console.log('Canceling registration for event:', eventId);
+      const headers = await this.getHeaders();
+      return firstValueFrom(
+        this.http.delete<any>(`${this.apiUrl}/events/${eventId}/registration`, {
           headers,
           withCredentials: true
         })
       );
     } catch (error) {
-      console.error('Error canceling event registration:', error);
+      console.error('Error canceling registration:', error);
       throw error;
     }
   }

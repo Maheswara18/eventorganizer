@@ -44,7 +44,7 @@ export class EventsPage implements OnInit {
     private authService: AuthService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.isAdmin = this.authService.isAdmin();
     
     // Subscribe ke perubahan query params
@@ -54,7 +54,7 @@ export class EventsPage implements OnInit {
       }
     });
     
-    this.loadEvents();
+    await this.loadEvents();
   }
 
   ionViewWillEnter() {

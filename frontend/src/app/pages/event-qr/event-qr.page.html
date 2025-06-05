@@ -1,0 +1,47 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/events"></ion-back-button>
+    </ion-buttons>
+    <ion-title>QR Code Absensi</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="refreshQRCode($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="qr-container" *ngIf="qrCode">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title class="ion-text-center">QR Code Absensi</ion-card-title>
+        <ion-card-subtitle class="ion-text-center">
+          Tunjukkan QR Code ini kepada panitia untuk absensi
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="qr-image">
+          <img [src]="'data:image/png;base64,' + qrCode.qr_code" alt="QR Code Absensi">
+        </div>
+        
+        <div class="token-info ion-text-center">
+          <p>Token: {{ qrCode.token }}</p>
+        </div>
+
+        <ion-note class="ion-text-center">
+          <p>QR Code ini hanya berlaku untuk satu kali scan</p>
+          <p>Tarik ke bawah untuk memperbarui QR Code</p>
+        </ion-note>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <div *ngIf="!qrCode" class="ion-text-center ion-padding">
+    <ion-spinner *ngIf="loading"></ion-spinner>
+    <ion-text color="medium" *ngIf="!loading">
+      <p>QR Code tidak tersedia. Pastikan Anda sudah membayar event ini.</p>
+    </ion-text>
+  </div>
+</ion-content> 
