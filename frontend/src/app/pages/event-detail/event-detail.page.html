@@ -54,7 +54,7 @@
             <ion-icon name="cash-outline" slot="start"></ion-icon>
             <ion-label>
               <h2>Harga</h2>
-              <p>Rp {{ event.price.toLocaleString('id-ID') }}</p>
+              <p>Rp {{ formatPrice(event.price) | number:'1.0-0' }}</p>
             </ion-label>
           </ion-item>
 

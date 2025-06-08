@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController, LoadingController, ModalController } from '@ionic/angular';
 import { EventsService } from '../../services/events.service';
@@ -9,160 +10,129 @@ import { FormTemplateService } from '../../services/form-template.service';
 import { FormTemplate, FormTemplateResponse } from '../../interfaces/form-template';
 import { firstValueFrom } from 'rxjs';
 import { FormBuilderComponent } from '../../components/form-builder/form-builder.component';
-
-interface EventData {
-  id: number;
-  title: string;
-  description: string;
-  location: string;
-  price: number;
-  max_participants: number;
-  start_datetime: string;
-  end_datetime: string;
-  image_path: string;
-  status: string;
-  provides_certificate: boolean;
-  [key: string]: any; // Index signature
-}
+import { Event as EventModel } from '../../interfaces/event.interface';
 
 @Component({
   standalone: true,
   selector: 'app-edit-event',
   templateUrl: './edit-event.page.html',
   styleUrls: ['./edit-event.page.scss'],
-  imports: [CommonModule, FormsModule, IonicModule]
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule]
 })
 export class EditEventPage implements OnInit {
-  event: EventData = {
-    id: 0,
-    title: '',
-    description: '',
-    location: '',
-    price: 0,
-    max_participants: 0,
-    start_datetime: new Date().toISOString(),
-    end_datetime: new Date().toISOString(),
-    image_path: '',
-    status: 'draft',
-    provides_certificate: false
-  };
-
-  selectedImage: File | null = null;
-  formTemplate: FormTemplate | null = null;
+  eventForm: FormGroup;
   eventId: number = 0;
+  event!: EventModel;
+  selectedImage: File | null = null;
+  imagePreview: string | null = null;
+  formTemplate: FormTemplate | null = null;
 
   constructor(
+    private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private eventsService: EventsService,
     private toastController: ToastController,
-    private loadingCtrl: LoadingController,
+    private loadingController: LoadingController,
     private formTemplateService: FormTemplateService,
     private modalCtrl: ModalController
-  ) {}
+  ) {
+    this.eventForm = this.formBuilder.group({
+      title: ['', Validators.required],
+      description: ['', Validators.required],
+      location: ['', Validators.required],
+      price: [0, [Validators.required, Validators.min(0)]],
+      max_participants: [0, [Validators.required, Validators.min(1)]],
+      start_datetime: ['', Validators.required],
+      end_datetime: ['', Validators.required],
+      provides_certificate: [false],
+      status: ['draft']
+    });
+  }
 
   async ngOnInit() {
-    this.eventId = Number(this.route.snapshot.paramMap.get('id'));
-    await this.loadEvent(this.eventId);
+    this.eventId = +this.route.snapshot.paramMap.get('id')!;
+    await this.loadEvent();
     await this.loadFormTemplate();
   }
 
-  async loadEvent(id: number) {
-    const loading = await this.loadingCtrl.create({
-      message: 'Loading event...',
-      spinner: 'circular'
+  async loadEvent() {
+    const loading = await this.loadingController.create({
+      message: 'Memuat data event...'
     });
     await loading.present();
 
     try {
-      const eventData = await this.eventsService.getEvent(id);
+      const event = await this.eventsService.getEvent(this.eventId);
+      this.event = event;
       
-      // Format dates properly
-      this.event = {
-        ...eventData,
-        start_datetime: new Date(eventData.start_datetime).toISOString(),
-        end_datetime: new Date(eventData.end_datetime).toISOString()
-      };
-      
-      console.log('Loaded event data:', this.event);
+      this.eventForm.patchValue({
+        title: event.title,
+        description: event.description,
+        location: event.location,
+        price: event.price,
+        max_participants: event.max_participants,
+        start_datetime: event.start_datetime,
+        end_datetime: event.end_datetime,
+        provides_certificate: event.provides_certificate,
+        status: event.status
+      });
+
+      if (event.image_path) {
+        this.imagePreview = event.image_path;
+      }
     } catch (error) {
       console.error('Error loading event:', error);
-      await this.showToast('Gagal memuat data event');
-      this.router.navigate(['/events']);
+      await this.showToast('Gagal memuat data event', 'danger');
     } finally {
-      loading.dismiss();
+      await loading.dismiss();
     }
   }
 
   onImageSelected(event: any) {
-    const files = event?.target?.files;
-    if (files?.length > 0) {
-      this.selectedImage = files[0];
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.selectedImage = file;
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreview = reader.result as string;
+      };
+      reader.readAsDataURL(file);
     }
   }
 
-  async updateEvent() {
-    const loading = await this.loadingCtrl.create({
-      message: 'Updating event...',
-      spinner: 'circular'
-    });
-    await loading.present();
-
-    try {
-      // Buat objek data yang bersih
-      const cleanEventData = {
-        title: this.event.title,
-        description: this.event.description,
-        location: this.event.location,
-        price: this.event.price,
-        max_participants: this.event.max_participants,
-        start_datetime: new Date(this.event.start_datetime).toISOString(),
-        end_datetime: new Date(this.event.end_datetime).toISOString(),
-        provides_certificate: this.event.provides_certificate,
-        status: this.event.status
-      };
-
-      // Validasi data
-      if (!cleanEventData.title || !cleanEventData.description || !cleanEventData.location) {
-        throw new Error('Title, description, and location are required');
-      }
-
-      const formData = new FormData();
-      
-      // Tambahkan method field untuk Laravel
-      formData.append('_method', 'PUT');
-
-      // Tambahkan data event yang bersih
-      Object.entries(cleanEventData).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          formData.append(key, String(value));
-        }
+  async onSubmit() {
+    if (this.eventForm.valid) {
+      const loading = await this.loadingController.create({
+        message: 'Menyimpan perubahan...'
       });
-      
-      // Tambahkan gambar jika ada
-      if (this.selectedImage) {
-        formData.append('image_path', this.selectedImage);
-      }
+      await loading.present();
 
-      console.log('Clean event data:', cleanEventData);
+      try {
+        const formData = new FormData();
+        const eventData = this.eventForm.value;
 
-      const updatedEvent = await this.eventsService.updateEvent(this.event.id, formData);
-      console.log('Response from server:', updatedEvent);
+        // Append form fields to FormData
+        Object.keys(eventData).forEach(key => {
+          formData.append(key, eventData[key]);
+        });
 
-      await this.showToast('Event berhasil diupdate');
-
-      // Navigasi kembali ke halaman events dengan parameter refresh
-      this.router.navigate(['/events'], { 
-        queryParams: { 
-          refresh: new Date().getTime()
+        // Append image if selected
+        if (this.selectedImage) {
+          formData.append('image', this.selectedImage);
         }
-      });
-      
-    } catch (error: any) {
-      console.error('Error updating event:', error);
-      await this.showToast(error?.message || 'Gagal mengupdate event');
-    } finally {
-      loading.dismiss();
+
+        await this.eventsService.updateEvent(this.eventId, formData);
+        await this.showToast('Event berhasil diperbarui', 'success');
+        this.router.navigate(['/events']);
+      } catch (error) {
+        console.error('Error updating event:', error);
+        await this.showToast('Gagal memperbarui event', 'danger');
+      } finally {
+        await loading.dismiss();
+      }
+    } else {
+      await this.showToast('Mohon lengkapi semua field yang diperlukan', 'warning');
     }
   }
 
@@ -216,7 +186,7 @@ export class EditEventPage implements OnInit {
   }
 
   async onFormTemplateSubmit(formData: Partial<FormTemplate>) {
-    const loading = await this.loadingCtrl.create({
+    const loading = await this.loadingController.create({
       message: 'Menyimpan form template...',
       spinner: 'circular'
     });
@@ -238,25 +208,26 @@ export class EditEventPage implements OnInit {
 
       if (response && response.template) {
         this.formTemplate = response.template;
-        await this.showToast('Form template berhasil ' + (this.formTemplate.id ? 'diupdate' : 'dibuat'));
+        await this.showToast('Form template berhasil ' + (this.formTemplate.id ? 'diupdate' : 'dibuat'), 'success');
         await this.loadFormTemplate(); // Reload the template to get fresh data
       } else {
         throw new Error('Invalid response format');
       }
     } catch (error) {
       console.error('Error saving form template:', error);
-      await this.showToast('Gagal menyimpan form template');
+      await this.showToast('Gagal menyimpan form template', 'danger');
     } finally {
       loading.dismiss();
     }
   }
 
-  async showToast(message: string) {
+  private async showToast(message: string, color: 'success' | 'danger' | 'warning') {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
-      color: 'primary'
+      color,
+      position: 'bottom'
     });
-    toast.present();
+    await toast.present();
   }
 } 

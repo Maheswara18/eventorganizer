@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\FormTemplate;
 use App\Models\FormField;
+use App\Models\FormResponse;
+use App\Models\Participant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class FormTemplateController extends Controller
 {
@@ -149,6 +152,70 @@ class FormTemplateController extends Controller
             return response()->json(['message' => 'Form template deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error deleting form template'], 500);
+        }
+    }
+
+    public function storeResponses(Request $request, Event $event)
+    {
+        try {
+            \Log::info('Storing form responses for event: ' . $event->id);
+            \Log::info('Request data:', $request->all());
+
+            $template = FormTemplate::where('event_id', $event->id)->firstOrFail();
+            
+            // Validate participant
+            $participant = Participant::where('event_id', $event->id)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+
+            // Validate responses
+            $validator = Validator::make($request->all(), [
+                'responses' => 'required|array',
+                'responses.*.field_id' => 'required|exists:form_fields,id',
+                'responses.*.value' => 'required|string'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            DB::beginTransaction();
+
+            try {
+                // Store responses
+                foreach ($request->responses as $response) {
+                    FormResponse::create([
+                        'participant_id' => $participant->id,
+                        'form_field_id' => $response['field_id'],
+                        'value' => $response['value']
+                    ]);
+                }
+
+                DB::commit();
+                return response()->json(['message' => 'Form responses saved successfully']);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error storing form responses: ' . $e->getMessage());
+            return response()->json(['message' => 'Error storing form responses'], 500);
+        }
+    }
+
+    public function getResponses(Event $event)
+    {
+        try {
+            $participant = Participant::where('event_id', $event->id)
+                ->where('user_id', Auth::id())
+                ->with('formResponses.field')
+                ->firstOrFail();
+
+            return response()->json([
+                'responses' => $participant->formResponses
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error fetching form responses'], 500);
         }
     }
 } 

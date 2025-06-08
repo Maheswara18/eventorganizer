@@ -97,12 +97,12 @@ class EventController extends Controller
 
             $validated = $request->validate([
                 'title' => 'required|string',
-                'description' => 'nullable|string',
+                'description' => 'required|string',
                 'provides_certificate' => 'boolean',
-                'price' => 'numeric|min:0',
+                'price' => 'required|numeric|min:0',
                 'location' => 'required|string',
-                'status' => 'in:active,ended',
-                'max_participants' => 'nullable|integer|min:1',
+                'status' => 'required|in:active,ended',
+                'max_participants' => 'required|integer|min:1',
                 'start_datetime' => 'required|date',
                 'end_datetime' => 'required|date|after_or_equal:start_datetime',
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
@@ -113,14 +113,14 @@ class EventController extends Controller
             // Handle image upload if new image is provided
             if ($request->hasFile('image_path')) {
                 \Log::info('Processing new image upload');
-                // Delete old image if exists
+                    // Delete old image if exists
                 if ($event->image_path && Storage::exists('public/' . str_replace('storage/', '', $event->image_path))) {
                     Storage::delete('public/' . str_replace('storage/', '', $event->image_path));
-                }
+                    }
 
-                $imageName = time() . '_' . uniqid() . '.' . $request->file('image_path')->extension();
-                $request->file('image_path')->move(public_path('storage/images'), $imageName);
-                $validated['image_path'] = 'storage/images/' . $imageName;
+                    $imageName = time() . '_' . uniqid() . '.' . $request->file('image_path')->extension();
+                    $request->file('image_path')->move(public_path('storage/images'), $imageName);
+                    $validated['image_path'] = 'storage/images/' . $imageName;
             }
 
             // Convert provides_certificate to boolean
@@ -144,7 +144,7 @@ class EventController extends Controller
                 // Reload event to verify changes
                 $event = Event::with('admin')->findOrFail($id);
                 \Log::info('Updated event data:', $event->toArray());
-
+                
                 return response()->json($event);
             } catch (\Exception $e) {
                 \DB::rollback();
@@ -155,8 +155,7 @@ class EventController extends Controller
             \Log::error($e->getTraceAsString());
             return response()->json([
                 'message' => 'Error updating event',
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -330,7 +329,9 @@ class EventController extends Controller
                     'end_datetime' => $event->end_datetime,
                     'image_path' => $event->image_path,
                     'payment_status' => $participant->payment ? $participant->payment->status : 'unpaid',
-                    'registration_date' => $participant->created_at
+                    'registration_date' => $participant->created_at,
+                    'max_participants' => $event->max_participants,
+                    'registered_participants' => $event->participants()->count()
                 ];
             });
 

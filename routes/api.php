@@ -99,4 +99,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/events/{event}/form-template', [FormTemplateController::class, 'store']);
     Route::put('/events/{event}/form-template/{template}', [FormTemplateController::class, 'update']);
     Route::delete('/events/{event}/form-template/{template}', [FormTemplateController::class, 'destroy']);
+    
+    // Form responses routes
+    Route::post('/events/{event}/form-responses', [FormTemplateController::class, 'storeResponses']);
+    Route::get('/events/{event}/form-responses', [FormTemplateController::class, 'getResponses']);
 });

@@ -8,58 +8,71 @@ ion-toolbar {
 }
 
 .welcome-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  text-align: center;
-  margin-bottom: 2rem;
+  background: var(--ion-color-primary);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
 
   h2 {
     margin: 0;
-    color: var(--ion-color-primary);
+    font-size: 24px;
+    font-weight: bold;
   }
 
   p {
-    margin-top: 0.5rem;
-    color: #555;
+    margin: 10px 0 0;
+    opacity: 0.9;
   }
 }
 
 .action-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
 
   ion-card {
-    border-radius: 12px;
-    text-align: center;
+    margin: 0;
+    cursor: pointer;
+    transition: transform 0.2s;
     background: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    border: 1px solid #d0d0d0; // Tambahkan border abu-abu terang
-    transition: transform 0.2s, border-color 0.2s;
 
     &:hover {
       transform: translateY(-2px);
-      border-color: var(--ion-color-primary); // Border saat hover
     }
 
     ion-card-content {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 1rem;
+      text-align: center;
+      padding: 16px;
 
       ion-icon {
-        font-size: 2em;
-        margin-bottom: 0.5rem;
+        font-size: 32px;
+        margin-bottom: 8px;
         color: var(--ion-color-primary);
       }
 
       span {
-        font-size: 0.95em;
-        color: #333;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ion-color-primary);
       }
     }
+  }
+}
+
+ion-list-header {
+  margin-top: 20px;
+  padding-left: 0;
+  
+  ion-label {
+    font-weight: bold;
+    font-size: 18px;
+    color: var(--ion-color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 }

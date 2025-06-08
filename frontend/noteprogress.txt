@@ -1,0 +1,93 @@
+Aplikasi dikembangkan berbasis mobile-first dengan menggunakan Ionic + Angular sebagai frontend
+mobile, Laravel / Django Rest Framework sebagai backend API, dan MySQL sebagai basis data.
+Seluruh komponen sistem harus terintegrasi penuh tanpa penggunaan dummy, dan dapat diuji
+secara nyata (real-end-to-end integration).
+Sistem ini wajib mendukung proses bisnis sebagai berikut:
+• Event Organizer (Admin) dapat membuat event lengkap dengan form pendaftaran yang
+dapat dikustomisasi, menentukan apakah event mengeluarkan sertifikat atau tidak, serta
+memantau dan mengelola data peserta secara menyeluruh.
+• Peserta dapat mencari event, melihat detailnya, mendaftar secara online, menerima QR
+code untuk validasi kehadiran, serta mengambil sertifikat digital jika memenuhi kriteria
+kehadiran.
+Sistem harus mampu menghasilkan QR code secara otomatis, menyimpan dan mengelola data
+peserta terverifikasi, menyediakan link verifikasi sertifikat, serta mendukung visualisasi data peserta
+dalam bentuk laporan.
+
+=== STATUS PENGEMBANGAN ===
+
+Role Pengguna & Fitur Wajib
+ Event Organizer (Admin/EO)
+1. Login Admin ✅
+   - [x] Autentikasi token-based (Sanctum)
+   - [x] Role khusus admin untuk akses penuh sistem
+2. Buat & Kelola Event ✅
+   - [x] Form tambah event: nama, jadwal, lokasi, kuota, deskripsi, jenis (gratis/berbayar)
+   - [x] Kustomisasi form pendaftaran peserta
+   - [x] Opsi: apakah event mengeluarkan sertifikat atau tidak
+   - [x] Event yang dibuat disimpan ke database dan bisa diedit atau dinonaktifkan
+3. Manajemen Peserta ⚠️ (Parsial)
+   - [x] Lihat data peserta tiap event
+   - [ ] Filter & pencarian peserta
+   - [x] Ubah status kehadiran peserta
+4. Scan QR Code Kehadiran ✅
+   - [x] Verifikasi kehadiran via QR code
+   - [x] Update status otomatis di database
+   - [x] Alternatif manual jika QR tidak berfungsi
+5. Laporan Statistik Event ⚠️ (Parsial)
+   - [x] Jumlah peserta (terdaftar, hadir, tidak hadir)
+   - [x] Kuota & persentase keterisian
+   - [ ] Visualisasi dengan grafik (Chart.js/Highcharts)
+6. Penerbitan Sertifikat ⚠️ (Parsial)
+   - [x] Generate sertifikat otomatis untuk peserta hadir
+   - [x] QR verification
+   - [ ] Format PDF perlu diperbaiki
+   - [x] Link verifikasi publik
+ Peserta
+1. Registrasi & Login ✅
+   - [x] Autentikasi token-based
+   - [x] Akses ke daftar event & riwayat pribadi
+2. Lihat Daftar Event ✅
+   - [x] Menampilkan event yang tersedia (dari backend API)
+   - [x] Detail event: nama, waktu, lokasi, kuota, jenis event, deskripsi
+3. Pendaftaran Event ✅
+   - [x] Mengisi form dinamis yang dibuat oleh EO
+   - [x] Data disimpan ke database dan ditautkan ke ID event
+4. QR Code Tiket ✅
+   - [x] Generate QR code sebagai identitas peserta
+   - [x] QR untuk verifikasi kehadiran saat hari-H
+5. Riwayat Event & Sertifikat ✅
+   - [x] Tampilan semua event yang diikuti
+   - [x] Status pembayaran dan kehadiran
+   - [x] Tombol "Ambil Sertifikat" untuk yang berhak
+   - [x] Informasi kapasitas dan jumlah peserta
+
+=== PRIORITAS PENGEMBANGAN SELANJUTNYA ===
+
+1. Visualisasi Data (Prioritas Tinggi)
+   - Implementasi Chart.js/Highcharts untuk statistik
+   - Dashboard admin dengan grafik
+   - Export data statistik
+
+2. Penyempurnaan Manajemen Peserta
+   - Implementasi filter dan pencarian
+   - Sorting data
+   - Export data peserta
+
+3. Penyempurnaan Sertifikat
+   - Perbaikan template PDF
+   - Preview sertifikat
+   - Kustomisasi template
+
+4. Fitur Tambahan (Opsional)
+   - Push notification untuk reminder event
+   - Export data dalam berbagai format
+   - Filter dan pencarian event yang lebih advanced
+
+Catatan Teknis
+• Semua fitur sudah menggunakan RESTful API nyata ✅
+• Backend sudah menggunakan autentikasi token-based (Sanctum) ✅
+• QR code sudah dibuat menggunakan library nyata & disimpan ke server ✅
+• Sertifikat sudah bisa diverifikasi tapi format PDF perlu diperbaiki ⚠️
+• Push notification belum diimplementasi ❌
+• Semua data tersimpan dengan baik di database ✅
+• Fitur riwayat event dan informasi peserta sudah lengkap ✅

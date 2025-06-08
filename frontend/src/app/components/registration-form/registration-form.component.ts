@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { IonicModule, ModalController, ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-registration-form',
@@ -14,44 +14,52 @@ export class RegistrationFormComponent implements OnInit {
   @Input() event: any;
   @Input() formTemplate: any;
   formData: any = {};
+  checkboxValues: { [key: string]: string[] } = {};
 
-  constructor(private modalCtrl: ModalController) {}
+  constructor(
+    private modalCtrl: ModalController,
+    private toastCtrl: ToastController
+  ) {}
 
   ngOnInit() {
     // Initialize form data with empty values
-    if (this.formTemplate && this.formTemplate.fields) {
+    if (this.formTemplate?.fields) {
       this.formTemplate.fields.forEach((field: any) => {
         if (field.type === 'checkbox') {
-          this.formData[field.name] = [];
+          this.checkboxValues[field.id] = [];
+          field.options.forEach((option: string) => {
+            this.formData[`field_${field.id}_${option}`] = false;
+          });
         } else {
-          this.formData[field.name] = '';
+          this.formData[`field_${field.id}`] = '';
         }
       });
     }
   }
 
-  handleCheckboxChange(fieldName: string, option: string, event: any) {
-    if (!this.formData[fieldName]) {
-      this.formData[fieldName] = [];
+  handleCheckboxChange(fieldId: number, option: string, event: any) {
+    if (!this.checkboxValues[fieldId]) {
+      this.checkboxValues[fieldId] = [];
     }
     
     if (event.detail.checked) {
-      this.formData[fieldName].push(option);
+      this.checkboxValues[fieldId].push(option);
     } else {
-      const index = this.formData[fieldName].indexOf(option);
+      const index = this.checkboxValues[fieldId].indexOf(option);
       if (index > -1) {
-        this.formData[fieldName].splice(index, 1);
+        this.checkboxValues[fieldId].splice(index, 1);
       }
     }
   }
 
   isFieldValid(field: any): boolean {
-    if (!field.required) return true;
+    if (!field.is_required) return true;
     
-    const value = this.formData[field.name];
     if (field.type === 'checkbox') {
-      return Array.isArray(value) && value.length > 0;
+      return this.checkboxValues[field.id]?.length > 0;
     }
+    
+    const value = this.formData[`field_${field.id}`];
     return value !== undefined && value !== null && value !== '';
   }
 
@@ -62,13 +70,31 @@ export class RegistrationFormComponent implements OnInit {
       .map((field: any) => field.label);
 
     if (invalidFields.length > 0) {
-      // Show error for invalid fields
-      const errorMessage = `Mohon lengkapi field berikut: ${invalidFields.join(', ')}`;
-      // You might want to show this in a toast or alert
+      const toast = await this.toastCtrl.create({
+        message: `Mohon lengkapi field berikut: ${invalidFields.join(', ')}`,
+        duration: 3000,
+        color: 'danger'
+      });
+      await toast.present();
       return;
     }
 
-    await this.modalCtrl.dismiss(this.formData);
+    // Prepare form responses
+    const responses = this.formTemplate.fields.map((field: any) => {
+      let value;
+      if (field.type === 'checkbox') {
+        value = this.checkboxValues[field.id].join(', ');
+      } else {
+        value = this.formData[`field_${field.id}`];
+      }
+      
+      return {
+        field_id: field.id,
+        value: value
+      };
+    });
+
+    await this.modalCtrl.dismiss({ responses });
   }
 
   cancel() {

@@ -1,90 +1,102 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { ToastController, LoadingController, AlertController, IonicModule } from '@ionic/angular';
 import { EventsService } from '../../services/events.service';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-
-// Mendefinisikan tipe data Event
-interface Event {
-  id: number;
-  title: string;
-  description: string;
-  location: string;
-  price: number;
-  max_participants: number;
-  start_datetime: string;
-  end_datetime: string;
-  image_path: string;
-}
+import { Event } from '../../interfaces/event.interface';
 
 @Component({
   standalone: true,
   selector: 'app-events',
   templateUrl: './events.page.html',
   styleUrls: ['./events.page.scss'],
-  imports: [
-    CommonModule,
-    IonicModule,
-    RouterModule
-  ]
+  imports: [CommonModule, IonicModule, RouterModule]
 })
 export class EventsPage implements OnInit {
   events: Event[] = [];
   isAdmin = false;
+  isLoading = false;
+  originalEvents: Event[] = [];
+  searchTerm = '';
+  error: string | null = null;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private toastController: ToastController,
-    private loadingCtrl: LoadingController,
-    private alertCtrl: AlertController,
+    private loadingController: LoadingController,
+    private alertController: AlertController,
     private eventsService: EventsService,
     private authService: AuthService
   ) {}
 
+  formatPrice(price: string): number {
+    return parseFloat(price);
+  }
+
   async ngOnInit() {
-    this.isAdmin = this.authService.isAdmin();
-    
-    // Subscribe ke perubahan query params
-    this.route.queryParams.subscribe(params => {
-      if (params['refresh']) {
-        this.loadEvents();
-      }
-    });
-    
+    await this.checkAdminStatus();
     await this.loadEvents();
+    
+    // Refresh events when navigating back to this page
+    this.route.queryParams.subscribe(params => {
+    if (params['refresh']) {
+        this.loadEvents();
+    }
+    });
   }
 
   ionViewWillEnter() {
-    // Reload events setiap kali halaman akan ditampilkan
+    // Reload events when entering the page
     this.loadEvents();
+  }
+
+  async checkAdminStatus() {
+    try {
+      this.isAdmin = await this.authService.isAdmin();
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      this.error = 'Gagal memeriksa status admin';
+    }
+  }
+
+  async loadEvents() {
+    const loading = await this.loadingController.create({
+      message: 'Memuat daftar event...',
+      spinner: 'circular'
+    });
+
+    try {
+      this.isLoading = true;
+      this.error = null;
+    await loading.present();
+
+      const events = await this.eventsService.getEvents();
+      console.log('Events loaded:', events); // Debug log
+
+      if (Array.isArray(events)) {
+        this.events = events;
+        this.originalEvents = [...events];
+        
+        if (events.length === 0) {
+          this.error = 'Tidak ada event yang tersedia';
+        }
+      } else {
+        throw new Error('Invalid events data format');
+      }
+    } catch (error) {
+      console.error('Error loading events:', error);
+      this.error = 'Gagal memuat daftar event';
+      await this.showToast('Gagal memuat daftar event', 'danger');
+    } finally {
+      this.isLoading = false;
+      await loading.dismiss();
+    }
   }
 
   goHome() {
     this.router.navigate(['/home']);
-  }
-
-  async loadEvents() {
-    const loading = await this.loadingCtrl.create({
-      message: 'Loading events...'
-    });
-    await loading.present();
-
-    try {
-      this.events = await this.eventsService.getAllEvents();
-      loading.dismiss();
-    } catch (error) {
-      console.error('Error loading events:', error);
-      loading.dismiss();
-      const toast = await this.toastController.create({
-        message: 'Gagal memuat daftar event',
-        duration: 2000,
-        color: 'danger'
-      });
-      await toast.present();
-    }
   }
 
   goToCreateEvent() {
@@ -96,7 +108,7 @@ export class EventsPage implements OnInit {
   }
 
   async deleteEvent(eventId: number) {
-    const alert = await this.alertCtrl.create({
+    const alert = await this.alertController.create({
       header: 'Konfirmasi',
       message: 'Apakah Anda yakin ingin menghapus event ini?',
       buttons: [
@@ -106,31 +118,23 @@ export class EventsPage implements OnInit {
         },
         {
           text: 'Hapus',
+          role: 'confirm',
           handler: async () => {
-            const loading = await this.loadingCtrl.create({
+            const loading = await this.loadingController.create({
               message: 'Menghapus event...'
             });
             await loading.present();
 
             try {
               await this.eventsService.deleteEvent(eventId);
-              loading.dismiss();
-              const toast = await this.toastController.create({
-                message: 'Event berhasil dihapus',
-                duration: 2000,
-                color: 'success'
-              });
-              await toast.present();
-              this.loadEvents(); // Reload daftar event
+              this.events = this.events.filter(event => event.id !== eventId);
+              this.originalEvents = this.originalEvents.filter(event => event.id !== eventId);
+              await this.showToast('Event berhasil dihapus', 'success');
             } catch (error) {
               console.error('Error deleting event:', error);
-              loading.dismiss();
-              const toast = await this.toastController.create({
-                message: 'Gagal menghapus event',
-                duration: 2000,
-                color: 'danger'
-              });
-              await toast.present();
+              await this.showToast('Gagal menghapus event', 'danger');
+            } finally {
+              await loading.dismiss();
             }
           }
         }
@@ -140,12 +144,47 @@ export class EventsPage implements OnInit {
     await alert.present();
   }
 
-  async showToast(message: string) {
+  async registerForEvent(eventId: number) {
+    const loading = await this.loadingController.create({
+      message: 'Mendaftarkan event...'
+    });
+    await loading.present();
+
+    try {
+      await this.eventsService.registerForEvent(eventId, {});
+      await this.showToast('Berhasil mendaftar event', 'success');
+      await this.loadEvents(); // Reload events to update status
+    } catch (error) {
+      console.error('Error registering for event:', error);
+      await this.showToast('Gagal mendaftar event', 'danger');
+    } finally {
+      await loading.dismiss();
+    }
+  }
+
+  searchEvents(event: any) {
+    const searchTerm = event.target.value.toLowerCase();
+    this.searchTerm = searchTerm;
+
+    if (!searchTerm) {
+      this.events = [...this.originalEvents];
+      return;
+    }
+
+    this.events = this.originalEvents.filter(event =>
+      event.title.toLowerCase().includes(searchTerm) ||
+      event.description.toLowerCase().includes(searchTerm) ||
+      event.location.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  private async showToast(message: string, color: 'success' | 'danger' | 'warning') {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
-      color: 'primary'
+      color,
+      position: 'bottom'
     });
-    toast.present();
+    await toast.present();
   }
 }

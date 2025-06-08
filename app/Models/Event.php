@@ -34,4 +34,9 @@ class Event extends Model
     {
         return $this->hasMany(Certificate::class);
     }
+
+    public function formTemplate()
+    {
+        return $this->hasOne(FormTemplate::class);
+    }
 }

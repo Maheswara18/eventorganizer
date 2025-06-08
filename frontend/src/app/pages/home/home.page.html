@@ -11,10 +11,14 @@
 
 <ion-content class="ion-padding">
   <div class="welcome-card">
-    <h2>Selamat Datang 👋</h2>
+    <h2>Selamat Datang, {{ username }} 👋</h2>
     <p>Siap menghadiri event menarik hari ini?</p>
   </div>
 
+  <!-- Menu untuk Semua User -->
+  <ion-list-header>
+    <ion-label>Menu Utama</ion-label>
+  </ion-list-header>
   <div class="action-grid">
     <ion-card button routerLink="/events">
       <ion-card-content>
@@ -36,6 +40,35 @@
         <span>Profil Saya</span>
       </ion-card-content>
     </ion-card>
+  </div>
+
+  <!-- Menu Admin -->
+  <div *ngIf="isAdmin">
+    <ion-list-header>
+      <ion-label>Menu Admin</ion-label>
+    </ion-list-header>
+    <div class="action-grid">
+      <ion-card button routerLink="/create-event">
+        <ion-card-content>
+          <ion-icon name="add-circle-outline"></ion-icon>
+          <span>Buat Event</span>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card button routerLink="/payments">
+        <ion-card-content>
+          <ion-icon name="cash-outline"></ion-icon>
+          <span>Pembayaran</span>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card button routerLink="/certificates">
+        <ion-card-content>
+          <ion-icon name="ribbon-outline"></ion-icon>
+          <span>Sertifikat</span>
+        </ion-card-content>
+      </ion-card>
+    </div>
   </div>
 </ion-content>
 

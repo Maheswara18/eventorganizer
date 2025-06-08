@@ -14,10 +14,31 @@
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-searchbar
+      placeholder="Cari event..."
+      (ionInput)="searchEvents($event)"
+      [value]="searchTerm">
+    </ion-searchbar>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-list>
+  <!-- Loading Indicator -->
+  <div class="ion-text-center" *ngIf="isLoading">
+    <ion-spinner name="circular"></ion-spinner>
+    <p>Memuat daftar event...</p>
+  </div>
+
+  <!-- Error Message -->
+  <ion-item *ngIf="error && !isLoading" color="danger">
+    <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+    <ion-label>{{ error }}</ion-label>
+  </ion-item>
+
+  <!-- Events List -->
+  <ion-list *ngIf="!isLoading && events.length > 0">
     <ion-item-sliding *ngFor="let event of events">
       <ion-item [routerLink]="['/event-detail', event.id]" detail>
         <ion-thumbnail slot="start" *ngIf="event.image_path">
@@ -29,7 +50,7 @@
           <p>{{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}</p>
         </ion-label>
         <ion-note slot="end" color="primary">
-          Rp {{ event.price.toLocaleString('id-ID') }}
+          Rp {{ formatPrice(event.price) | number:'1.0-0' }}
         </ion-note>
       </ion-item>
 
@@ -43,6 +64,13 @@
       </ion-item-options>
     </ion-item-sliding>
   </ion-list>
+
+  <!-- No Events Message -->
+  <ion-item *ngIf="!isLoading && !error && events.length === 0" lines="none">
+    <ion-label class="ion-text-center">
+      <p>Tidak ada event yang tersedia</p>
+    </ion-label>
+  </ion-item>
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="isAdmin">
     <ion-fab-button routerLink="/create-event">

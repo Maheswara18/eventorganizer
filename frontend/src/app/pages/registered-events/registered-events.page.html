@@ -1,65 +1,74 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/events"></ion-back-button>
+      <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Event Terdaftar</ion-title>
+    <ion-title>Event Saya</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-refresher slot="fixed" (ionRefresh)="loadRegisteredEvents()">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
-
-  <div *ngIf="registeredEvents.length === 0" class="ion-text-center ion-padding">
-    <p>Anda belum terdaftar di event apapun</p>
+  <!-- Loading Spinner -->
+  <div class="ion-text-center ion-padding" *ngIf="isLoading">
+    <ion-spinner></ion-spinner>
   </div>
 
-  <ion-list>
+  <!-- Empty State -->
+  <ion-card *ngIf="!isLoading && registeredEvents.length === 0">
+    <ion-card-content class="ion-text-center">
+      <ion-icon name="calendar-outline" style="font-size: 48px; margin: 16px 0;"></ion-icon>
+      <h2>Belum Ada Event</h2>
+      <p>Anda belum terdaftar di event apapun</p>
+      <ion-button routerLink="/events" expand="block" class="ion-margin-top">
+        Lihat Event
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Event List -->
+  <ion-list *ngIf="!isLoading && registeredEvents.length > 0">
     <ion-item-sliding *ngFor="let event of registeredEvents">
-      <ion-item>
-        <ion-thumbnail slot="start" *ngIf="event.image_path">
-          <img [src]="'http://localhost:8000/' + event.image_path" [alt]="event.title">
+      <ion-item (click)="showEventDetail(event)">
+        <ion-thumbnail slot="start">
+          <img [src]="event.image_path || 'assets/default-event.jpg'" [alt]="event.title">
         </ion-thumbnail>
         <ion-label>
           <h2>{{ event.title }}</h2>
-          <p>{{ event.description }}</p>
           <p>
-            <ion-text color="medium">
-              {{ formatDate(event.start_datetime) }} - {{ formatDate(event.end_datetime) }}
-            </ion-text>
+            <ion-icon name="location-outline"></ion-icon>
+            {{ event.location }}
           </p>
           <p>
-            <ion-text color="medium">
-              Terdaftar: {{ formatDate(event.registration_date) }}
-            </ion-text>
+            <ion-icon name="calendar-outline"></ion-icon>
+            {{ event.start_datetime | date:'medium' }}
           </p>
-          <ion-chip [color]="event.payment_status === 'paid' ? 'success' : 'warning'">
-            <ion-label>{{ event.payment_status === 'paid' ? 'Lunas' : 'Belum Lunas' }}</ion-label>
-          </ion-chip>
+          <p>
+            <ion-icon name="time-outline"></ion-icon>
+            Terdaftar: {{ event.registration_date | date:'medium' }}
+          </p>
         </ion-label>
+        <ion-badge [color]="event.payment_status === 'paid' ? 'success' : 'warning'" slot="end">
+          {{ event.payment_status === 'paid' ? 'Lunas' : 'Menunggu Pembayaran' }}
+        </ion-badge>
       </ion-item>
 
       <ion-item-options side="end">
-        <ion-item-option color="danger" (click)="showCancelConfirmation(event.id)">
-          <ion-icon slot="icon-only" name="trash"></ion-icon>
-          Batalkan
+        <ion-item-option color="danger" (click)="unregisterFromEvent(event.id)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
         </ion-item-option>
       </ion-item-options>
     </ion-item-sliding>
   </ion-list>
-</ion-content>
 
-<!-- Modal Detail Event -->
-<ion-modal [isOpen]="selectedEvent !== null" (didDismiss)="closeEventDetail()">
+  <!-- Event Detail Modal -->
+  <ion-modal [isOpen]="!!selectedEvent" (didDismiss)="selectedEvent = null">
   <ng-template>
     <ion-header>
-      <ion-toolbar color="primary">
+        <ion-toolbar>
         <ion-title>Detail Event</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="closeEventDetail()">
-            <ion-icon name="close"></ion-icon>
+            <ion-button (click)="selectedEvent = null">
+              <ion-icon name="close-outline"></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -67,54 +76,56 @@
 
     <ion-content class="ion-padding" *ngIf="selectedEvent">
       <ion-card>
-        <img *ngIf="selectedEvent.image_path" [src]="'http://localhost:8000/' + selectedEvent.image_path" [alt]="selectedEvent.title">
+          <img [src]="selectedEvent.image_path || 'assets/default-event.jpg'" [alt]="selectedEvent.title">
         
         <ion-card-header>
           <ion-card-title>{{ selectedEvent.title }}</ion-card-title>
-          <ion-chip [color]="getPaymentStatusColor(selectedEvent.payment_status)">
-            <ion-label>{{ selectedEvent.payment_status | titlecase }}</ion-label>
-          </ion-chip>
+            <ion-card-subtitle>
+              <ion-icon name="location-outline"></ion-icon>
+              {{ selectedEvent.location }}
+            </ion-card-subtitle>
         </ion-card-header>
 
         <ion-card-content>
-          <p>{{ selectedEvent.description }}</p>
+            <p class="event-description">{{ selectedEvent.description }}</p>
           
-          <ion-list lines="none">
+            <ion-list>
             <ion-item>
-              <ion-icon name="location-outline" slot="start"></ion-icon>
-              <ion-label>{{ selectedEvent.location }}</ion-label>
+                <ion-icon name="calendar-outline" slot="start"></ion-icon>
+                <ion-label>
+                  <h3>Tanggal Event</h3>
+                  <p>{{ selectedEvent.start_datetime | date:'medium' }}</p>
+                </ion-label>
             </ion-item>
 
             <ion-item>
-              <ion-icon name="calendar-outline" slot="start"></ion-icon>
+                <ion-icon name="time-outline" slot="start"></ion-icon>
               <ion-label>
-                <p>Mulai: {{ formatDate(selectedEvent.start_datetime) }}</p>
-                <p>Selesai: {{ formatDate(selectedEvent.end_datetime) }}</p>
+                  <h3>Tanggal Pendaftaran</h3>
+                  <p>{{ selectedEvent.registration_date | date:'medium' }}</p>
               </ion-label>
             </ion-item>
 
             <ion-item>
-              <ion-icon name="cash-outline" slot="start"></ion-icon>
-              <ion-label>Rp {{ selectedEvent.price.toLocaleString('id-ID') }}</ion-label>
+                <ion-icon name="people-outline" slot="start"></ion-icon>
+                <ion-label>
+                  <h3>Kapasitas</h3>
+                  <p>{{ selectedEvent.registered_participants }}/{{ selectedEvent.max_participants }} Peserta</p>
+                </ion-label>
             </ion-item>
 
             <ion-item>
-              <ion-icon name="time-outline" slot="start"></ion-icon>
+                <ion-icon name="cash-outline" slot="start"></ion-icon>
               <ion-label>
-                <p>Terdaftar pada: {{ formatDate(selectedEvent.registration_date) }}</p>
+                  <h3>Status Pembayaran</h3>
+                  <p>{{ selectedEvent.payment_status === 'paid' ? 'Lunas' : 'Menunggu Pembayaran' }}</p>
               </ion-label>
             </ion-item>
           </ion-list>
 
-          <div class="ion-margin-top">
-            <ion-button expand="block" (click)="viewEventDetails(selectedEvent.id)">
-              Lihat di Halaman Event
-            </ion-button>
-            
-            <ion-button *ngIf="selectedEvent.payment_status.toLowerCase() === 'unpaid'"
-                      expand="block" 
-                      color="danger"
-                      (click)="cancelRegistration(selectedEvent.id)">
+            <div class="ion-padding-top">
+              <ion-button expand="block" color="danger" (click)="unregisterFromEvent(selectedEvent.id)">
+                <ion-icon name="trash-outline" slot="start"></ion-icon>
               Batalkan Pendaftaran
             </ion-button>
           </div>
@@ -123,3 +134,4 @@
     </ion-content>
   </ng-template>
 </ion-modal> 
+</ion-content> 

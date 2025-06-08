@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('certificate_path');
             $table->string('verification_code')->unique();
             $table->timestamp('issued_at')->useCurrent();
+            $table->timestamps();
         });        
     }
 

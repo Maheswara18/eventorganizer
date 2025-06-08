@@ -8,130 +8,110 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <form (ngSubmit)="updateEvent()">
+  <form [formGroup]="eventForm" (ngSubmit)="onSubmit()">
     <ion-item>
       <ion-label position="stacked">Judul Event</ion-label>
-      <ion-input type="text" [(ngModel)]="event.title" name="title" required></ion-input>
+      <ion-input type="text" formControlName="title"></ion-input>
+      <ion-note color="danger" *ngIf="eventForm.get('title')?.touched && eventForm.get('title')?.errors?.['required']">
+        Judul event wajib diisi
+      </ion-note>
     </ion-item>
 
     <ion-item>
       <ion-label position="stacked">Deskripsi</ion-label>
-      <ion-textarea [(ngModel)]="event.description" name="description" required></ion-textarea>
+      <ion-textarea formControlName="description"></ion-textarea>
+      <ion-note color="danger" *ngIf="eventForm.get('description')?.touched && eventForm.get('description')?.errors?.['required']">
+        Deskripsi event wajib diisi
+      </ion-note>
     </ion-item>
 
     <ion-item>
       <ion-label position="stacked">Lokasi</ion-label>
-      <ion-input type="text" [(ngModel)]="event.location" name="location" required></ion-input>
+      <ion-input type="text" formControlName="location"></ion-input>
+      <ion-note color="danger" *ngIf="eventForm.get('location')?.touched && eventForm.get('location')?.errors?.['required']">
+        Lokasi event wajib diisi
+      </ion-note>
     </ion-item>
 
     <ion-item>
       <ion-label position="stacked">Harga</ion-label>
-      <ion-input type="number" [(ngModel)]="event.price" name="price" required></ion-input>
+      <ion-input type="number" formControlName="price"></ion-input>
+      <ion-note color="danger" *ngIf="eventForm.get('price')?.touched && eventForm.get('price')?.errors?.['required']">
+        Harga event wajib diisi
+      </ion-note>
+      <ion-note color="danger" *ngIf="eventForm.get('price')?.touched && eventForm.get('price')?.errors?.['min']">
+        Harga tidak boleh negatif
+      </ion-note>
     </ion-item>
 
     <ion-item>
       <ion-label position="stacked">Maksimal Peserta</ion-label>
-      <ion-input type="number" [(ngModel)]="event.max_participants" name="max_participants" required></ion-input>
+      <ion-input type="number" formControlName="max_participants"></ion-input>
+      <ion-note color="danger" *ngIf="eventForm.get('max_participants')?.touched && eventForm.get('max_participants')?.errors?.['required']">
+        Maksimal peserta wajib diisi
+      </ion-note>
+      <ion-note color="danger" *ngIf="eventForm.get('max_participants')?.touched && eventForm.get('max_participants')?.errors?.['min']">
+        Maksimal peserta minimal 1
+      </ion-note>
     </ion-item>
 
     <ion-item>
-      <ion-label>Status Event</ion-label>
-      <ion-select [(ngModel)]="event.status" name="status">
-        <ion-select-option value="active">Active</ion-select-option>
-        <ion-select-option value="ended">Ended</ion-select-option>
-      </ion-select>
+      <ion-label position="stacked">Tanggal Mulai</ion-label>
+      <ion-datetime formControlName="start_datetime" display-format="DD MMM YYYY HH:mm" picker-format="DD MMM YYYY HH:mm"></ion-datetime>
+      <ion-note color="danger" *ngIf="eventForm.get('start_datetime')?.touched && eventForm.get('start_datetime')?.errors?.['required']">
+        Tanggal mulai wajib diisi
+      </ion-note>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Tanggal Selesai</ion-label>
+      <ion-datetime formControlName="end_datetime" display-format="DD MMM YYYY HH:mm" picker-format="DD MMM YYYY HH:mm"></ion-datetime>
+      <ion-note color="danger" *ngIf="eventForm.get('end_datetime')?.touched && eventForm.get('end_datetime')?.errors?.['required']">
+        Tanggal selesai wajib diisi
+      </ion-note>
     </ion-item>
 
     <ion-item>
       <ion-label>Menyediakan Sertifikat</ion-label>
-      <ion-toggle [(ngModel)]="event.provides_certificate" name="provides_certificate"></ion-toggle>
-    </ion-item>
-
-    <ion-item>
-      <ion-label position="stacked">Tanggal & Waktu Mulai</ion-label>
-      <ion-datetime-button datetime="start"></ion-datetime-button>
-      <ion-modal [keepContentsMounted]="true">
-        <ng-template>
-          <ion-datetime 
-            id="start" 
-            [(ngModel)]="event.start_datetime" 
-            name="start_datetime"
-            presentation="date-time"
-            [preferWheel]="true"
-            locale="id-ID"
-            [showDefaultButtons]="true"
-            doneText="Pilih"
-            cancelText="Batal"
-          ></ion-datetime>
-        </ng-template>
-      </ion-modal>
-    </ion-item>
-
-    <ion-item>
-      <ion-label position="stacked">Tanggal & Waktu Selesai</ion-label>
-      <ion-datetime-button datetime="end"></ion-datetime-button>
-      <ion-modal [keepContentsMounted]="true">
-        <ng-template>
-          <ion-datetime 
-            id="end" 
-            [(ngModel)]="event.end_datetime" 
-            name="end_datetime"
-            presentation="date-time"
-            [preferWheel]="true"
-            locale="id-ID"
-            [showDefaultButtons]="true"
-            doneText="Pilih"
-            cancelText="Batal"
-          ></ion-datetime>
-        </ng-template>
-      </ion-modal>
+      <ion-toggle formControlName="provides_certificate"></ion-toggle>
     </ion-item>
 
     <ion-item>
       <ion-label position="stacked">Gambar Event</ion-label>
       <input type="file" (change)="onImageSelected($event)" accept="image/*">
-      <img *ngIf="event.image_path" [src]="'http://localhost:8000/' + event.image_path" class="preview-image">
+      <ion-thumbnail *ngIf="imagePreview" slot="end">
+        <img [src]="imagePreview" alt="Preview">
+      </ion-thumbnail>
     </ion-item>
 
-    <ion-button expand="block" type="submit" class="ion-margin-top">
-      Update Event
+    <div class="ion-padding">
+      <ion-button expand="block" type="submit" [disabled]="!eventForm.valid">
+        Simpan Perubahan
     </ion-button>
+    </div>
   </form>
 
   <!-- Form Template Section -->
-  <div class="form-template-section ion-margin-top">
-    <ion-item-divider>
-      <ion-label>
-        Form Pendaftaran
-      </ion-label>
-    </ion-item-divider>
-
     <ion-card *ngIf="formTemplate">
       <ion-card-header>
-        <ion-card-title>{{ formTemplate.name }}</ion-card-title>
-        <ion-card-subtitle>{{ formTemplate.description }}</ion-card-subtitle>
+      <ion-card-title>Form Pendaftaran</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <ion-list>
-          <ion-item *ngFor="let field of formTemplate.fields">
-            <ion-label>
-              <h3>{{ field.label }}</h3>
-              <p>Tipe: {{ field.type }}</p>
-            </ion-label>
-          </ion-item>
-        </ion-list>
-        <ion-button expand="block" color="primary" (click)="editFormTemplate()">
-          Edit Form Template
+      <ion-button expand="block" (click)="editFormTemplate()">
+        Edit Form Pendaftaran
         </ion-button>
       </ion-card-content>
     </ion-card>
 
-    <div *ngIf="!formTemplate" class="ion-text-center ion-padding">
-      <p>Event ini belum memiliki form pendaftaran</p>
-      <ion-button expand="block" color="primary" (click)="createFormTemplate()">
-        <ion-icon name="add" slot="start"></ion-icon>
+  <ion-card *ngIf="!formTemplate">
+    <ion-card-header>
+      <ion-card-title>Form Pendaftaran</ion-card-title>
+      <ion-card-subtitle>Belum ada form pendaftaran</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-button expand="block" (click)="createFormTemplate()">
         Buat Form Pendaftaran
       </ion-button>
-    </div>
-  </div>
+    </ion-card-content>
+  </ion-card>
 </ion-content> 
