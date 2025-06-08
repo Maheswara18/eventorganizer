@@ -23,7 +23,17 @@ export class HomePage implements OnInit {
     private authService: AuthService
   ) {}
 
-  async ngOnInit() {
+  ngOnInit() {
+    // Initial load
+    this.initializeData();
+  }
+
+  ionViewWillEnter() {
+    // Refresh data setiap kali halaman akan muncul
+    this.initializeData();
+  }
+
+  private async initializeData() {
     await this.checkAdminStatus();
     await this.loadUserInfo();
   }
