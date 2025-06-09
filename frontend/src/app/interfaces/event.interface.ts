@@ -5,10 +5,11 @@ export interface Event {
   title: string;
   description: string;
   provides_certificate: number;
-  price: string;
+  price: number;
   location: string;
   status: string;
   max_participants: number;
+  registered_participants?: number;
   start_datetime: string;
   end_datetime: string;
   created_at: string;

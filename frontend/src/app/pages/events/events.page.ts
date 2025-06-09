@@ -5,6 +5,7 @@ import { EventsService } from '../../services/events.service';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { Event } from '../../interfaces/event.interface';
+import { environment } from '../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -16,10 +17,11 @@ import { Event } from '../../interfaces/event.interface';
 export class EventsPage implements OnInit {
   events: Event[] = [];
   isAdmin = false;
-  isLoading = false;
+  isLoading = true;
   originalEvents: Event[] = [];
   searchTerm = '';
   error: string | null = null;
+  environment = environment;
 
   constructor(
     private router: Router,
@@ -31,8 +33,8 @@ export class EventsPage implements OnInit {
     private authService: AuthService
   ) {}
 
-  formatPrice(price: string): number {
-    return parseFloat(price);
+  formatPrice(price: number): number {
+    return price;
   }
 
   async ngOnInit() {

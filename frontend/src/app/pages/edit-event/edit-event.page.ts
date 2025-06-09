@@ -11,6 +11,7 @@ import { FormTemplate, FormTemplateResponse } from '../../interfaces/form-templa
 import { firstValueFrom } from 'rxjs';
 import { FormBuilderComponent } from '../../components/form-builder/form-builder.component';
 import { Event as EventModel } from '../../interfaces/event.interface';
+import { environment } from '../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -26,6 +27,7 @@ export class EditEventPage implements OnInit {
   selectedImage: File | null = null;
   imagePreview: string | null = null;
   formTemplate: FormTemplate | null = null;
+  environment = environment;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -114,7 +116,11 @@ export class EditEventPage implements OnInit {
 
         // Append form fields to FormData
         Object.keys(eventData).forEach(key => {
-          formData.append(key, eventData[key]);
+          if (key === 'provides_certificate') {
+            formData.append(key, eventData[key] ? '1' : '0');
+          } else {
+            formData.append(key, eventData[key]);
+          }
         });
 
         // Append image if selected

@@ -30,7 +30,7 @@
     <ion-item-sliding *ngFor="let event of registeredEvents">
       <ion-item (click)="showEventDetail(event)">
         <ion-thumbnail slot="start">
-          <img [src]="event.image_path || 'assets/default-event.jpg'" [alt]="event.title">
+          <img [src]="event.image_path ? (environment.baseUrl + '/' + event.image_path) : 'assets/default-event.jpg'" [alt]="event.title">
         </ion-thumbnail>
         <ion-label>
           <h2>{{ event.title }}</h2>
@@ -76,7 +76,7 @@
 
     <ion-content class="ion-padding" *ngIf="selectedEvent">
       <ion-card>
-          <img [src]="selectedEvent.image_path || 'assets/default-event.jpg'" [alt]="selectedEvent.title">
+          <img [src]="selectedEvent.image_path ? (environment.baseUrl + '/' + selectedEvent.image_path) : 'assets/default-event.jpg'" [alt]="selectedEvent.title">
         
         <ion-card-header>
           <ion-card-title>{{ selectedEvent.title }}</ion-card-title>

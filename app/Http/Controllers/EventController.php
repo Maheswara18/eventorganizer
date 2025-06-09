@@ -435,4 +435,42 @@ class EventController extends Controller
             ], 500);
         }
     }
+
+    public function unregister($event)
+    {
+        try {
+            \Log::info('Starting event unregistration for event ID: ' . $event);
+            
+            $user = Auth::user();
+            \Log::info('User authenticated: ' . $user->name);
+
+            // Cari participant record
+            $participant = Participant::where('event_id', $event)
+                ->where('user_id', $user->id)
+                ->first();
+
+            if (!$participant) {
+                return response()->json(['message' => 'You are not registered for this event'], 404);
+            }
+
+            // Hapus QR code jika ada
+            if ($participant->qr_code_path) {
+                $qrPath = str_replace('storage/', 'public/', $participant->qr_code_path);
+                if (Storage::exists($qrPath)) {
+                    Storage::delete($qrPath);
+                    \Log::info('Deleted QR code: ' . $qrPath);
+                }
+            }
+
+            // Hapus participant record
+            $participant->delete();
+            \Log::info('Successfully unregistered from event');
+
+            return response()->json(['message' => 'Successfully unregistered from event']);
+        } catch (\Exception $e) {
+            \Log::error('Error in event unregistration: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return response()->json(['message' => 'Error unregistering from event', 'error' => $e->getMessage()], 500);
+        }
+    }
 }

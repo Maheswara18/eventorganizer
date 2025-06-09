@@ -41,18 +41,18 @@
   <ion-list *ngIf="!isLoading && events.length > 0">
     <ion-item-sliding *ngFor="let event of events">
       <ion-item [routerLink]="['/event-detail', event.id]" detail>
-        <ion-thumbnail slot="start" *ngIf="event.image_path">
-          <img [src]="'http://localhost:8000/' + event.image_path" [alt]="event.title">
-        </ion-thumbnail>
-        <ion-label>
-          <h2>{{ event.title }}</h2>
-          <p>{{ event.location }}</p>
+      <ion-thumbnail slot="start" *ngIf="event.image_path">
+        <img [src]="environment.baseUrl + '/' + event.image_path" [alt]="event.title">
+      </ion-thumbnail>
+      <ion-label>
+        <h2>{{ event.title }}</h2>
+        <p>{{ event.location }}</p>
           <p>{{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}</p>
-        </ion-label>
+      </ion-label>
         <ion-note slot="end" color="primary">
           Rp {{ formatPrice(event.price) | number:'1.0-0' }}
         </ion-note>
-      </ion-item>
+    </ion-item>
 
       <ion-item-options side="end" *ngIf="isAdmin">
         <ion-item-option color="primary" (click)="editEvent(event.id)">

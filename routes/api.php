@@ -41,7 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events/registered', [EventController::class, 'getRegisteredEvents']);
     Route::get('/events/{id}', [EventController::class, 'show']);
     Route::post('/events/{event}/register', [EventController::class, 'register']);
-    Route::get('/events/{event}/check-registration', [EventController::class, 'checkRegistration']);
+    Route::delete('/events/{event}/unregister', [EventController::class, 'unregister']);
+    Route::get('/events/{id}/check-registration', [EventController::class, 'checkRegistration']);
+    Route::get('/registered-events', [EventController::class, 'getRegisteredEvents']);
     Route::delete('/events/{id}/registration', [EventController::class, 'cancelRegistration']);
 });
 
@@ -57,10 +59,12 @@ Route::middleware('auth:sanctum')->group(function () {
 ///////////PARTICIPANT///////////
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/participants/export', [ParticipantController::class, 'export']);
     Route::get('/participants', [ParticipantController::class, 'index']);
     Route::post('/participants', [ParticipantController::class, 'store']);
     Route::get('/participants/{id}', [ParticipantController::class, 'show']);
     Route::put('/participants/{id}', [ParticipantController::class, 'update']);
+    Route::patch('/participants/{id}/status', [ParticipantController::class, 'updateStatus']);
 });
 
 

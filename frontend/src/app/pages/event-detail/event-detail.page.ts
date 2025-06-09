@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { FormTemplateService } from '../../services/form-template.service';
 import { RegistrationFormComponent } from '../../components/registration-form/registration-form.component';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 interface Event {
   id: number;
@@ -46,6 +47,7 @@ export class EventDetailPage implements OnInit {
   isLoading = true;
   formTemplate: any;
   formData: any = {};
+  environment = environment;
 
   constructor(
     private route: ActivatedRoute,

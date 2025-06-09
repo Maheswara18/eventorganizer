@@ -14,7 +14,7 @@
 
   <div *ngIf="!isLoading && event">
     <ion-card>
-      <img *ngIf="event.image_path" [src]="'http://localhost:8000/' + event.image_path" [alt]="event.title">
+      <img *ngIf="event.image_path" [src]="environment.baseUrl + '/' + event.image_path" [alt]="event.title">
       
       <ion-card-header>
         <ion-card-title>{{ event.title }}</ion-card-title>

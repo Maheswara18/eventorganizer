@@ -57,7 +57,7 @@ export class EventsService {
     } catch (error) {
       console.error('Error fetching event:', error);
       throw error;
-    }
+  }
   }
 
   async createEvent(eventData: FormData): Promise<EventModel> {
@@ -78,6 +78,7 @@ export class EventsService {
   async updateEvent(id: number, eventData: FormData): Promise<EventModel> {
     try {
       const headers = await this.getHeaders(true);
+      eventData.append('_method', 'PUT');
       return firstValueFrom(
         this.http.post<EventModel>(`${this.apiUrl}/events/${id}`, eventData, {
           headers,

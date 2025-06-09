@@ -1,0 +1,111 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+      <ion-button (click)="goHome()">
+        <ion-icon slot="icon-only" name="home-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Manajemen Peserta</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="exportData()">
+        <ion-icon slot="start" name="download-outline"></ion-icon>
+        Export
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-row>
+      <ion-col size="12" size-md="6">
+        <ion-searchbar placeholder="Cari peserta..." (ionInput)="onSearch($event)"></ion-searchbar>
+      </ion-col>
+      <ion-col size="12" size-md="6">
+        <ion-item>
+          <ion-label>Pilih Event</ion-label>
+          <ion-select [(ngModel)]="selectedEventId" (ionChange)="onEventChange()" interface="action-sheet" placeholder="Semua Event">
+            <ion-select-option [value]="undefined">Semua Event</ion-select-option>
+            <ion-select-option *ngFor="let event of events" [value]="event.id">{{ event.title }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="loadParticipants($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  <div *ngIf="loading && participants.length === 0" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Memuat data peserta...</p>
+  </div>
+
+  <!-- Data List -->
+  <ion-list *ngIf="!loading && participants.length > 0">
+    <ion-item-sliding *ngFor="let participant of participants">
+      <ion-item>
+        <ion-label>
+          <h2>{{ participant.user?.name }}</h2>
+          <p>{{ participant.user?.email }}</p>
+          <p *ngIf="participant.event && participant.event.title">
+            Event: {{ participant.event.title }}
+          </p>
+          <ion-badge [color]="getStatusColor(participant.attendance_status)">
+            {{ participant.attendance_status | titlecase }}
+          </ion-badge>
+        </ion-label>
+      </ion-item>
+
+      <ion-item-options side="end">
+        <ion-item-option 
+          color="success" 
+          (click)="updateAttendanceStatus(participant, 'present')" 
+          *ngIf="participant.attendance_status !== 'present'">
+          <ion-icon slot="icon-only" name="checkmark"></ion-icon>
+        </ion-item-option>
+        <ion-item-option 
+          color="warning" 
+          (click)="updateAttendanceStatus(participant, 'registered')" 
+          *ngIf="participant.attendance_status !== 'registered'">
+          <ion-icon slot="icon-only" name="time"></ion-icon>
+        </ion-item-option>
+        <ion-item-option 
+          color="danger" 
+          (click)="updateAttendanceStatus(participant, 'absent')" 
+          *ngIf="participant.attendance_status !== 'absent'">
+          <ion-icon slot="icon-only" name="close"></ion-icon>
+        </ion-item-option>
+        <ion-item-option color="danger" (click)="deleteParticipant(participant)">
+          <ion-icon slot="icon-only" name="trash"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && participants.length === 0" class="ion-text-center ion-padding">
+    <ion-text color="medium">
+      <p>Tidak ada peserta yang ditemukan</p>
+    </ion-text>
+  </div>
+
+  <!-- Infinite Scroll -->
+  <ion-infinite-scroll (ionInfinite)="loadMore($event)">
+    <ion-infinite-scroll-content
+      loadingText="Memuat lebih banyak...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <ion-loading [isOpen]="loading" message="Memuat data..."></ion-loading>
+
+  <ion-toast
+    [isOpen]="!!error"
+    [message]="error"
+    [duration]="3000"
+    color="danger"
+    position="top"
+  ></ion-toast>
+</ion-content>

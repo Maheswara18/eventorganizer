@@ -5,6 +5,7 @@ import { EventsService } from '../../services/events.service';
 import { CommonModule } from '@angular/common';
 import { RegisteredEvent } from '../../interfaces/event.interface';
 import { RouterModule } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -16,7 +17,8 @@ import { RouterModule } from '@angular/router';
 export class RegisteredEventsPage implements OnInit {
   registeredEvents: RegisteredEvent[] = [];
   selectedEvent: RegisteredEvent | null = null;
-  isLoading = false;
+  isLoading = true;
+  environment = environment;
 
   constructor(
     private router: Router,

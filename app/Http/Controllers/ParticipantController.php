@@ -13,19 +13,35 @@ use Illuminate\Support\Facades\Storage;
 class ParticipantController extends Controller
 {
     // ✅ Lihat semua partisipasi
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-
-        if ($user->role === 'admin') {
-            return response()->json(Participant::with(['user', 'event'])->get());
+        $query = Participant::with(['user', 'event']);
+        
+        // Filter berdasarkan event jika ada
+        if ($request->has('event_id')) {
+            $query->where('event_id', $request->event_id);
+        }
+        
+        // Filter berdasarkan pencarian
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
         }
 
-        return response()->json(
-            Participant::with('event')
-                ->where('user_id', $user->id)
-                ->get()
-        );
+        // Filter berdasarkan role
+        if ($user->role !== 'admin') {
+            $query->where('user_id', $user->id);
+        }
+
+        // Paginasi
+        $perPage = $request->get('per_page', 10);
+        $participants = $query->paginate($perPage);
+
+        return response()->json($participants);
     }
 
     // ✅ Detail 1 partisipasi
@@ -99,38 +115,125 @@ class ParticipantController extends Controller
         return response()->json($participant);
     }
 
-        public function registerToEvent($eventId)
+    public function registerToEvent($eventId)
     {
-    $user = auth()->user();
-    $event = Event::findOrFail($eventId);
+        $user = auth()->user();
+        $event = Event::findOrFail($eventId);
 
-    if (Participant::where('user_id', $user->id)->where('event_id', $eventId)->exists()) {
-        return response()->json(['message' => 'Sudah mendaftar'], 409);
+        if (Participant::where('user_id', $user->id)->where('event_id', $eventId)->exists()) {
+            return response()->json(['message' => 'Sudah mendaftar'], 409);
+        }
+
+        $qrData = Str::uuid()->toString();
+        $qrPath = 'qrcodes/' . $qrData . '.png';
+        QrCode::format('png')->size(300)->generate($qrData, public_path('storage/' . $qrPath));
+
+        $participant = Participant::create([
+            'user_id' => $user->id,
+            'event_id' => $eventId,
+            'qr_code_data' => $qrData,
+            'qr_code_path' => $qrPath,
+        ]);
+
+        return response()->json(['participant' => $participant], 201);
     }
 
-    $qrData = Str::uuid()->toString();
-    $qrPath = 'qrcodes/' . $qrData . '.png';
-    QrCode::format('png')->size(300)->generate($qrData, public_path('storage/' . $qrPath));
-
-    $participant = Participant::create([
-        'user_id' => $user->id,
-        'event_id' => $eventId,
-        'qr_code_data' => $qrData,
-        'qr_code_path' => $qrPath,
-    ]);
-
-    return response()->json(['participant' => $participant], 201);
-}
-
-        public function myEvents()
+    public function myEvents()
     {
-    $user = auth()->user();
+        $user = auth()->user();
 
-    $participations = Participant::with('event')
-        ->where('user_id', $user->id)
-        ->get();
+        $participations = Participant::with('event')
+            ->where('user_id', $user->id)
+            ->get();
 
-    return response()->json($participations);
+        return response()->json($participations);
     }
 
+    public function export(Request $request)
+    {
+        $user = Auth::user();
+        
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $query = Participant::with(['user', 'event']);
+        
+        // Filter berdasarkan event jika ada
+        if ($request->has('event_id')) {
+            $query->where('event_id', $request->event_id);
+        }
+        
+        // Filter berdasarkan pencarian
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $participants = $query->get();
+
+        // Generate CSV
+        $filename = 'participants_' . date('Y-m-d_His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+        ];
+
+        $handle = fopen('php://temp', 'r+');
+        
+        // Add headers
+        fputcsv($handle, [
+            'ID',
+            'Nama Peserta',
+            'Email',
+            'Event',
+            'Tanggal Registrasi',
+            'Status Kehadiran',
+            'QR Code'
+        ]);
+
+        // Add data rows
+        foreach ($participants as $participant) {
+            fputcsv($handle, [
+                $participant->id,
+                $participant->user->name,
+                $participant->user->email,
+                $participant->event->title,
+                $participant->created_at,
+                $participant->attendance_status,
+                $participant->qr_code_data
+            ]);
+        }
+
+        rewind($handle);
+        $content = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($content, 200, $headers);
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $user = Auth::user();
+        
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'status' => 'required|in:registered,present,absent'
+        ]);
+
+        $participant = Participant::findOrFail($id);
+        $participant->attendance_status = $request->status;
+        $participant->save();
+
+        return response()->json([
+            'message' => 'Status berhasil diperbarui',
+            'participant' => $participant
+        ]);
+    }
 }

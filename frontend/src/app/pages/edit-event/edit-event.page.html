@@ -80,7 +80,7 @@
       <ion-label position="stacked">Gambar Event</ion-label>
       <input type="file" (change)="onImageSelected($event)" accept="image/*">
       <ion-thumbnail *ngIf="imagePreview" slot="end">
-        <img [src]="imagePreview" alt="Preview">
+        <img [src]="imagePreview.startsWith('data:') ? imagePreview : (environment.baseUrl + '/' + imagePreview)" alt="Preview">
       </ion-thumbnail>
     </ion-item>
 
