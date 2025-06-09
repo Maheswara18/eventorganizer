@@ -71,7 +71,16 @@ const routes: Routes = [
         canActivate: [AuthGuard, AdminGuard]
       }
     ]
-  }
+  },
+  { 
+    path: 'event-qr',
+    loadComponent: () => import('./pages/event-qr/event-qr.page').then(m => m.EventQrPage)
+  },
+  {
+    path: 'payments',
+    loadComponent: () => import('./pages/payments/payments.page').then(m => m.PaymentsPage),
+    canActivate: [AuthGuard]
+  },
 ];
 
 @NgModule({

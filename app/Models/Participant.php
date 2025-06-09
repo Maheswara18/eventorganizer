@@ -11,7 +11,12 @@ class Participant extends Model
 
     protected $fillable = [
         'user_id', 'event_id', 'payment_id',
-        'registration_date', 'qr_code_path', 'qr_code_data', 'attendance_status'
+        'registration_date', 'qr_code_path', 'qr_code_data', 'attendance_status', 'payment_status'
+    ];
+
+    protected $attributes = [
+        'attendance_status' => 'registered',
+        'payment_status' => 'pending'
     ];
 
     public function user()

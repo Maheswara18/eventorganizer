@@ -124,11 +124,23 @@
           </ion-list>
 
             <div class="ion-padding-top">
+              <!-- Tombol Pembayaran -->
+              <ion-button expand="block" color="success" *ngIf="selectedEvent?.payment_status !== 'paid'" (click)="goToPayments()">
+                <ion-icon name="wallet-outline" slot="start"></ion-icon>
+                Lanjutkan ke Pembayaran
+              </ion-button>
+
+              <!-- Tombol QR Code -->
+              <ion-button expand="block" color="primary" *ngIf="selectedEvent?.payment_status === 'paid'" (click)="showQRCode(selectedEvent)">
+                <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+                Lihat QR Code Saya
+              </ion-button>
+
               <ion-button expand="block" color="danger" (click)="unregisterFromEvent(selectedEvent.id)">
                 <ion-icon name="trash-outline" slot="start"></ion-icon>
-              Batalkan Pendaftaran
-            </ion-button>
-          </div>
+                Batalkan Pendaftaran
+              </ion-button>
+            </div>
         </ion-card-content>
       </ion-card>
     </ion-content>

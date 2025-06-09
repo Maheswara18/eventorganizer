@@ -75,5 +75,13 @@ export const routes: Routes = [
         canActivate: [AuthGuard, AdminGuard]
       }
     ]
+  },
+  {
+    path: 'event-qr',
+    loadComponent: () => import('./pages/event-qr/event-qr.page').then(m => m.EventQrPage)
+  },
+  {
+    path: 'settings',
+    loadComponent: () => import('./pages/settings/settings.page').then(m => m.SettingsPage)
   }
 ]; 

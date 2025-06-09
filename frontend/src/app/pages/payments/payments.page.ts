@@ -6,6 +6,7 @@ import { PaymentService, Payment, RegisteredEvent } from '../../services/payment
 import { AuthService } from '../../services/auth.service';
 import { ToastController, LoadingController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-payments',
@@ -20,11 +21,36 @@ import { FormsModule } from '@angular/forms';
   ]
 })
 export class PaymentsPage implements OnInit {
+  activeSegment = 'registered';
   payments: Payment[] = [];
   registeredEvents: RegisteredEvent[] = [];
   isLoading = false;
+  isProcessing = false;
+  processingEventId: number | null = null;
+  environment = environment;
   isAdmin = false;
-  activeSegment = 'payments';
+
+  get unpaidEvents(): RegisteredEvent[] {
+    // Dapatkan ID event yang sudah dibayar (completed atau paid)
+    const paidEventIds = this.registeredEvents
+      .filter(event => event.payment_status === 'completed' || event.payment_status === 'paid')
+      .map(event => event.id);
+
+    // Filter event yang belum dibayar (tidak ada di paidEventIds)
+    return this.registeredEvents.filter(event => !paidEventIds.includes(event.id));
+  }
+
+  get paidEvents(): RegisteredEvent[] {
+    // Filter event yang sudah dibayar (completed atau paid)
+    return this.registeredEvents
+      .filter(event => event.payment_status === 'completed' || event.payment_status === 'paid')
+      .sort((a, b) => {
+        // Jika ada tanggal registrasi, gunakan itu untuk pengurutan
+        const dateA = a.registration_date ? new Date(a.registration_date) : new Date(a.start_datetime);
+        const dateB = b.registration_date ? new Date(b.registration_date) : new Date(b.start_datetime);
+        return dateB.getTime() - dateA.getTime();
+      });
+  }
 
   constructor(
     private paymentService: PaymentService,
@@ -38,78 +64,71 @@ export class PaymentsPage implements OnInit {
     this.loadData();
   }
 
+  ionViewWillEnter() {
+    // Reload data setiap kali halaman akan ditampilkan
+    this.loadData();
+  }
+
   async loadData() {
-    if (this.activeSegment === 'payments') {
-      await this.loadPayments();
-    } else {
-      await this.loadRegisteredEvents();
-    }
-  }
-
-  async loadPayments() {
+    this.isLoading = true;
     try {
-      this.isLoading = true;
-      this.payments = await this.paymentService.getPayments();
-    } catch (error: any) {
-      console.error('Error loading payments:', error);
-      this.showToast('Gagal memuat data pembayaran', 'danger');
+      // Load data secara bersamaan
+      const [payments, registeredEvents] = await Promise.all([
+        this.paymentService.getPayments(),
+        this.paymentService.getRegisteredEvents()
+      ]);
+
+      console.log('Payments:', payments); // Debug
+      console.log('Registered Events:', registeredEvents); // Debug
+
+      this.payments = payments;
+      this.registeredEvents = registeredEvents;
+
+    } catch (error) {
+      console.error('Error loading data:', error);
+      this.showToast('Gagal memuat data', 'danger');
     } finally {
       this.isLoading = false;
     }
   }
 
-  async loadRegisteredEvents() {
-    try {
-      this.isLoading = true;
-      this.registeredEvents = await this.paymentService.getRegisteredEvents();
-    } catch (error: any) {
-      console.error('Error loading registered events:', error);
-      this.showToast('Gagal memuat data event', 'danger');
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  async updatePaymentStatus(paymentId: number, status: 'completed' | 'failed') {
+  async updatePaymentStatus(paymentId: number, status: string) {
     try {
       await this.paymentService.updatePaymentStatus(paymentId, status);
+      await this.loadData();
       this.showToast('Status pembayaran berhasil diperbarui', 'success');
-      await this.loadPayments();
-      await this.loadRegisteredEvents();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating payment status:', error);
       this.showToast('Gagal memperbarui status pembayaran', 'danger');
     }
   }
 
   async simulatePayment(eventId: number) {
-    const loading = await this.loadingController.create({
-      message: 'Memproses pembayaran...',
-      spinner: 'circular'
-    });
-
+    this.isProcessing = true;
+    this.processingEventId = eventId;
     try {
-      await loading.present();
       await this.paymentService.simulatePayment(eventId);
+      await this.loadData(); // Refresh data setelah pembayaran
       this.showToast('Pembayaran berhasil', 'success');
+      // Pindah ke tab riwayat setelah pembayaran berhasil
       this.activeSegment = 'payments';
-      this.loadPayments();
-    } catch (error: any) {
-      console.error('Error processing payment:', error);
-      this.showToast('Gagal memproses pembayaran', 'danger');
+    } catch (error) {
+      console.error('Error simulating payment:', error);
+      this.showToast('Pembayaran gagal', 'danger');
     } finally {
-      await loading.dismiss();
+      this.isProcessing = false;
+      this.processingEventId = null;
     }
   }
 
   segmentChanged(event: any) {
     this.activeSegment = event.detail.value;
-    this.loadData();
   }
 
-  getStatusColor(status: 'pending' | 'completed' | 'failed'): string {
+  getStatusColor(status: string): string {
     switch (status) {
       case 'completed':
+      case 'paid':
         return 'success';
       case 'pending':
         return 'warning';
@@ -123,17 +142,19 @@ export class PaymentsPage implements OnInit {
   formatPrice(price: number): string {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
-      currency: 'IDR'
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(price);
   }
 
-  async showToast(message: string, color: string) {
+  private async showToast(message: string, color: string) {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
       color,
       position: 'bottom'
     });
-    toast.present();
+    await toast.present();
   }
 } 

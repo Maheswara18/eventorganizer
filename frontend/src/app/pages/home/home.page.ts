@@ -4,6 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
+import { PaymentService } from '../../services/payment.service';
 
 @Component({
   selector: 'app-home',
@@ -19,14 +20,19 @@ import { Subscription } from 'rxjs';
 export class HomePage implements OnInit, OnDestroy {
   username: string = '';
   isAdmin: boolean = false;
+  unpaidEventsCount = 0;
   private userSubscription: Subscription | undefined;
 
   constructor(
-    private authService: AuthService
+    private authService: AuthService,
+    private paymentService: PaymentService
   ) {}
 
   async ngOnInit() {
     await this.loadUserData();
+    if (!this.isAdmin) {
+      this.loadUnpaidEventsCount();
+    }
   }
 
   ngOnDestroy() {
@@ -44,5 +50,22 @@ export class HomePage implements OnInit, OnDestroy {
 
   logout() {
     this.authService.logout();
+  }
+
+  async loadUnpaidEventsCount() {
+    try {
+      const registeredEvents = await this.paymentService.getRegisteredEvents();
+      this.unpaidEventsCount = registeredEvents.filter(event => 
+        !event.payment_status || event.payment_status === 'pending' || event.payment_status === 'failed'
+      ).length;
+    } catch (error) {
+      console.error('Error loading unpaid events count:', error);
+    }
+  }
+
+  ionViewWillEnter() {
+    if (!this.isAdmin) {
+      this.loadUnpaidEventsCount();
+    }
   }
 }

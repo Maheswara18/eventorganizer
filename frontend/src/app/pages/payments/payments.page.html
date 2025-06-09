@@ -7,11 +7,11 @@
   </ion-toolbar>
   <ion-toolbar>
     <ion-segment [(ngModel)]="activeSegment" (ionChange)="segmentChanged($event)">
-      <ion-segment-button value="payments">
-        <ion-label>Riwayat</ion-label>
-      </ion-segment-button>
       <ion-segment-button value="registered">
-        <ion-label>Event Terdaftar</ion-label>
+        <ion-label>Belum Bayar</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="payments">
+        <ion-label>Riwayat Pembayaran</ion-label>
       </ion-segment-button>
     </ion-segment>
   </ion-toolbar>
@@ -35,94 +35,94 @@
     </ion-item>
   </ion-list>
 
-  <!-- Payments history -->
-  <div *ngIf="activeSegment === 'payments'">
-    <!-- Empty state for payments -->
-    <ion-list *ngIf="!isLoading && payments.length === 0">
+  <!-- Event yang belum dibayar -->
+  <div *ngIf="activeSegment === 'registered'">
+    <!-- Empty state untuk event yang belum dibayar -->
+    <ion-list *ngIf="!isLoading && unpaidEvents.length === 0">
       <ion-item lines="none">
         <ion-label class="ion-text-center">
-          <ion-icon name="receipt-outline" style="font-size: 48px; margin: 16px 0;"></ion-icon>
-          <h2>Belum Ada Pembayaran</h2>
-          <p>Riwayat pembayaran Anda akan muncul di sini</p>
+          <ion-icon name="calendar-outline" style="font-size: 48px; margin: 16px 0;"></ion-icon>
+          <h2>Tidak Ada Event</h2>
+          <p>Semua event Anda sudah dibayar</p>
         </ion-label>
       </ion-item>
     </ion-list>
 
-    <!-- Payment list -->
-    <ion-list *ngIf="!isLoading && payments.length > 0">
-      <ion-item *ngFor="let payment of payments">
+    <!-- Daftar event yang belum dibayar -->
+    <ion-list *ngIf="!isLoading && unpaidEvents.length > 0">
+      <ion-item *ngFor="let event of unpaidEvents">
+        <ion-thumbnail slot="start" *ngIf="event.image_path">
+          <img [src]="environment.baseUrl + '/' + event.image_path" [alt]="event.title">
+        </ion-thumbnail>
+        <ion-thumbnail slot="start" *ngIf="!event.image_path">
+          <img src="assets/default-event.jpg" [alt]="event.title">
+        </ion-thumbnail>
         <ion-label>
-          <h2>{{ payment.event?.title }}</h2>
-          <!-- Tampilkan info peserta hanya untuk admin -->
-          <p *ngIf="isAdmin && payment.user">
-            <ion-icon name="person-outline"></ion-icon>
-            {{ payment.user.name }} ({{ payment.user.email }})
-          </p>
-          <p>
-            <ion-icon name="cash-outline"></ion-icon>
-            {{ formatPrice(payment.amount) }}
-          </p>
-          <p>
-            <ion-icon name="calendar-outline"></ion-icon>
-            {{ payment.created_at | date:'medium' }}
-          </p>
-          <p *ngIf="payment.event?.start_datetime">
-            <ion-icon name="time-outline"></ion-icon>
-            Event: {{ payment.event?.start_datetime | date:'medium' }}
-          </p>
+          <h2>{{ event.title }}</h2>
+          <p>{{ formatPrice(event.price) }}</p>
+          <p>{{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}</p>
+          <ion-badge [color]="getStatusColor(event.payment_status || 'pending')">
+            {{ event.payment_status === 'failed' ? 'Pembayaran Gagal' : 'Menunggu Pembayaran' }}
+          </ion-badge>
         </ion-label>
-        <ion-badge [color]="getStatusColor(payment.payment_status)" slot="end">
-          {{ payment.payment_status }}
-        </ion-badge>
-        <!-- Admin actions -->
-        <ion-buttons slot="end" *ngIf="isAdmin && payment.payment_status === 'pending'">
-          <ion-button (click)="updatePaymentStatus(payment.id, 'completed')" color="success">
-            <ion-icon name="checkmark"></ion-icon>
-          </ion-button>
-          <ion-button (click)="updatePaymentStatus(payment.id, 'failed')" color="danger">
-            <ion-icon name="close"></ion-icon>
-          </ion-button>
-        </ion-buttons>
+        <ion-button 
+          (click)="simulatePayment(event.id)" 
+          [disabled]="isProcessing && processingEventId === event.id"
+          color="primary"
+          fill="outline"
+          slot="end">
+          <ion-spinner *ngIf="isProcessing && processingEventId === event.id"></ion-spinner>
+          <span *ngIf="!(isProcessing && processingEventId === event.id)">Bayar</span>
+        </ion-button>
       </ion-item>
     </ion-list>
   </div>
 
-  <!-- Registered events -->
-  <div *ngIf="activeSegment === 'registered'">
-    <!-- Empty state for registered events -->
-    <ion-list *ngIf="!isLoading && registeredEvents.length === 0">
+  <!-- Riwayat pembayaran yang sudah lunas -->
+  <div *ngIf="activeSegment === 'payments'">
+    <!-- Empty state untuk riwayat pembayaran -->
+    <ion-list *ngIf="!isLoading && paidEvents.length === 0">
       <ion-item lines="none">
         <ion-label class="ion-text-center">
-          <ion-icon name="calendar-outline" style="font-size: 48px; margin: 16px 0;"></ion-icon>
-          <h2>Belum Ada Event</h2>
-          <p>Anda belum mendaftar ke event apapun</p>
+          <ion-icon name="receipt-outline" style="font-size: 48px; margin: 16px 0;"></ion-icon>
+          <h2>Belum Ada Pembayaran</h2>
+          <p>Riwayat pembayaran yang lunas akan muncul di sini</p>
         </ion-label>
       </ion-item>
     </ion-list>
 
-    <!-- Registered events list -->
-    <ion-list *ngIf="!isLoading && registeredEvents.length > 0">
-      <ion-item *ngFor="let event of registeredEvents">
+    <!-- Daftar event yang sudah lunas -->
+    <ion-list *ngIf="!isLoading && paidEvents.length > 0">
+      <ion-item *ngFor="let event of paidEvents">
+        <ion-thumbnail slot="start" *ngIf="event.image_path">
+          <img [src]="environment.baseUrl + '/' + event.image_path" [alt]="event.title">
+        </ion-thumbnail>
+        <ion-thumbnail slot="start" *ngIf="!event.image_path">
+          <img src="assets/default-event.jpg" [alt]="event.title">
+        </ion-thumbnail>
         <ion-label>
           <h2>{{ event.title }}</h2>
-          <p>{{ formatPrice(event.price) }}</p>
-          <p>{{ event.start_datetime | date:'medium' }}</p>
+          <p>
+            <ion-icon name="cash-outline"></ion-icon>
+            {{ formatPrice(event.price) }}
+          </p>
+          <p>
+            <ion-icon name="calendar-outline"></ion-icon>
+            Tanggal Event: {{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}
+          </p>
+          <p *ngIf="event.registration_date">
+            <ion-icon name="time-outline"></ion-icon>
+            Tanggal Bayar: {{ event.registration_date | date:'dd MMM yyyy HH:mm' }}
+          </p>
+          <ion-badge color="success">Lunas</ion-badge>
         </ion-label>
-        <ion-button 
-          *ngIf="!event.payment_status || event.payment_status === 'failed'"
-          (click)="simulatePayment(event.id)" 
-          color="primary"
-          fill="outline"
-          slot="end">
-          Bayar
-        </ion-button>
-        <ion-badge 
-          *ngIf="event.payment_status"
-          [color]="getStatusColor(event.payment_status)" 
-          slot="end">
-          {{ event.payment_status }}
-        </ion-badge>
       </ion-item>
     </ion-list>
+  </div>
+
+  <!-- Loading indicator -->
+  <div class="ion-text-center ion-padding" *ngIf="isLoading">
+    <ion-spinner></ion-spinner>
+    <p>Memuat data...</p>
   </div>
 </ion-content> 

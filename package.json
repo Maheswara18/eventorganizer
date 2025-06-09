@@ -5,12 +5,16 @@
         "build": "vite build"
     },
     "devDependencies": {
+        "@types/qrcode": "^1.5.5",
         "axios": "^1.1.2",
         "laravel-vite-plugin": "^0.7.2",
         "vite": "^4.0.0"
     },
     "dependencies": {
+        "@capacitor-community/barcode-scanner": "^4.0.1",
         "@capacitor/barcode-scanner": "^2.0.3",
-        "@capacitor/filesystem": "^7.0.1"
+        "@capacitor/filesystem": "^7.0.1",
+        "angularx-qrcode": "^20.0.0",
+        "html5-qrcode": "^2.3.8"
     }
 }

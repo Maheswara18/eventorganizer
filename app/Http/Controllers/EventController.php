@@ -279,70 +279,108 @@ class EventController extends Controller
         }
     }
 
-    public function checkRegistration($eventId)
+    public function checkRegistration(Event $event)
+    {
+        $isRegistered = $event->participants()->where('user_id', auth()->id())->exists();
+        return response()->json(['registered' => $isRegistered]);
+    }
+
+    public function simulatePayment(Event $event)
     {
         try {
-            $user = Auth::user();
-            $isRegistered = Participant::where('user_id', $user->id)
-                ->where('event_id', $eventId)
-                ->exists();
+            \Log::info('Starting payment simulation', [
+                'event_id' => $event->id,
+                'user_id' => auth()->id()
+            ]);
 
-            return response()->json(['registered' => $isRegistered]);
+            // Cari pendaftaran peserta
+            $participant = $event->participants()
+                ->where('user_id', auth()->id())
+                ->first();
+
+            \Log::info('Found participant', [
+                'participant_id' => $participant ? $participant->id : null,
+                'current_payment_status' => $participant ? $participant->payment_status : null
+            ]);
+
+            if (!$participant) {
+                return response()->json([
+                    'message' => 'Anda belum terdaftar di event ini'
+                ], 404);
+            }
+
+            // Update status pembayaran
+            $participant->payment_status = 'paid';
+            $participant->save();
+
+            \Log::info('Payment status updated', [
+                'participant_id' => $participant->id,
+                'new_payment_status' => $participant->payment_status
+            ]);
+
+            // Verifikasi perubahan
+            $updatedParticipant = $event->participants()
+                ->where('user_id', auth()->id())
+                ->first();
+
+            \Log::info('Verified payment status', [
+                'participant_id' => $updatedParticipant->id,
+                'verified_payment_status' => $updatedParticipant->payment_status
+            ]);
+
+            return response()->json([
+                'message' => 'Pembayaran berhasil diproses',
+                'payment_status' => $updatedParticipant->payment_status
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error checking registration', 'error' => $e->getMessage()], 500);
+            \Log::error('Error in payment simulation', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Gagal memproses pembayaran',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
     public function getRegisteredEvents()
     {
         try {
-            \Log::info('Getting registered events for user: ' . Auth::id());
-            
-            $user = Auth::user();
-            \Log::info('User found:', ['user_id' => $user->id, 'name' => $user->name]);
+            $user = auth()->user();
+            $registeredEvents = Event::join('participants', 'events.id', '=', 'participants.event_id')
+                ->where('participants.user_id', $user->id)
+                ->select(
+                    'events.*',
+                    'participants.created_at as registration_date',
+                    'participants.payment_status',
+                    'participants.id as participant_id'
+                )
+                ->get()
+                ->map(function ($event) {
+                    return [
+                        'id' => $event->id,
+                        'title' => $event->title,
+                        'description' => $event->description,
+                        'location' => $event->location,
+                        'start_datetime' => $event->start_datetime,
+                        'end_datetime' => $event->end_datetime,
+                        'image_path' => $event->image_path,
+                        'max_participants' => $event->max_participants,
+                        'registered_participants' => $event->registered_participants,
+                        'registration_date' => $event->registration_date,
+                        'payment_status' => $event->payment_status,
+                        'participant_id' => $event->participant_id
+                    ];
+                });
 
-            $registeredEvents = Event::with(['participants' => function($query) use ($user) {
-                $query->where('user_id', $user->id);
-            }, 'participants.payment'])
-            ->whereHas('participants', function($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->get();
-
-            \Log::info('Found registered events:', ['count' => $registeredEvents->count()]);
-
-            $events = $registeredEvents->map(function($event) use ($user) {
-                $participant = $event->participants->first();
-                \Log::info('Processing event:', [
-                    'event_id' => $event->id,
-                    'title' => $event->title,
-                    'participant_id' => $participant->id,
-                    'payment_status' => $participant->payment ? $participant->payment->status : 'unpaid'
-                ]);
-
-                return [
-                    'id' => $event->id,
-                    'title' => $event->title,
-                    'description' => $event->description,
-                    'location' => $event->location,
-                    'price' => $event->price,
-                    'start_datetime' => $event->start_datetime,
-                    'end_datetime' => $event->end_datetime,
-                    'image_path' => $event->image_path,
-                    'payment_status' => $participant->payment ? $participant->payment->status : 'unpaid',
-                    'registration_date' => $participant->created_at,
-                    'max_participants' => $event->max_participants,
-                    'registered_participants' => $event->participants()->count()
-                ];
-            });
-
-            \Log::info('Returning events data:', ['count' => $events->count()]);
-            return response()->json($events);
+            return response()->json($registeredEvents);
         } catch (\Exception $e) {
-            \Log::error('Error in getRegisteredEvents:', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json(['message' => 'Error fetching registered events', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Error fetching registered events',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 

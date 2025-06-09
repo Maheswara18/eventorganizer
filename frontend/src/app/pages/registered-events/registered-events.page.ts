@@ -1,18 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule, LoadingController, ToastController, AlertController, IonItemSliding } from '@ionic/angular';
+import { IonicModule, LoadingController, ToastController, AlertController, IonItemSliding, ModalController } from '@ionic/angular';
 import { EventsService } from '../../services/events.service';
 import { CommonModule } from '@angular/common';
 import { RegisteredEvent } from '../../interfaces/event.interface';
 import { RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { QrCodeComponent } from '../../components/qr-code/qr-code.component';
 
 @Component({
   standalone: true,
   selector: 'app-registered-events',
   templateUrl: './registered-events.page.html',
   styleUrls: ['./registered-events.page.scss'],
-  imports: [CommonModule, IonicModule, RouterModule]
+  imports: [CommonModule, IonicModule, RouterModule, QrCodeComponent]
 })
 export class RegisteredEventsPage implements OnInit {
   registeredEvents: RegisteredEvent[] = [];
@@ -25,7 +26,8 @@ export class RegisteredEventsPage implements OnInit {
     private eventsService: EventsService,
     private loadingController: LoadingController,
     private toastController: ToastController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private modalController: ModalController
   ) {}
 
   ngOnInit() {
@@ -36,12 +38,13 @@ export class RegisteredEventsPage implements OnInit {
     this.isLoading = true;
     try {
       this.registeredEvents = await this.eventsService.getRegisteredEvents();
+      console.log('Loaded events:', this.registeredEvents); // Debug log
     } catch (error) {
       console.error('Error loading registered events:', error);
       this.showToast('Gagal memuat event terdaftar', 'danger');
     } finally {
       this.isLoading = false;
-      }
+    }
   }
 
   showEventDetail(event: RegisteredEvent) {
@@ -114,6 +117,23 @@ export class RegisteredEventsPage implements OnInit {
   viewEventDetails(eventId: number) {
     this.closeEventDetail();
     this.router.navigate(['/events', eventId]);
+  }
+
+  async showQRCode(event: RegisteredEvent) {
+    const modal = await this.modalController.create({
+      component: QrCodeComponent,
+      componentProps: {
+        eventId: event.id,
+        eventTitle: event.title
+      }
+    });
+
+    await modal.present();
+  }
+
+  goToPayments() {
+    this.closeEventDetail();
+    this.router.navigate(['/payments']);
   }
 
   private async showToast(message: string, color: 'success' | 'danger' | 'warning') {

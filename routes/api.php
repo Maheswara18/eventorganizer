@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events/{id}/statistics', [EventController::class, 'getStatistics']);
     Route::get('/registered-events', [EventController::class, 'getRegisteredEvents']);
     Route::delete('/events/{id}/registration', [EventController::class, 'cancelRegistration']);
+    Route::post('/events/{event}/simulate-payment', [EventController::class, 'simulatePayment']);
 });
 
 ////////PAYMENT//////////

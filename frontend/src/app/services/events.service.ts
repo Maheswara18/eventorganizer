@@ -182,4 +182,12 @@ export class EventsService {
       throw error;
     }
   }
+
+  async getCurrentUserId(): Promise<number> {
+    const currentUser = this.authService.currentUserValue;
+    if (!currentUser) {
+      throw new Error('User not authenticated');
+    }
+    return currentUser.id;
+  }
 } 

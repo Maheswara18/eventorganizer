@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Pengaturan</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list>
+    <ion-item>
+      <ion-icon name="moon-outline" slot="start"></ion-icon>
+      <ion-label>Mode Gelap</ion-label>
+      <ion-toggle [(ngModel)]="darkMode" (ionChange)="toggleDarkMode()"></ion-toggle>
+    </ion-item>
+
+    <ion-item>
+      <ion-icon name="notifications-outline" slot="start"></ion-icon>
+      <ion-label>Notifikasi</ion-label>
+      <ion-toggle [(ngModel)]="notificationsEnabled" (ionChange)="toggleNotifications()"></ion-toggle>
+    </ion-item>
+
+    <ion-item>
+      <ion-icon name="language-outline" slot="start"></ion-icon>
+      <ion-label>Bahasa</ion-label>
+      <ion-select [(ngModel)]="language" (ionChange)="changeLanguage()">
+        <ion-select-option value="id">Indonesia</ion-select-option>
+        <ion-select-option value="en">English</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-list-header>
+      <ion-label>Tentang</ion-label>
+    </ion-list-header>
+
+    <ion-item button detail>
+      <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+      <ion-label>Versi Aplikasi</ion-label>
+      <ion-note slot="end">1.0.0</ion-note>
+    </ion-item>
+
+    <ion-item button detail>
+      <ion-icon name="document-text-outline" slot="start"></ion-icon>
+      <ion-label>Syarat dan Ketentuan</ion-label>
+    </ion-item>
+
+    <ion-item button detail>
+      <ion-icon name="shield-outline" slot="start"></ion-icon>
+      <ion-label>Kebijakan Privasi</ion-label>
+    </ion-item>
+  </ion-list>
+
+  <div class="ion-padding">
+    <ion-button expand="block" color="danger" (click)="logout()">
+      <ion-icon name="log-out-outline" slot="start"></ion-icon>
+      Keluar
+    </ion-button>
+  </div>
+</ion-content> 

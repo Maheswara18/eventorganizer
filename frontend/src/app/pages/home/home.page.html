@@ -34,6 +34,14 @@
       </ion-card-content>
     </ion-card>
 
+    <ion-card button routerLink="/payments">
+      <ion-card-content>
+        <ion-icon name="wallet" slot="start"></ion-icon>
+        <span>Pembayaran</span>
+        <ion-badge color="danger" slot="end" *ngIf="unpaidEventsCount > 0">{{ unpaidEventsCount }}</ion-badge>
+      </ion-card-content>
+    </ion-card>
+
     <ion-card button routerLink="/profile">
       <ion-card-content>
         <ion-icon name="person-outline"></ion-icon>
@@ -48,6 +56,13 @@
       <ion-label>Menu Admin</ion-label>
     </ion-list-header>
     <div class="action-grid">
+      <ion-card button routerLink="/event-qr">
+        <ion-card-content>
+          <ion-icon name="qr-code-outline"></ion-icon>
+          <span>Scan QR Event</span>
+        </ion-card-content>
+      </ion-card>
+      
       <ion-card button routerLink="/create-event">
         <ion-card-content>
           <ion-icon name="add-circle-outline"></ion-icon>
