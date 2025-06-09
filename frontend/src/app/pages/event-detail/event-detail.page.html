@@ -1,89 +1,103 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/events" (click)="goBack()"></ion-back-button>
+      <ion-back-button defaultHref="/events"></ion-back-button>
     </ion-buttons>
     <ion-title>Detail Event</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <div *ngIf="isLoading" class="ion-text-center">
-    <ion-spinner></ion-spinner>
+<ion-content>
+  <div *ngIf="isLoading" class="ion-padding">
+    <ion-skeleton-text animated style="width: 100%; height: 200px;"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width: 60%; margin-top: 16px;"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width: 80%;"></ion-skeleton-text>
   </div>
 
-  <div *ngIf="!isLoading && event">
-    <ion-card>
-      <img *ngIf="event.image_path" [src]="environment.baseUrl + '/' + event.image_path" [alt]="event.title">
-      
+  <div *ngIf="!isLoading && event" class="event-detail-container">
+    <!-- Event Header Image -->
+    <div class="event-header">
+      <img [src]="environment.baseUrl + '/' + event.image_path" 
+           [alt]="event.title"
+           class="event-image"
+           onError="this.src='assets/default-event.jpg'">
+      <div class="event-header-content">
+        <h1>{{ event.title }}</h1>
+        <p class="event-organizer">Diselenggarakan oleh {{ event.admin?.name }}</p>
+      </div>
+    </div>
+
+    <!-- Quick Info Cards -->
+    <div class="quick-info-grid">
+      <ion-card class="quick-info-card">
+        <ion-card-content>
+          <ion-icon name="calendar-outline" color="primary"></ion-icon>
+          <div class="info-text">
+            <small>Tanggal Mulai</small>
+            <strong>{{ formatDate(event.start_datetime) }}</strong>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="quick-info-card">
+        <ion-card-content>
+          <ion-icon name="location-outline" color="primary"></ion-icon>
+          <div class="info-text">
+            <small>Lokasi</small>
+            <strong>{{ event.location }}</strong>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="quick-info-card">
+        <ion-card-content>
+          <ion-icon name="cash-outline" color="primary"></ion-icon>
+          <div class="info-text">
+            <small>Biaya</small>
+            <strong>Rp {{ formatPrice(event.price) | number:'1.0-0' }}</strong>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="quick-info-card">
+        <ion-card-content>
+          <ion-icon name="people-outline" color="primary"></ion-icon>
+          <div class="info-text">
+            <small>Kuota</small>
+            <strong>{{ event.max_participants }} peserta</strong>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Event Description -->
+    <ion-card class="description-card">
       <ion-card-header>
-        <ion-card-title>{{ event.title }}</ion-card-title>
-        <ion-chip *ngIf="isRegistered" color="success">
-          <ion-icon name="checkmark-circle"></ion-icon>
-          <ion-label>Sudah Terdaftar</ion-label>
-        </ion-chip>
+        <ion-card-title>Deskripsi Event</ion-card-title>
       </ion-card-header>
-
       <ion-card-content>
-        <ion-list>
-          <ion-item>
-            <ion-icon name="calendar-outline" slot="start"></ion-icon>
-            <ion-label>
-              <h2>Waktu Mulai</h2>
-              <p>{{ formatDate(event.start_datetime) }}</p>
-            </ion-label>
-          </ion-item>
-
-          <ion-item>
-            <ion-icon name="time-outline" slot="start"></ion-icon>
-            <ion-label>
-              <h2>Waktu Selesai</h2>
-              <p>{{ formatDate(event.end_datetime) }}</p>
-            </ion-label>
-          </ion-item>
-
-          <ion-item>
-            <ion-icon name="location-outline" slot="start"></ion-icon>
-            <ion-label>
-              <h2>Lokasi</h2>
-              <p>{{ event.location }}</p>
-            </ion-label>
-          </ion-item>
-
-          <ion-item>
-            <ion-icon name="cash-outline" slot="start"></ion-icon>
-            <ion-label>
-              <h2>Harga</h2>
-              <p>Rp {{ formatPrice(event.price) | number:'1.0-0' }}</p>
-            </ion-label>
-          </ion-item>
-
-          <ion-item>
-            <ion-icon name="people-outline" slot="start"></ion-icon>
-            <ion-label>
-              <h2>Maksimal Peserta</h2>
-              <p>{{ event.max_participants }} orang</p>
-            </ion-label>
-          </ion-item>
-
-          <ion-item lines="none">
-            <ion-label>
-              <h2>Deskripsi</h2>
-              <p class="ion-text-wrap description">{{ event.description }}</p>
-            </ion-label>
-          </ion-item>
-        </ion-list>
+        <p class="description-text">{{ event.description }}</p>
       </ion-card-content>
     </ion-card>
-
-    <div class="ion-padding">
-      <ion-button expand="block" color="primary" (click)="registerForEvent(event.id)" *ngIf="!isRegistered && event">
-        Daftar Event
-      </ion-button>
-      <ion-button expand="block" color="success" disabled *ngIf="isRegistered">
-        <ion-icon name="checkmark-circle" slot="start"></ion-icon>
-        Sudah Terdaftar
-      </ion-button>
-    </div>
   </div>
+
+  <!-- Fixed bottom toolbar for registration -->
+  <ion-footer *ngIf="!isLoading && event && !isAdmin">
+    <ion-toolbar>
+      <div class="registration-toolbar">
+        <div class="registration-info">
+          <ion-text color="medium">Status:</ion-text>
+          <ion-badge [color]="isRegistered ? 'success' : 'primary'">
+            {{ isRegistered ? 'Terdaftar' : 'Belum Terdaftar' }}
+          </ion-badge>
+        </div>
+        <ion-button 
+          *ngIf="!isRegistered"
+          (click)="showRegistrationForm()" 
+          expand="block">
+          Daftar Sekarang
+        </ion-button>
+      </div>
+    </ion-toolbar>
+  </ion-footer>
 </ion-content> 

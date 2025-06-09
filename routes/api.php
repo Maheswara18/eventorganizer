@@ -9,6 +9,7 @@ use App\Http\Controllers\ParticipantController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FormTemplateController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,9 +41,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events', [EventController::class, 'index']);
     Route::get('/events/registered', [EventController::class, 'getRegisteredEvents']);
     Route::get('/events/{id}', [EventController::class, 'show']);
+    Route::post('/events', [EventController::class, 'store']);
+    Route::put('/events/{id}', [EventController::class, 'update']);
+    Route::delete('/events/{id}', [EventController::class, 'destroy']);
     Route::post('/events/{event}/register', [EventController::class, 'register']);
     Route::delete('/events/{event}/unregister', [EventController::class, 'unregister']);
     Route::get('/events/{id}/check-registration', [EventController::class, 'checkRegistration']);
+    Route::get('/events/{id}/statistics', [EventController::class, 'getStatistics']);
     Route::get('/registered-events', [EventController::class, 'getRegisteredEvents']);
     Route::delete('/events/{id}/registration', [EventController::class, 'cancelRegistration']);
 });
@@ -107,4 +112,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Form responses routes
     Route::post('/events/{event}/form-responses', [FormTemplateController::class, 'storeResponses']);
     Route::get('/events/{event}/form-responses', [FormTemplateController::class, 'getResponses']);
+});
+
+// Dashboard routes
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('/dashboard/stats', [DashboardController::class, 'getStats']);
+    Route::get('/dashboard/registrations', [DashboardController::class, 'getRegistrations']);
+    Route::get('/dashboard/revenue', [DashboardController::class, 'getRevenue']);
+    Route::get('/dashboard/activities', [DashboardController::class, 'getActivities']);
 });

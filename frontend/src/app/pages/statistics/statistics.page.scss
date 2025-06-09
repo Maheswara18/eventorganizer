@@ -1,0 +1,210 @@
+:host {
+  --card-border-radius: 16px;
+  --icon-wrapper-size: 48px;
+}
+
+.dashboard-card {
+  margin: 8px;
+  border-radius: var(--card-border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  ion-card-content {
+    padding: 20px;
+  }
+
+  &.summary-card {
+    .card-icon-wrapper {
+      width: var(--icon-wrapper-size);
+      height: var(--icon-wrapper-size);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+
+      ion-icon {
+        font-size: 24px;
+        color: white;
+      }
+
+      &.primary {
+        background: var(--ion-color-primary);
+      }
+
+      &.success {
+        background: var(--ion-color-success);
+      }
+
+      &.warning {
+        background: var(--ion-color-warning);
+      }
+    }
+
+    .card-content {
+      h2 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--ion-color-medium);
+      }
+
+      .stat-number {
+        margin: 8px 0 0;
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--ion-color-dark);
+      }
+    }
+  }
+}
+
+.chart-card {
+  margin: 8px;
+  border-radius: var(--card-border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  ion-card-header {
+    padding: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      font-size: 1.2rem;
+      
+      ion-icon {
+        margin-right: 8px;
+        font-size: 1.4rem;
+      }
+    }
+
+    ion-card-subtitle {
+      margin-top: 4px;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  ion-card-content {
+    padding: 16px;
+  }
+}
+
+.activity-card {
+  margin: 8px;
+  border-radius: var(--card-border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  ion-card-header {
+    padding: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      font-size: 1.2rem;
+
+      ion-icon {
+        margin-right: 8px;
+        font-size: 1.4rem;
+      }
+    }
+  }
+
+  ion-card-content {
+    padding: 0;
+  }
+}
+
+.activity-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  --background: transparent;
+  
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .activity-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+
+    ion-icon {
+      font-size: 20px;
+      color: white;
+    }
+
+    &.primary {
+      background: var(--ion-color-primary);
+    }
+
+    &.success {
+      background: var(--ion-color-success);
+    }
+
+    &.warning {
+      background: var(--ion-color-warning);
+    }
+  }
+
+  ion-label {
+    h3 {
+      font-weight: 500;
+      margin-bottom: 4px;
+      color: var(--ion-color-dark);
+    }
+
+    .activity-description {
+      color: var(--ion-color-medium);
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .activity-time {
+      font-size: 0.8rem;
+      color: var(--ion-color-medium-shade);
+    }
+  }
+}
+
+canvas {
+  width: 100% !important;
+  height: 300px !important;
+}
+
+.activity-time {
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+ion-list {
+  background: transparent;
+}
+
+ion-item {
+  --background: transparent;
+  margin-bottom: 8px;
+
+  ion-icon {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+} 

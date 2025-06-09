@@ -61,6 +61,16 @@ const routes: Routes = [
     path: 'participant-management',
     loadComponent: () => import('./pages/participant-management/participant-management.page').then(m => m.ParticipantManagementPage),
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'admin',
+    children: [
+      {
+        path: 'statistics',
+        loadComponent: () => import('./pages/statistics/statistics.page').then(m => m.StatisticsPage),
+        canActivate: [AuthGuard, AdminGuard]
+      }
+    ]
   }
 ];
 

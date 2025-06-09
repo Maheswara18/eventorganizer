@@ -8,6 +8,7 @@ import { FormTemplateService } from '../../services/form-template.service';
 import { RegistrationFormComponent } from '../../components/registration-form/registration-form.component';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth.service';
 
 interface Event {
   id: number;
@@ -39,118 +40,114 @@ interface Event {
   templateUrl: './event-detail.page.html',
   styleUrls: ['./event-detail.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, RouterModule, FormsModule]
+  imports: [
+    IonicModule,
+    CommonModule,
+    RouterModule,
+    FormsModule
+  ]
 })
 export class EventDetailPage implements OnInit {
   event: any;
-  isRegistered = false;
   isLoading = true;
-  formTemplate: any;
-  formData: any = {};
+  isRegistered = false;
+  isAdmin = false;
   environment = environment;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private eventsService: EventsService,
-    private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController,
-    private alertCtrl: AlertController,
+    private loadingController: LoadingController,
+    private toastController: ToastController,
+    private alertController: AlertController,
     private modalCtrl: ModalController,
-    private formTemplateService: FormTemplateService
+    private formTemplateService: FormTemplateService,
+    private authService: AuthService
   ) {}
 
   async ngOnInit() {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (id) {
-      await this.loadEvent(id);
-    }
+    await this.checkAdminStatus();
+    await this.loadEvent();
   }
 
-  async loadEvent(id: number) {
-    const loading = await this.loadingCtrl.create({
-      message: 'Memuat detail event...'
+  private async checkAdminStatus() {
+    this.authService.currentUser.subscribe(user => {
+      this.isAdmin = user?.role === 'admin';
+  });
+}
+
+  async loadEvent() {
+    const loading = await this.loadingController.create({
+      message: 'Memuat event...'
     });
     await loading.present();
 
     try {
-      this.event = await this.eventsService.getEvent(id);
-      await this.checkRegistrationStatus(id);
-      this.isLoading = false;
-      loading.dismiss();
-    } catch (error) {
-      console.error('Error loading event:', error);
-      loading.dismiss();
-      await this.showToast('Gagal memuat detail event', 'danger');
-    }
-  }
-
-  async checkRegistrationStatus(id: number) {
-    try {
-      this.isRegistered = await this.eventsService.checkRegistration(id);
-    } catch (error) {
-      console.error('Error checking registration status:', error);
-    }
-  }
-
-  async registerForEvent(eventId: number) {
-    if (!eventId) {
-      await this.showToast('ID event tidak valid', 'danger');
-      return;
-    }
-
-    try {
-      // Load form template first
-      const formTemplate = await firstValueFrom(this.formTemplateService.getFormTemplate(eventId));
-      
-      if (!formTemplate) {
-        await this.showToast('Form pendaftaran tidak tersedia', 'danger');
-        return;
+      const id = this.route.snapshot.paramMap.get('id');
+      if (!id) {
+        throw new Error('Event ID not found');
       }
 
-      // Show registration form modal
+      this.event = await this.eventsService.getEvent(Number(id));
+      if (this.event) {
+        this.isRegistered = await this.eventsService.checkRegistration(this.event.id);
+      }
+    } catch (error) {
+      console.error('Error loading event:', error);
+      const toast = await this.toastController.create({
+        message: 'Gagal memuat event',
+        duration: 2000,
+        color: 'danger'
+      });
+      await toast.present();
+    } finally {
+      await loading.dismiss();
+      this.isLoading = false;
+    }
+  }
+
+  async showRegistrationForm() {
+    if (!this.event) return;
+
+    try {
+      const formTemplate = await firstValueFrom(
+        this.formTemplateService.getFormTemplate(this.event.id)
+      );
+
       const modal = await this.modalCtrl.create({
         component: RegistrationFormComponent,
         componentProps: {
-          event: this.event,
-          formTemplate: formTemplate
-        }
-      });
-
-      modal.onDidDismiss().then(async (result) => {
-        if (result.data) {
-          const loading = await this.loadingCtrl.create({
-            message: 'Mendaftarkan event...'
-          });
-          await loading.present();
-
-          try {
-            await this.eventsService.registerForEvent(eventId, result.data);
-            this.isRegistered = true;
-            loading.dismiss();
-            await this.showToast('Berhasil mendaftar event', 'success');
-          } catch (error) {
-            console.error('Error registering for event:', error);
-            loading.dismiss();
-            await this.showToast('Gagal mendaftar event', 'danger');
-          }
+          eventId: this.event.id,
+          formTemplate: formTemplate.template
         }
       });
 
       await modal.present();
+
+      const { data } = await modal.onWillDismiss();
+      if (data?.registered) {
+        this.isRegistered = true;
+        const toast = await this.toastController.create({
+          message: 'Berhasil mendaftar event',
+          duration: 2000,
+          color: 'success'
+        });
+        await toast.present();
+      }
     } catch (error) {
-      console.error('Error loading form template:', error);
-      await this.showToast('Gagal memuat form pendaftaran', 'danger');
+      console.error('Error showing registration form:', error);
+      const toast = await this.toastController.create({
+        message: 'Gagal memuat form pendaftaran',
+        duration: 2000,
+        color: 'danger'
+      });
+      await toast.present();
     }
   }
 
-  private async showToast(message: string, color: string) {
-    const toast = await this.toastCtrl.create({
-      message,
-      duration: 2000,
-      color
-    });
-    await toast.present();
+  goBack() {
+    this.router.navigate(['/events']);
   }
 
   formatDate(dateString: string): string {
@@ -166,9 +163,5 @@ export class EventDetailPage implements OnInit {
 
   formatPrice(price: string): number {
     return parseFloat(price);
-  }
-
-  goBack() {
-    this.router.navigate(['/events']);
   }
 } 

@@ -1,0 +1,136 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <ion-text>Statistik Event</ion-text>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="refreshData()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-grid fixed>
+    <!-- Summary Cards -->
+    <ion-row>
+      <ion-col size="12" size-md="4">
+        <ion-card class="dashboard-card summary-card" routerLink="/events">
+          <ion-ripple-effect></ion-ripple-effect>
+          <ion-card-content class="ion-text-center">
+            <div class="card-icon-wrapper primary">
+              <ion-icon name="calendar"></ion-icon>
+            </div>
+            <div class="card-content">
+              <h2>Total Event</h2>
+              <p class="stat-number">{{ dashboardStats.totalEvents || 0 }}</p>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="4">
+        <ion-card class="dashboard-card summary-card" routerLink="/participant-management">
+          <ion-ripple-effect></ion-ripple-effect>
+          <ion-card-content class="ion-text-center">
+            <div class="card-icon-wrapper success">
+              <ion-icon name="people"></ion-icon>
+            </div>
+            <div class="card-content">
+              <h2>Total Peserta</h2>
+              <p class="stat-number">{{ dashboardStats.totalParticipants || 0 }}</p>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="4">
+        <ion-card class="dashboard-card summary-card" routerLink="/payments">
+          <ion-ripple-effect></ion-ripple-effect>
+          <ion-card-content class="ion-text-center">
+            <div class="card-icon-wrapper warning">
+              <ion-icon name="cash"></ion-icon>
+            </div>
+            <div class="card-content">
+              <h2>Pembayaran Pending</h2>
+              <p class="stat-number">{{ dashboardStats.pendingPayments || 0 }}</p>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <!-- Charts Section -->
+    <ion-row class="ion-margin-top">
+      <ion-col size="12" size-md="6">
+        <ion-card class="chart-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="trending-up-outline" color="primary"></ion-icon>
+              Pendaftaran Event
+            </ion-card-title>
+            <ion-card-subtitle>6 Bulan Terakhir</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <canvas baseChart
+              [data]="registrationChartData"
+              [options]="chartOptions"
+              type="line">
+            </canvas>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="6">
+        <ion-card class="chart-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="bar-chart-outline" color="success"></ion-icon>
+              Pendapatan
+            </ion-card-title>
+            <ion-card-subtitle>6 Bulan Terakhir</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <canvas baseChart
+              [data]="revenueChartData"
+              [options]="chartOptions"
+              type="bar">
+            </canvas>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <!-- Recent Activities -->
+    <ion-row class="ion-margin-top">
+      <ion-col size="12">
+        <ion-card class="activity-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="time-outline" color="tertiary"></ion-icon>
+              Aktivitas Terbaru
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="none">
+              <ion-item *ngFor="let activity of recentActivities" class="activity-item">
+                <div class="activity-icon-wrapper" [class]="activity.color">
+                  <ion-icon [name]="activity.icon"></ion-icon>
+                </div>
+                <ion-label>
+                  <h3>{{ activity.title }}</h3>
+                  <p class="activity-description">{{ activity.description }}</p>
+                  <p class="activity-time">{{ activity.time }}</p>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content> 

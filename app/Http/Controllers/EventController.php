@@ -473,4 +473,54 @@ class EventController extends Controller
             return response()->json(['message' => 'Error unregistering from event', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function getStatistics($id)
+    {
+        try {
+            \Log::info('Getting statistics for event ID: ' . $id);
+            
+            $event = Event::findOrFail($id);
+            
+            // Get total registered participants
+            $registeredParticipants = Participant::where('event_id', $id)->count();
+            \Log::info('Total registered participants: ' . $registeredParticipants);
+            
+            // Get attendance counts using raw SQL to ensure proper quoting
+            $presentCount = \DB::table('participants')
+                ->where('event_id', $id)
+                ->where('attendance_status', '=', 'present')
+                ->count();
+            \Log::info('Present count: ' . $presentCount);
+                
+            $absentCount = \DB::table('participants')
+                ->where('event_id', $id)
+                ->where('attendance_status', '=', 'absent')
+                ->count();
+            \Log::info('Absent count: ' . $absentCount);
+                
+            $pendingCount = \DB::table('participants')
+                ->where('event_id', $id)
+                ->where('attendance_status', '=', 'registered')
+                ->count();
+            \Log::info('Pending count: ' . $pendingCount);
+
+            $response = [
+                'registered_participants' => $registeredParticipants,
+                'max_participants' => $event->max_participants,
+                'present_count' => $presentCount,
+                'absent_count' => $absentCount,
+                'pending_count' => $pendingCount
+            ];
+            
+            \Log::info('Statistics response:', $response);
+            return response()->json($response);
+        } catch (\Exception $e) {
+            \Log::error('Error getting event statistics: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return response()->json([
+                'message' => 'Error getting event statistics',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

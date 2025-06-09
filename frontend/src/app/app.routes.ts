@@ -65,5 +65,15 @@ export const routes: Routes = [
   {
     path: 'registration-form',
     component: RegistrationFormComponent
+  },
+  {
+    path: 'admin',
+    children: [
+      {
+        path: 'statistics',
+        loadComponent: () => import('./pages/statistics/statistics.page').then(m => m.StatisticsPage),
+        canActivate: [AuthGuard, AdminGuard]
+      }
+    ]
   }
 ]; 
