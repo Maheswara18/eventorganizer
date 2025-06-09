@@ -17,7 +17,13 @@
     </ion-card-header>
 
     <ion-card-content>
-      <form #registrationForm="ngForm" (ngSubmit)="submitForm()">
+      <div *ngIf="!formTemplate?.fields" class="ion-text-center ion-padding">
+        <ion-text color="medium">
+          <p>Form pendaftaran tidak tersedia</p>
+        </ion-text>
+      </div>
+
+      <form #registrationForm="ngForm" (ngSubmit)="submitForm()" *ngIf="formTemplate?.fields">
         <ion-list>
           <ng-container *ngFor="let field of formTemplate?.fields">
             <!-- Text, Number, Email inputs -->
@@ -90,7 +96,7 @@
         </ion-list>
 
         <div class="ion-padding">
-          <ion-button expand="block" type="submit" color="primary" [disabled]="!registrationForm.form.valid">
+          <ion-button expand="block" type="submit" color="primary">
             Daftar Event
           </ion-button>
           <ion-button expand="block" color="medium" (click)="cancel()" class="ion-margin-top">

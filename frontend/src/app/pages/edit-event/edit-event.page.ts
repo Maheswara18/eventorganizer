@@ -142,18 +142,6 @@ export class EditEventPage implements OnInit {
     }
   }
 
-  async loadFormTemplate() {
-    try {
-      const response = await firstValueFrom(this.formTemplateService.getFormTemplate(this.eventId));
-      if (response && response.template) {
-        this.formTemplate = response.template;
-      }
-    } catch (error) {
-      console.error('Error loading form template:', error);
-      // Don't show a toast here as this is not a critical error
-    }
-  }
-
   async createFormTemplate() {
     const modal = await this.modalCtrl.create({
       component: FormBuilderComponent,
@@ -169,10 +157,12 @@ export class EditEventPage implements OnInit {
       }
     });
 
-    return await modal.present();
+    await modal.present();
   }
 
   async editFormTemplate() {
+    if (!this.formTemplate) return;
+
     const modal = await this.modalCtrl.create({
       component: FormBuilderComponent,
       componentProps: {
@@ -188,18 +178,31 @@ export class EditEventPage implements OnInit {
       }
     });
 
-    return await modal.present();
+    await modal.present();
   }
 
+  async loadFormTemplate() {
+    try {
+      const response = await firstValueFrom(this.formTemplateService.getFormTemplate(this.eventId));
+      // The response IS the FormTemplate, no need to check for response.template
+      if (response) {
+        this.formTemplate = response;
+      }
+    } catch (error) {
+      console.error('Error loading form template:', error);
+      // Don't show a toast here as this is not a critical error
+    }
+  }
+  
   async onFormTemplateSubmit(formData: Partial<FormTemplate>) {
     const loading = await this.loadingController.create({
       message: 'Menyimpan form template...',
       spinner: 'circular'
     });
     await loading.present();
-
+  
     try {
-      let response: FormTemplateResponse;
+      let response: FormTemplate;
       if (this.formTemplate?.id) {
         // Update existing template
         response = await firstValueFrom(
@@ -211,14 +214,13 @@ export class EditEventPage implements OnInit {
           this.formTemplateService.createFormTemplate(this.eventId, formData)
         );
       }
-
-      if (response && response.template) {
-        this.formTemplate = response.template;
-        await this.showToast('Form template berhasil ' + (this.formTemplate.id ? 'diupdate' : 'dibuat'), 'success');
-        await this.loadFormTemplate(); // Reload the template to get fresh data
-      } else {
-        throw new Error('Invalid response format');
-      }
+  
+      this.formTemplate = response;
+      await this.showToast(
+        `Form template berhasil ${this.formTemplate?.id ? 'diupdate' : 'dibuat'}`,
+        'success'
+      );
+      await this.loadFormTemplate(); // Reload the template to get fresh data
     } catch (error) {
       console.error('Error saving form template:', error);
       await this.showToast('Gagal menyimpan form template', 'danger');

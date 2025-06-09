@@ -22,6 +22,8 @@ export class RegistrationFormComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log('Form template:', this.formTemplate); // Debug log
+    
     // Initialize form data with empty values
     if (this.formTemplate?.fields) {
       this.formTemplate.fields.forEach((field: any) => {
@@ -34,6 +36,8 @@ export class RegistrationFormComponent implements OnInit {
           this.formData[`field_${field.id}`] = '';
         }
       });
+    } else {
+      console.error('No fields found in form template');
     }
   }
 
@@ -64,6 +68,16 @@ export class RegistrationFormComponent implements OnInit {
   }
 
   async submitForm() {
+    if (!this.formTemplate?.fields) {
+      const toast = await this.toastCtrl.create({
+        message: 'Form template tidak valid',
+        duration: 3000,
+        color: 'danger'
+      });
+      await toast.present();
+      return;
+    }
+
     // Validate all required fields
     const invalidFields = this.formTemplate.fields
       .filter((field: any) => !this.isFieldValid(field))

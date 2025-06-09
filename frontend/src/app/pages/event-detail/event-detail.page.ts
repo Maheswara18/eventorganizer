@@ -115,18 +115,24 @@ export class EventDetailPage implements OnInit {
         this.formTemplateService.getFormTemplate(this.event.id)
       );
 
+      if (!formTemplate || !formTemplate.fields) {
+        throw new Error('Form template tidak tersedia');
+      }
+
       const modal = await this.modalCtrl.create({
         component: RegistrationFormComponent,
         componentProps: {
-          eventId: this.event.id,
-          formTemplate: formTemplate.template
+          event: this.event,
+          formTemplate: formTemplate
         }
       });
 
       await modal.present();
 
       const { data } = await modal.onWillDismiss();
-      if (data?.registered) {
+      if (data?.responses) {
+        // Register the participant with the form responses
+        await this.eventsService.registerForEvent(this.event.id, { responses: data.responses });
         this.isRegistered = true;
         const toast = await this.toastController.create({
           message: 'Berhasil mendaftar event',
@@ -135,10 +141,10 @@ export class EventDetailPage implements OnInit {
         });
         await toast.present();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error showing registration form:', error);
       const toast = await this.toastController.create({
-        message: 'Gagal memuat form pendaftaran',
+        message: error.message || 'Gagal memuat form pendaftaran',
         duration: 2000,
         color: 'danger'
       });
