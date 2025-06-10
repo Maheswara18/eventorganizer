@@ -23,6 +23,13 @@ export class HomePage implements OnInit, OnDestroy {
   unpaidEventsCount = 0;
   private userSubscription: Subscription | undefined;
 
+  // 🔽 Tambahan: Dummy list event rekomendasi
+  recommendedEvents = [
+    { title: 'Tech Conference 2025', date: '10 Juni 2025' },
+    { title: 'Workshop UI/UX', date: '12 Juni 2025' },
+    { title: 'Festival Musik', date: '15 Juni 2025' }
+  ];
+
   constructor(
     private authService: AuthService,
     private paymentService: PaymentService

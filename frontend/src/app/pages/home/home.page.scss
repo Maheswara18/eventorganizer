@@ -1,128 +1,115 @@
-ion-content {
-  --background: #f9f9f9;
+:host {
+  --background: none;
 }
 
-ion-toolbar {
-  --background: var(--ion-color-primary);
-  --color: white;
-}
-
-.welcome-card {
-  background: var(--ion-color-primary);
-  color: white;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-
-  h2 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: bold;
-  }
-
-  p {
-    margin: 10px 0 0;
-    opacity: 0.9;
-  }
-}
-
-.action-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 16px;
-  margin: 16px 0;
-
-  ion-card {
-    margin: 0;
-    cursor: pointer;
-    transition: transform 0.2s;
-    background: white;
-
-    &:hover {
-      transform: translateY(-2px);
-    }
-
-    ion-card-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 16px;
-
-      ion-icon {
-        font-size: 32px;
-        margin-bottom: 8px;
-        color: var(--ion-color-primary);
-      }
-
-      span {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--ion-color-primary);
-      }
-    }
-  }
-}
-
-ion-list-header {
-  margin-top: 20px;
-  padding-left: 0;
-  
-  ion-label {
-    font-weight: bold;
-    font-size: 18px;
-    color: var(--ion-color-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-}
-
-.dashboard-card {
-  margin: 0;
+.page-container {
   height: 100%;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-  }
-
-  ion-card-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-
-    ion-icon {
-      font-size: 32px;
-      margin-bottom: 8px;
-    }
-
-    h2 {
-      margin: 8px 0;
-      font-size: 16px;
-      font-weight: 500;
-      color: var(--ion-color-dark);
-    }
-
-    p {
-      margin: 0;
-      font-size: 20px;
-      font-weight: bold;
-      color: var(--ion-color-medium);
-    }
-  }
+  width: 100%;
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.9) 80%, #ffffff 100%),
+    url('/assets/wave.jpg') no-repeat center center / cover;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
-.activity-time {
-  font-size: 12px;
-  color: var(--ion-color-medium);
-  margin-top: 4px;
+/* ===== TRANSPARENT TOOLBAR ATAS TANPA SHADOW ===== */
+ion-toolbar {
+  --background: transparent !important;
+  --ion-color-base: transparent;
+  box-shadow: none;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-// Make charts responsive
-canvas {
-  width: 100% !important;
-  height: 300px !important;
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.logo {
+  width: 24px;
+  height: 24px;
+}
+
+.logo-text {
+  font-family: 'Engebrechtre', sans-serif;
+  font-size: 18px;
+  font-weight: normal;
+  color: white;
+}
+
+/* ===== KONTEN UTAMA ===== */
+.welcome-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-card h2 {
+  color: #003366;
+  margin-bottom: 8px;
+}
+
+.welcome-card p {
+  color: #666;
+  margin: 0;
+}
+
+.event-section {
+  margin-top: 24px;
+}
+
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.event-header h3 {
+  color: #003366;
+  margin: 0;
+}
+
+ion-card {
+  background: white;
+  border-radius: 10px;
+  margin-top: 12px;
+}
+
+ion-card-content h4 {
+  margin: 0;
+  font-weight: 600;
+  color: #003366;
+}
+
+ion-card-content p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===== PUTIH UNTUK ION-TAB-BAR ===== */
+ion-tab-bar {
+  background: #ffffff !important;
+  border-top: 1px solid #ccc;
+  --color-selected: #007bff;
+  --color: #555;
+}
+
+/* ===== ANIMASI KLIK ===== */
+.animate-click {
+  transition: transform 0.2s ease-in-out;
+}
+.animate-click:active {
+  transform: scale(0.95);
 }
