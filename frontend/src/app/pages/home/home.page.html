@@ -46,30 +46,38 @@
 </ion-content>
 
 <ion-footer>
-  <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="beranda" routerLink="/home">
-      <ion-icon name="home-outline"></ion-icon>
-      <ion-label>Beranda</ion-label>
-    </ion-tab-button>
+  <div class="footer-wrapper">
+    <ion-tab-bar slot="bottom" class="custom-tab-bar">
 
-    <ion-tab-button tab="event-saya" routerLink="/registered-events">
-      <ion-icon name="bookmark-outline"></ion-icon>
-      <ion-label>Event Saya</ion-label>
-    </ion-tab-button>
+      <ion-tab-button tab="beranda" routerLink="/home">
+        <ion-icon name="home-outline"></ion-icon>
+        <ion-label>Beranda</ion-label>
+      </ion-tab-button>
 
-    <ion-tab-button tab="lihat-event" routerLink="/events">
-      <ion-icon name="calendar-outline"></ion-icon>
-      <ion-label>Lihat Event</ion-label>
-    </ion-tab-button>
+      <ion-tab-button tab="event-saya" routerLink="/registered-events">
+        <ion-icon name="bookmark-outline"></ion-icon>
+        <ion-label>Event Saya</ion-label>
+      </ion-tab-button>
 
-    <ion-tab-button tab="pembayaran" routerLink="/payments">
-      <ion-icon name="wallet-outline"></ion-icon>
-      <ion-label>Pembayaran</ion-label>
-    </ion-tab-button>
+      <!-- SPACER UNTUK MENGOSONGKAN POSISI TENGAH -->
+      <ion-tab-button disabled class="empty-tab"></ion-tab-button>
 
-    <ion-tab-button tab="pengaturan" routerLink="/settings">
-      <ion-icon name="settings-outline"></ion-icon>
-      <ion-label>Pengaturan</ion-label>
-    </ion-tab-button>
-  </ion-tab-bar>
+      <ion-tab-button tab="pembayaran" routerLink="/payments">
+        <ion-icon name="wallet-outline"></ion-icon>
+        <ion-label>Pembayaran</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="pengaturan" routerLink="/settings">
+        <ion-icon name="settings-outline"></ion-icon>
+        <ion-label>Pengaturan</ion-label>
+      </ion-tab-button>
+
+    </ion-tab-bar>
+
+    <!-- Tombol Tengah Float -->
+    <div class="floating-button" routerLink="/events">
+      <div class="ticket-bg"></div>
+      <div class="ticket-label">Lihat Event</div>
+    </div>
+  </div>
 </ion-footer>

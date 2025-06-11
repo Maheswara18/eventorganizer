@@ -12,15 +12,33 @@
   box-sizing: border-box;
 }
 
+.page-container ion-toolbar ion-button ion-icon {
+  color: white !important;
+}
+
 /* ===== TRANSPARENT TOOLBAR ATAS TANPA SHADOW ===== */
+ion-header,
 ion-toolbar {
   --background: transparent !important;
-  --ion-color-base: transparent;
-  box-shadow: none;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  --ion-color-base: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-bottom: none !important;
+  outline: none !important;
+  z-index: 0;
+}
+
+/* Pseudo-elements kadang dipakai oleh Ionic untuk shadow */
+ion-header::before,
+ion-toolbar::before,
+ion-header::after,
+ion-toolbar::after {
+  display: none !important;
+  content: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
 }
 
 .logo-container {
@@ -98,18 +116,81 @@ ion-card-content p {
   gap: 6px;
 }
 
-/* ===== PUTIH UNTUK ION-TAB-BAR ===== */
 ion-tab-bar {
   background: #ffffff !important;
+  --background: #ffffff !important;
+  --ion-color-base: #ffffff !important;
+  --color: #666 !important;
+  --color-selected: #000 !important;
   border-top: 1px solid #ccc;
-  --color-selected: #007bff;
-  --color: #555;
 }
 
-/* ===== ANIMASI KLIK ===== */
+/* ===== ANIMASI KLIK GLOBAL ===== */
 .animate-click {
   transition: transform 0.2s ease-in-out;
 }
 .animate-click:active {
   transform: scale(0.95);
+}
+
+/* Custom bottom tab bar layout */
+.footer-wrapper {
+  position: relative;
+}
+
+.custom-tab-bar {
+  background: #000;
+  border-top: 1px solid #444;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  position: relative;
+}
+
+.empty-tab {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.floating-button {
+  position: absolute;
+  top: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72px;
+  height: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  background: none;
+  box-shadow: none;
+
+  /* === EFEK KLIK UNTUK LIHAT EVENT === */
+  transition: transform 0.2s ease-in-out;
+}
+.floating-button:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.ticket-bg {
+  width: 72px;
+  height: 72px;
+  background: url('/assets/tab-ticket.png') no-repeat center center;
+  background-size: contain;
+
+  /* === EFEK KLIK UNTUK LIHAT EVENT === */
+  transition: box-shadow 0.2s ease-in-out;
+}
+.floating-button:active .ticket-bg {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ticket-label {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+  text-align: center;
 }
