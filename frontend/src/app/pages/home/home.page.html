@@ -1,61 +1,31 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Beranda</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()">
-        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<ion-content fullscreen>
+  <div class="page-container">
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button [routerLink]="['/profile']">
+            <ion-icon name="person-circle-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <div class="logo-container">
+          <img src="assets/logo-rundexo.png" class="logo" />
+          <span class="logo-text">Rundexo</span>
+        </div>
+        <ion-buttons slot="end">
+          <ion-button (click)="logout()">
+            <ion-icon name="log-out-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
 
-<ion-content class="ion-padding">
-  <div class="welcome-card">
-    <h2>Selamat Datang, {{ username }} 👋</h2>
-    <p>Siap menghadiri event menarik hari ini?</p>
-  </div>
+    <div class="welcome-card">
+      <h2>Selamat Datang, "{{ username }}"</h2>
+      <p>Siap menghadiri event menarik hari ini?</p>
+    </div>
 
-  <!-- Menu untuk Semua User -->
-  <ion-list-header>
-    <ion-label>Menu Utama</ion-label>
-  </ion-list-header>
-  <div class="action-grid">
-    <ion-card button routerLink="/events">
-      <ion-card-content>
-        <ion-icon name="calendar-outline"></ion-icon>
-        <span>Lihat Event</span>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card button routerLink="/registered-events">
-      <ion-card-content>
-        <ion-icon name="bookmark-outline"></ion-icon>
-        <span>Event Saya</span>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card button routerLink="/payments">
-      <ion-card-content>
-        <ion-icon name="wallet" slot="start"></ion-icon>
-        <span>Pembayaran</span>
-        <ion-badge color="danger" slot="end" *ngIf="unpaidEventsCount > 0">{{ unpaidEventsCount }}</ion-badge>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card button routerLink="/profile">
-      <ion-card-content>
-        <ion-icon name="person-outline"></ion-icon>
-        <span>Profil Saya</span>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
-  <!-- Menu Admin -->
-  <div *ngIf="isAdmin">
-    <ion-list-header>
-      <ion-label>Menu Admin</ion-label>
-    </ion-list-header>
-    <div class="action-grid">
+    <!-- Menu Admin -->
+    <div class="admin-menu" *ngIf="isAdmin">
       <ion-card button routerLink="/event-qr">
         <ion-card-content>
           <ion-icon name="qr-code-outline"></ion-icon>
@@ -98,15 +68,60 @@
         </ion-card-content>
       </ion-card>
     </div>
+
+    <!-- Event Rekomendasi untuk Peserta -->
+    <div class="event-section" *ngIf="!isAdmin">
+      <div class="event-header">
+        <h3>Event Rekomendasi</h3>
+        <ion-button fill="clear" size="small" [routerLink]="['/events']">
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <ion-card *ngFor="let event of recommendedEvents" class="animate-click">
+        <ion-card-content>
+          <h4>{{ event.title }}</h4>
+          <p>
+            <ion-icon name="calendar-outline"></ion-icon>
+            {{ event.date }}
+          </p>
+        </ion-card-content>
+      </ion-card>
+    </div>
   </div>
 </ion-content>
 
 <ion-footer>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button routerLink="/settings">
-        <ion-icon name="settings-outline" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
+  <div class="footer-wrapper">
+    <ion-tab-bar slot="bottom" class="custom-tab-bar">
+      <ion-tab-button tab="beranda" routerLink="/home">
+        <ion-icon name="home-outline"></ion-icon>
+        <ion-label>Beranda</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="event-saya" routerLink="/registered-events">
+        <ion-icon name="bookmark-outline"></ion-icon>
+        <ion-label>Event Saya</ion-label>
+      </ion-tab-button>
+
+      <!-- SPACER UNTUK MENGOSONGKAN POSISI TENGAH -->
+      <ion-tab-button disabled class="empty-tab"></ion-tab-button>
+
+      <ion-tab-button tab="pembayaran" routerLink="/payments">
+        <ion-icon name="wallet-outline"></ion-icon>
+        <ion-label>Pembayaran</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="pengaturan" routerLink="/settings">
+        <ion-icon name="settings-outline"></ion-icon>
+        <ion-label>Pengaturan</ion-label>
+      </ion-tab-button>
+    </ion-tab-bar>
+
+    <!-- Tombol Tengah Float -->
+    <div class="floating-button" routerLink="/events">
+      <div class="ticket-bg"></div>
+      <div class="ticket-label">Lihat Event</div>
+    </div>
+  </div>
 </ion-footer>

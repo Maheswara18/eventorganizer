@@ -1,128 +1,196 @@
-ion-content {
-  --background: #f9f9f9;
+:host {
+  --background: none;
 }
 
-ion-toolbar {
-  --background: var(--ion-color-primary);
-  --color: white;
-}
-
-.welcome-card {
-  background: var(--ion-color-primary);
-  color: white;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-
-  h2 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: bold;
-  }
-
-  p {
-    margin: 10px 0 0;
-    opacity: 0.9;
-  }
-}
-
-.action-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 16px;
-  margin: 16px 0;
-
-  ion-card {
-    margin: 0;
-    cursor: pointer;
-    transition: transform 0.2s;
-    background: white;
-
-    &:hover {
-      transform: translateY(-2px);
-    }
-
-    ion-card-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 16px;
-
-      ion-icon {
-        font-size: 32px;
-        margin-bottom: 8px;
-        color: var(--ion-color-primary);
-      }
-
-      span {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--ion-color-primary);
-      }
-    }
-  }
-}
-
-ion-list-header {
-  margin-top: 20px;
-  padding-left: 0;
-  
-  ion-label {
-    font-weight: bold;
-    font-size: 18px;
-    color: var(--ion-color-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-}
-
-.dashboard-card {
-  margin: 0;
+.page-container {
   height: 100%;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-  }
-
-  ion-card-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-
-    ion-icon {
-      font-size: 32px;
-      margin-bottom: 8px;
-    }
-
-    h2 {
-      margin: 8px 0;
-      font-size: 16px;
-      font-weight: 500;
-      color: var(--ion-color-dark);
-    }
-
-    p {
-      margin: 0;
-      font-size: 20px;
-      font-weight: bold;
-      color: var(--ion-color-medium);
-    }
-  }
+  width: 100%;
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.9) 80%, #ffffff 100%),
+    url('/assets/wave.jpg') no-repeat center center / cover;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
-.activity-time {
-  font-size: 12px;
-  color: var(--ion-color-medium);
+.page-container ion-toolbar ion-button ion-icon {
+  color: white !important;
+}
+
+/* ===== TRANSPARENT TOOLBAR ATAS TANPA SHADOW ===== */
+ion-header,
+ion-toolbar {
+  --background: transparent !important;
+  --ion-color-base: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-bottom: none !important;
+  outline: none !important;
+  z-index: 0;
+}
+
+/* Pseudo-elements kadang dipakai oleh Ionic untuk shadow */
+ion-header::before,
+ion-toolbar::before,
+ion-header::after,
+ion-toolbar::after {
+  display: none !important;
+  content: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.logo {
+  width: 24px;
+  height: 24px;
+}
+
+.logo-text {
+  font-family: 'Engebrechtre', sans-serif;
+  font-size: 18px;
+  font-weight: normal;
+  color: white;
+}
+
+/* ===== KONTEN UTAMA ===== */
+.welcome-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-card h2 {
+  color: #003366;
+  margin-bottom: 8px;
+}
+
+.welcome-card p {
+  color: #666;
+  margin: 0;
+}
+
+.event-section {
+  margin-top: 24px;
+}
+
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.event-header h3 {
+  color: #003366;
+  margin: 0;
+}
+
+ion-card {
+  background: white;
+  border-radius: 10px;
+  margin-top: 12px;
+}
+
+ion-card-content h4 {
+  margin: 0;
+  font-weight: 600;
+  color: #003366;
+}
+
+ion-card-content p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+ion-tab-bar {
+  background: #ffffff !important;
+  --background: #ffffff !important;
+  --ion-color-base: #ffffff !important;
+  --color: #666 !important;
+  --color-selected: #000 !important;
+  border-top: 1px solid #ccc;
+}
+
+/* ===== ANIMASI KLIK GLOBAL ===== */
+.animate-click {
+  transition: transform 0.2s ease-in-out;
+}
+.animate-click:active {
+  transform: scale(0.95);
+}
+
+/* Custom bottom tab bar layout */
+.footer-wrapper {
+  position: relative;
+}
+
+.custom-tab-bar {
+  background: #000;
+  border-top: 1px solid #444;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  position: relative;
+}
+
+.empty-tab {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.floating-button {
+  position: absolute;
+  top: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72px;
+  height: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  background: none;
+  box-shadow: none;
+
+  /* === EFEK KLIK UNTUK LIHAT EVENT === */
+  transition: transform 0.2s ease-in-out;
+}
+.floating-button:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.ticket-bg {
+  width: 72px;
+  height: 72px;
+  background: url('/assets/tab-ticket.png') no-repeat center center;
+  background-size: contain;
+
+  /* === EFEK KLIK UNTUK LIHAT EVENT === */
+  transition: box-shadow 0.2s ease-in-out;
+}
+.floating-button:active .ticket-bg {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ticket-label {
   margin-top: 4px;
-}
-
-// Make charts responsive
-canvas {
-  width: 100% !important;
-  height: 300px !important;
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+  text-align: center;
 }
