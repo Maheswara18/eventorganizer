@@ -1,0 +1,105 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Verifikasi Pembayaran</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="selectedStatus" (ionChange)="filterPayments()">
+      <ion-segment-button value="all">
+        <ion-label>Semua</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="pending">
+        <ion-label>Menunggu</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="completed">
+        <ion-label>Diterima</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="failed">
+        <ion-label>Ditolak</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Loading indicator -->
+  <div class="ion-text-center" *ngIf="isLoading">
+    <ion-spinner></ion-spinner>
+    <p>Memuat data pembayaran...</p>
+  </div>
+
+  <!-- Payment list -->
+  <ion-list *ngIf="!isLoading">
+    <ion-item-sliding *ngFor="let payment of filteredPayments">
+      <ion-item>
+        <ion-grid>
+          <ion-row class="ion-align-items-center">
+            <ion-col size="12" size-md="3">
+              <h2>{{ payment.event?.title }}</h2>
+              <p>Peserta: {{ payment.user?.name }}</p>
+            </ion-col>
+            <ion-col size="6" size-md="2">
+              <strong>{{ payment.amount | currency:'IDR' }}</strong>
+              <p>{{ payment.payment_method }}</p>
+            </ion-col>
+            <ion-col size="6" size-md="2">
+              <ion-badge [color]="
+                payment.payment_status === 'completed' ? 'success' : 
+                payment.payment_status === 'pending' ? 'warning' : 'danger'
+              ">
+                {{ payment.payment_status === 'completed' ? 'Diterima' :
+                   payment.payment_status === 'pending' ? 'Menunggu' : 'Ditolak' }}
+              </ion-badge>
+              <p>{{ payment.created_at | date:'short' }}</p>
+            </ion-col>
+            <ion-col size="12" size-md="3" *ngIf="payment.payment_proof_path">
+              <ion-button fill="clear" (click)="viewPaymentProof(payment)">
+                <ion-icon slot="start" name="image-outline"></ion-icon>
+                Lihat Bukti
+              </ion-button>
+            </ion-col>
+            <ion-col size="12" size-md="2" *ngIf="payment.payment_status === 'pending'">
+              <ion-button color="success" (click)="updatePaymentStatus(payment.id, 'completed')">
+                <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+                Terima
+              </ion-button>
+              <ion-button color="danger" (click)="updatePaymentStatus(payment.id, 'failed')">
+                <ion-icon slot="start" name="close-circle"></ion-icon>
+                Tolak
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-item>
+    </ion-item-sliding>
+  </ion-list>
+
+  <!-- Empty state -->
+  <div class="ion-text-center ion-padding" *ngIf="!isLoading && filteredPayments.length === 0">
+    <ion-icon name="receipt-outline" style="font-size: 48px; color: var(--ion-color-medium)"></ion-icon>
+    <p>Tidak ada pembayaran yang perlu diverifikasi</p>
+  </div>
+</ion-content>
+
+<!-- Modal untuk preview bukti pembayaran -->
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Bukti Pembayaran</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal()">
+            <ion-icon name="close"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <div class="image-container">
+        <img [src]="selectedPaymentProof" alt="Bukti Pembayaran" *ngIf="selectedPaymentProof">
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal> 

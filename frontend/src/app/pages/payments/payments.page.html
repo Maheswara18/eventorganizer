@@ -39,11 +39,13 @@
   <div *ngIf="activeSegment === 'registered'">
     <!-- Empty state untuk event yang belum dibayar -->
     <ion-list *ngIf="!isLoading && unpaidEvents.length === 0">
-      <ion-item lines="none">
+      <ion-item lines="none" class="ion-text-center">
         <ion-label class="ion-text-center">
-          <ion-icon name="calendar-outline" style="font-size: 48px; margin: 16px 0;"></ion-icon>
-          <h2>Tidak Ada Event</h2>
-          <p>Semua event Anda sudah dibayar</p>
+          <div class="empty-state">
+            <ion-icon name="calendar-outline" class="empty-state-icon"></ion-icon>
+            <h2>Tidak Ada Event</h2>
+            <p>Semua event Anda sudah dibayar</p>
+          </div>
         </ion-label>
       </ion-item>
     </ion-list>
@@ -66,7 +68,7 @@
           </ion-badge>
         </ion-label>
         <ion-button 
-          (click)="simulatePayment(event.id)" 
+          (click)="openPaymentModal(event)" 
           [disabled]="isProcessing && processingEventId === event.id"
           color="primary"
           fill="outline"
@@ -78,22 +80,24 @@
     </ion-list>
   </div>
 
-  <!-- Riwayat pembayaran yang sudah lunas -->
+  <!-- Riwayat pembayaran -->
   <div *ngIf="activeSegment === 'payments'">
     <!-- Empty state untuk riwayat pembayaran -->
-    <ion-list *ngIf="!isLoading && paidEvents.length === 0">
-      <ion-item lines="none">
+    <ion-list *ngIf="!isLoading && registeredEvents.length === 0">
+      <ion-item lines="none" class="ion-text-center">
         <ion-label class="ion-text-center">
-          <ion-icon name="receipt-outline" style="font-size: 48px; margin: 16px 0;"></ion-icon>
-          <h2>Belum Ada Pembayaran</h2>
-          <p>Riwayat pembayaran yang lunas akan muncul di sini</p>
+          <div class="empty-state">
+            <ion-icon name="receipt-outline" class="empty-state-icon"></ion-icon>
+            <h2>Belum Ada Pembayaran</h2>
+            <p>Riwayat pembayaran Anda akan muncul di sini</p>
+          </div>
         </ion-label>
       </ion-item>
     </ion-list>
 
-    <!-- Daftar event yang sudah lunas -->
-    <ion-list *ngIf="!isLoading && paidEvents.length > 0">
-      <ion-item *ngFor="let event of paidEvents">
+    <!-- Daftar riwayat pembayaran -->
+    <ion-list *ngIf="!isLoading && registeredEvents.length > 0">
+      <ion-item *ngFor="let event of registeredEvents" class="payment-history-item">
         <ion-thumbnail slot="start" *ngIf="event.image_path">
           <img [src]="environment.baseUrl + '/' + event.image_path" [alt]="event.title">
         </ion-thumbnail>
@@ -101,21 +105,35 @@
           <img src="assets/default-event.jpg" [alt]="event.title">
         </ion-thumbnail>
         <ion-label>
-          <h2>{{ event.title }}</h2>
-          <p>
-            <ion-icon name="cash-outline"></ion-icon>
-            {{ formatPrice(event.price) }}
-          </p>
-          <p>
-            <ion-icon name="calendar-outline"></ion-icon>
-            Tanggal Event: {{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}
-          </p>
-          <p *ngIf="event.registration_date">
-            <ion-icon name="time-outline"></ion-icon>
-            Tanggal Bayar: {{ event.registration_date | date:'dd MMM yyyy HH:mm' }}
-          </p>
-          <ion-badge color="success">Lunas</ion-badge>
+          <h2 class="event-title">{{ event.title }}</h2>
+          <div class="event-details">
+            <p class="price-info">
+              <ion-icon name="cash-outline" class="info-icon"></ion-icon>
+              {{ formatPrice(event.price) }}
+            </p>
+            <p class="date-info">
+              <ion-icon name="calendar-outline" class="info-icon"></ion-icon>
+              {{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}
+            </p>
+            <p class="payment-date" *ngIf="event.registration_date">
+              <ion-icon name="time-outline" class="info-icon"></ion-icon>
+              {{ event.registration_date | date:'dd MMM yyyy HH:mm' }}
+            </p>
+          </div>
+          <ion-badge [color]="getStatusColor(event.payment_status || 'unknown')" class="status-badge">
+            {{ event.payment_status === 'completed' ? 'Lunas' : 
+               event.payment_status === 'pending' ? 'Menunggu Verifikasi' :
+               event.payment_status === 'failed' ? 'Pembayaran Gagal' : 'Menunggu Pembayaran' }}
+          </ion-badge>
         </ion-label>
+        <ion-button 
+          *ngIf="event.payment_proof_path"
+          fill="clear"
+          size="small"
+          (click)="viewPaymentProof(event)"
+          slot="end">
+          <ion-icon name="image-outline" slot="icon-only"></ion-icon>
+        </ion-button>
       </ion-item>
     </ion-list>
   </div>
@@ -125,4 +143,78 @@
     <ion-spinner></ion-spinner>
     <p>Memuat data...</p>
   </div>
+
+  <!-- Modal untuk preview bukti pembayaran -->
+  <ion-modal [isOpen]="showProofModal" (didDismiss)="closeProofModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Bukti Pembayaran</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeProofModal()">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <div class="proof-image-container">
+          <img [src]="selectedProofUrl" alt="Bukti Pembayaran" *ngIf="selectedProofUrl">
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Modal untuk form pembayaran -->
+  <ion-modal [isOpen]="showPaymentModal" (didDismiss)="closePaymentModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Form Pembayaran</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closePaymentModal()">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <form (ngSubmit)="submitPayment()" #paymentForm="ngForm">
+          <ion-item>
+            <ion-label position="stacked">Event</ion-label>
+            <ion-input [value]="selectedEvent?.title" readonly></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Jumlah Pembayaran</ion-label>
+            <ion-input type="number" [(ngModel)]="paymentData.amount" name="amount" required readonly [value]="selectedEvent?.price"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Metode Pembayaran</ion-label>
+            <ion-select [(ngModel)]="paymentData.payment_method" name="payment_method" required>
+              <ion-select-option value="transfer">Transfer Bank</ion-select-option>
+              <ion-select-option value="credit_card">Kartu Kredit</ion-select-option>
+              <ion-select-option value="e_wallet">E-Wallet</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Bukti Pembayaran</ion-label>
+            <ion-input type="file" (change)="onFileSelected($event)" accept="image/*" required></ion-input>
+          </ion-item>
+
+          <div class="preview-image" *ngIf="selectedFile">
+            <img [src]="previewUrl" alt="Preview bukti pembayaran">
+          </div>
+
+          <ion-button expand="block" type="submit" [disabled]="!paymentForm.valid || isSubmitting" class="ion-margin-top">
+            <ion-spinner *ngIf="isSubmitting"></ion-spinner>
+            <span *ngIf="!isSubmitting">Kirim Pembayaran</span>
+          </ion-button>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content> 

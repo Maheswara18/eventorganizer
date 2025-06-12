@@ -142,9 +142,38 @@ class ParticipantController extends Controller
     {
         $user = auth()->user();
 
-        $participations = Participant::with('event')
+        $participations = Participant::with(['event', 'payment'])
             ->where('user_id', $user->id)
-            ->get();
+            ->get()
+            ->map(function ($participant) {
+                $event = $participant->event;
+                
+                // Sync status with payment if exists
+                if ($participant->payment && $participant->status !== $participant->payment->payment_status) {
+                    $participant->status = $participant->payment->payment_status;
+                    $participant->save();
+                }
+                
+                return [
+                    'id' => $participant->id,
+                    'event' => [
+                        'id' => $event->id,
+                        'title' => $event->title,
+                        'description' => $event->description,
+                        'start_datetime' => $event->start_datetime,
+                        'end_datetime' => $event->end_datetime,
+                        'location' => $event->location,
+                        'image_path' => $event->image_path,
+                        'price' => $event->price
+                    ],
+                    'qr_code_path' => $participant->qr_code_path,
+                    'qr_code_data' => $participant->qr_code_data,
+                    'attendance_status' => $participant->attendance_status,
+                    'payment_status' => $participant->payment ? $participant->payment->payment_status : null,
+                    'registration_date' => $participant->created_at,
+                    'payment_date' => $participant->payment ? $participant->payment->paid_at : null
+                ];
+            });
 
         return response()->json($participations);
     }

@@ -14,6 +14,7 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^19.0.0",
+    "@angular/cdk": "^20.0.2",
     "@angular/common": "^19.2.10",
     "@angular/compiler": "^19.0.0",
     "@angular/core": "^19.0.0",
@@ -32,8 +33,10 @@
     "@types/qrcode": "^1.5.5",
     "angularx-qrcode": "^19.0.0",
     "chart.js": "^4.4.9",
+    "html-to-pdfmake": "^2.5.26",
     "ionicons": "^7.0.0",
     "ng2-charts": "^8.0.0",
+    "pdfmake": "^0.2.20",
     "qrcode": "^1.5.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

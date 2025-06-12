@@ -10,6 +10,7 @@ use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FormTemplateController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CertificateTemplateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,9 +58,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/payments', [PaymentController::class, 'index']);
+    Route::get('/payments/admin', [PaymentController::class, 'getAdminPayments']);
+    Route::get('/payments/event/{eventId}', [PaymentController::class, 'getEventPayments']);
+    Route::get('/payments/user/{userId}', [PaymentController::class, 'getUserPayments']);
+    Route::get('/payments/events/registered', [PaymentController::class, 'getRegisteredEvents']);
     Route::post('/payments', [PaymentController::class, 'store']);
     Route::get('/payments/{id}', [PaymentController::class, 'show']);
     Route::put('/payments/{id}', [PaymentController::class, 'update']); // update status
+    Route::patch('/payments/{id}/status', [PaymentController::class, 'updateStatus']);
+    Route::post('/payments/simulate/{eventId}', [PaymentController::class, 'simulatePayment']);
 });
 
 ///////////PARTICIPANT///////////
@@ -121,4 +128,11 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/dashboard/registrations', [DashboardController::class, 'getRegistrations']);
     Route::get('/dashboard/revenue', [DashboardController::class, 'getRevenue']);
     Route::get('/dashboard/activities', [DashboardController::class, 'getActivities']);
+});
+
+// Certificate Template Routes
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::apiResource('certificate-templates', CertificateTemplateController::class);
+    Route::post('certificate-templates/{template}/preview', [CertificateTemplateController::class, 'preview']);
+    Route::post('certificate-templates/{template}/generate', [CertificateTemplateController::class, 'generate']);
 });

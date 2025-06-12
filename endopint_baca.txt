@@ -1,34 +1,40 @@
-POST api/register
+# DOKUMENTASI API EVENTORGANIZER
 
+## AUTENTIKASI
+
+### Register
+POST api/register
+```json
 {
   "name": "John Doe",
   "email": "john@example.com",
   "password": "password",
   "password_confirmation": "password",
-  "role": "admin" atau "participant"
+  "role": "admin" // atau "participant"
 }
+```
 
-////////////////////////
-
+### Login
 POST api/login
-
+```json
 {
   "email": "john@example.com",
   "password": "password"
 }
+```
+Response akan memberikan token yang harus digunakan di header request selanjutnya
 
-///////////////////////////
-
+### Logout
 POST api/logout
+Header: Authorization: Bearer {token}
 
-header: Authorized (token)
+## EVENT MANAGEMENT
 
-///////////////////////////
-
-Create Event
-
+### Create Event
 POST api/events
-
+Header: Authorization: Bearer {token}
+Content-Type: multipart/form-data
+```json
 {
   "title": "Webinar Laravel",
   "description": "Belajar Laravel untuk Pemula",
@@ -39,92 +45,90 @@ POST api/events
   "max_participants": 100,
   "start_datetime": "2025-06-01 10:00:00",
   "end_datetime": "2025-06-01 12:00:00",
-  "image_path": "storage/images/webinar.jpg"
+  "image_path": "(file)" // Upload gambar format jpg/png, max 2MB
 }
+```
 
-///////////////////////////////////////////////
+### Event Endpoints
+| Fitur        | Endpoint           | Method | Keterangan |
+|--------------|-------------------|--------|------------|
+| List Events  | `/api/events`     | GET    | Menampilkan semua event |
+| View Detail  | `/api/events/{id}`| GET    | Detail satu event |
+| Update Event | `/api/events/{id}`| PUT    | Update data event (format sama dengan create) |
+| Delete Event | `/api/events/{id}`| DELETE | Hapus event dan data terkait |
 
-| Fitur        | Endpoint           | Method |
-| ------------ | ------------------ | ------ |
-| Create Event | `/api/events`      | POST   |
-| List Events  | `/api/events`      | GET    |
-| View Detail  | `/api/events/{id}` | GET    |
-| Update Event | `/api/events/{id}` | PUT    |
-| Delete Event | `/api/events/{id}` | DELETE |
+## PEMBAYARAN
 
-////////////////////////////////////////////////
-
-PAYMENT
-
-| Fitur                    | Endpoint             | Method |
-| ------------------------ | -------------------- | ------ |
-| Buat pembayaran          | `/api/payments`      | POST   |
-| Lihat semua pembayaran   | `/api/payments`      | GET    |
-| Detail 1 pembayaran      | `/api/payments/{id}` | GET    |
-| Update status pembayaran | `/api/payments/{id}` | PUT    |
-
-///////////////////////////////////////////////////
-
-buat pembayaran pastikan form data
-
-event_id: 1
-amount: 100000
-payment_method: transfer
-payment_proof: (upload file .jpg/.png)
-
-
-/////////////////////////////////////////////////////
-
-REGISTRASI EVENT, QR CODE, STATUS KEHADIRAN
-
-| Fitur                             | Endpoint                 | Method |
-| --------------------------------- | ------------------------ | ------ |
-| Registrasi ke event (generate QR) | `/api/participants`      | POST   |
-| Lihat semua partisipasi           | `/api/participants`      | GET    |
-| Update status kehadiran           | `/api/participants/{id}` | PUT    |
-| Lihat detail 1 partisipasi        | `/api/participants/{id}` | GET    |
-
-/////////////////////////////////////////////////////////
-
-POST api/participants
-
-header: Authorize (token)
-
+### Create Payment
+POST api/payments
+Header: Authorization: Bearer {token}
+Content-Type: multipart/form-data
+```json
 {
   "event_id": 1,
-  "payment_id": 1
+  "amount": 100000,
+  "payment_method": "transfer", // transfer/credit_card/e_wallet
+  "payment_proof": "(file)" // Upload bukti pembayaran jpg/png
 }
+```
 
+### Payment Endpoints
+| Fitur                    | Endpoint             | Method | Keterangan |
+|-------------------------|---------------------|--------|------------|
+| List Payments           | `/api/payments`     | GET    | Lihat semua pembayaran |
+| Payment Detail          | `/api/payments/{id}`| GET    | Detail satu pembayaran |
+| Update Payment Status   | `/api/payments/{id}/status`| PATCH | Update status (pending/completed/failed) |
 
-//////////////////////////////////////////////////////
+## PARTICIPANT MANAGEMENT
 
-SERTIFIKAT
-
-| Fitur                      | Endpoint                   | Method |
-| -------------------------- | -------------------------- | ------ |
-| Buat sertifikat peserta    | `/api/certificates`        | POST   |
-| Lihat semua sertifikat     | `/api/certificates`        | GET    |
-| Detail sertifikat          | `/api/certificates/{id}`   | GET    |
-| Verifikasi kode sertifikat | `/api/certificates/verify` | POST   |
-
-/////////////////////////////////////////////////////////
-
- POST /api/certificates (Admin generate)
-
- {
-  "participant_id": 2,
+### Register for Event
+POST api/participants
+Header: Authorization: Bearer {token}
+```json
+{
   "event_id": 1
 }
+```
+Response akan memberikan QR code untuk kehadiran
 
-pastikan peserta sebagai present
-///////////////////////////////////////////
+### Participant Endpoints
+| Fitur                    | Endpoint                  | Method | Keterangan |
+|-------------------------|--------------------------|--------|------------|
+| List Participants       | `/api/participants`      | GET    | Lihat semua partisipasi |
+| Participant Detail      | `/api/participants/{id}` | GET    | Detail satu partisipasi |
+| Update Attendance       | `/api/participants/{id}/status` | PATCH | Update kehadiran (registered/present/absent) |
 
-POST /api/certificates/verify (Publik)
+## SERTIFIKAT
 
+### Generate Certificate
+POST api/certificates
+Header: Authorization: Bearer {token}
+```json
+{
+  "participant_id": 1,
+  "event_id": 1
+}
+```
+Note: Hanya bisa di-generate jika status kehadiran "present"
+
+### Verify Certificate
+POST api/certificates/verify
+```json
 {
   "verification_code": "ABCD123456"
 }
+```
 
-file sertifikat nya di simpen di /storage/certificates/....
+### Certificate Endpoints
+| Fitur                      | Endpoint                   | Method | Keterangan |
+|--------------------------|---------------------------|--------|------------|
+| List Certificates        | `/api/certificates`       | GET    | Lihat semua sertifikat |
+| Certificate Detail       | `/api/certificates/{id}`  | GET    | Detail satu sertifikat |
 
-///////////////////////////////////////////
+## CATATAN PENTING
+- Semua request yang membutuhkan autentikasi harus menyertakan header `Authorization: Bearer {token}`
+- Upload file menggunakan `multipart/form-data`
+- Gambar event disimpan di `public/storage/images/`
+- QR Code disimpan di `public/storage/qrcodes/`
+- Sertifikat disimpan di `public/storage/certificates/`
+- Default image untuk event tersedia di `public/storage/images/default-event.jpg`

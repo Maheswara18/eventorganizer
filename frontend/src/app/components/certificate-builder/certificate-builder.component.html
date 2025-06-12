@@ -1,0 +1,170 @@
+<ion-grid>
+  <ion-row>
+    <!-- Toolbox -->
+    <ion-col size="3">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Elemen</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list cdkDropList [cdkDropListData]="availableElements" 
+                    [cdkDropListConnectedTo]="['canvas']">
+            <ion-item *ngFor="let element of availableElements" cdkDrag 
+                      [cdkDragData]="element">
+              <ion-icon [name]="element.type === 'text' ? 'text' : 
+                               element.type === 'image' ? 'image' : 'qr-code'" 
+                       slot="start"></ion-icon>
+              <ion-label>{{ element.label }}</ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </ion-col>
+
+    <!-- Canvas -->
+    <ion-col size="6">
+      <ion-card>
+        <ion-card-content>
+          <div class="certificate-canvas" cdkDropList id="canvas"
+               [cdkDropListData]="elements"
+               (cdkDropListDropped)="onDrop($event)">
+            <div *ngFor="let element of elements" 
+                 [ngStyle]="{'position': 'absolute', 
+                            'left.px': element.style.x,
+                            'top.px': element.style.y,
+                            'width.px': element.style.width,
+                            'height.px': element.style.height}"
+                 (click)="onElementSelect(element)"
+                 [class.selected]="selectedElement?.id === element.id">
+              
+              <!-- Text Element -->
+              <div *ngIf="element.type === 'text'"
+                   [ngStyle]="{'font-size.px': element.style.fontSize,
+                              'font-family': element.style.fontFamily,
+                              'color': element.style.color,
+                              'text-align': element.style.alignment}">
+                {{ element.content || 'Teks Baru' }}
+              </div>
+
+              <!-- Image Element -->
+              <img *ngIf="element.type === 'image'"
+                   [src]="element.content || 'assets/placeholder-image.png'"
+                   [style.width.px]="element.style.width"
+                   [style.height.px]="element.style.height">
+
+              <!-- QR Code Element -->
+              <qrcode *ngIf="element.type === 'qr'"
+                      [qrdata]="element.content || 'QR Code'"
+                      [width]="element.style.width"
+                      [errorCorrectionLevel]="'M'">
+              </qrcode>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </ion-col>
+
+    <!-- Properties -->
+    <ion-col size="3">
+      <ion-card *ngIf="selectedElement">
+        <ion-card-header>
+          <ion-card-title>Properti</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <!-- Common Properties -->
+            <ion-item>
+              <ion-label position="stacked">Posisi X</ion-label>
+              <ion-input type="number" [(ngModel)]="selectedElement.style.x"
+                        (ionChange)="updateElement(selectedElement)"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Posisi Y</ion-label>
+              <ion-input type="number" [(ngModel)]="selectedElement.style.y"
+                        (ionChange)="updateElement(selectedElement)"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Lebar</ion-label>
+              <ion-input type="number" [(ngModel)]="selectedElement.style.width"
+                        (ionChange)="updateElement(selectedElement)"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Tinggi</ion-label>
+              <ion-input type="number" [(ngModel)]="selectedElement.style.height"
+                        (ionChange)="updateElement(selectedElement)"></ion-input>
+            </ion-item>
+
+            <!-- Text Properties -->
+            <ng-container *ngIf="selectedElement.type === 'text'">
+              <ion-item>
+                <ion-label position="stacked">Konten</ion-label>
+                <ion-textarea [(ngModel)]="selectedElement.content"
+                            (ionChange)="updateElement(selectedElement)"></ion-textarea>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Ukuran Font</ion-label>
+                <ion-input type="number" [(ngModel)]="selectedElement.style.fontSize"
+                          (ionChange)="updateElement(selectedElement)"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Font</ion-label>
+                <ion-select [(ngModel)]="selectedElement.style.fontFamily"
+                          (ionChange)="updateElement(selectedElement)">
+                  <ion-select-option value="Arial">Arial</ion-select-option>
+                  <ion-select-option value="Times New Roman">Times New Roman</ion-select-option>
+                  <ion-select-option value="Helvetica">Helvetica</ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Warna</ion-label>
+                <ion-input type="color" [(ngModel)]="selectedElement.style.color"
+                          (ionChange)="updateElement(selectedElement)"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Perataan</ion-label>
+                <ion-select [(ngModel)]="selectedElement.style.alignment"
+                          (ionChange)="updateElement(selectedElement)">
+                  <ion-select-option value="left">Kiri</ion-select-option>
+                  <ion-select-option value="center">Tengah</ion-select-option>
+                  <ion-select-option value="right">Kanan</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ng-container>
+
+            <!-- Image Properties -->
+            <ng-container *ngIf="selectedElement.type === 'image'">
+              <ion-item>
+                <ion-label position="stacked">URL Gambar</ion-label>
+                <ion-input type="text" [(ngModel)]="selectedElement.content"
+                          (ionChange)="updateElement(selectedElement)"></ion-input>
+              </ion-item>
+            </ng-container>
+
+            <!-- QR Code Properties -->
+            <ng-container *ngIf="selectedElement.type === 'qr'">
+              <ion-item>
+                <ion-label position="stacked">Data QR</ion-label>
+                <ion-input type="text" [(ngModel)]="selectedElement.content"
+                          (ionChange)="updateElement(selectedElement)"></ion-input>
+              </ion-item>
+            </ng-container>
+
+            <ion-button expand="block" color="danger" (click)="deleteElement(selectedElement.id)">
+              Hapus Elemen
+            </ion-button>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </ion-col>
+  </ion-row>
+</ion-grid>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-buttons slot="end">
+      <ion-button (click)="onSave()" color="primary">
+        Simpan Template
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer> 

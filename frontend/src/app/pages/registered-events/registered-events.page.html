@@ -30,7 +30,9 @@
     <ion-item-sliding *ngFor="let event of registeredEvents">
       <ion-item (click)="showEventDetail(event)">
         <ion-thumbnail slot="start">
-          <img [src]="event.image_path ? (environment.baseUrl + '/' + event.image_path) : 'assets/default-event.jpg'" [alt]="event.title">
+          <img [src]="event.image_path ? (environment.baseUrl + '/' + event.image_path) : (environment.baseUrl + '/storage/images/default-event.jpg')"
+               [alt]="event.title"
+               (error)="handleImageError($event)">
         </ion-thumbnail>
         <ion-label>
           <h2>{{ event.title }}</h2>
@@ -62,66 +64,68 @@
 
   <!-- Event Detail Modal -->
   <ion-modal [isOpen]="!!selectedEvent" (didDismiss)="selectedEvent = null">
-  <ng-template>
-    <ion-header>
+    <ng-template>
+      <ion-header>
         <ion-toolbar>
-        <ion-title>Detail Event</ion-title>
-        <ion-buttons slot="end">
+          <ion-title>Detail Event</ion-title>
+          <ion-buttons slot="end">
             <ion-button (click)="selectedEvent = null">
               <ion-icon name="close-outline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
 
-    <ion-content class="ion-padding" *ngIf="selectedEvent">
-      <ion-card>
-          <img [src]="selectedEvent.image_path ? (environment.baseUrl + '/' + selectedEvent.image_path) : 'assets/default-event.jpg'" [alt]="selectedEvent.title">
-        
-        <ion-card-header>
-          <ion-card-title>{{ selectedEvent.title }}</ion-card-title>
+      <ion-content class="ion-padding" *ngIf="selectedEvent">
+        <ion-card>
+          <img [src]="selectedEvent.image_path ? (environment.baseUrl + '/' + selectedEvent.image_path) : (environment.baseUrl + '/storage/images/default-event.jpg')"
+               [alt]="selectedEvent.title"
+               (error)="handleImageError($event)">
+          
+          <ion-card-header>
+            <ion-card-title>{{ selectedEvent.title }}</ion-card-title>
             <ion-card-subtitle>
               <ion-icon name="location-outline"></ion-icon>
               {{ selectedEvent.location }}
             </ion-card-subtitle>
-        </ion-card-header>
+          </ion-card-header>
 
-        <ion-card-content>
+          <ion-card-content>
             <p class="event-description">{{ selectedEvent.description }}</p>
-          
+            
             <ion-list>
-            <ion-item>
+              <ion-item>
                 <ion-icon name="calendar-outline" slot="start"></ion-icon>
                 <ion-label>
                   <h3>Tanggal Event</h3>
                   <p>{{ selectedEvent.start_datetime | date:'medium' }}</p>
                 </ion-label>
-            </ion-item>
+              </ion-item>
 
-            <ion-item>
+              <ion-item>
                 <ion-icon name="time-outline" slot="start"></ion-icon>
-              <ion-label>
+                <ion-label>
                   <h3>Tanggal Pendaftaran</h3>
                   <p>{{ selectedEvent.registration_date | date:'medium' }}</p>
-              </ion-label>
-            </ion-item>
+                </ion-label>
+              </ion-item>
 
-            <ion-item>
+              <ion-item>
                 <ion-icon name="people-outline" slot="start"></ion-icon>
                 <ion-label>
                   <h3>Kapasitas</h3>
                   <p>{{ selectedEvent.registered_participants }}/{{ selectedEvent.max_participants }} Peserta</p>
                 </ion-label>
-            </ion-item>
+              </ion-item>
 
-            <ion-item>
+              <ion-item>
                 <ion-icon name="cash-outline" slot="start"></ion-icon>
-              <ion-label>
+                <ion-label>
                   <h3>Status Pembayaran</h3>
                   <p>{{ selectedEvent.payment_status === 'paid' ? 'Lunas' : 'Menunggu Pembayaran' }}</p>
-              </ion-label>
-            </ion-item>
-          </ion-list>
+                </ion-label>
+              </ion-item>
+            </ion-list>
 
             <div class="ion-padding-top">
               <!-- Tombol Pembayaran -->
@@ -141,9 +145,9 @@
                 Batalkan Pendaftaran
               </ion-button>
             </div>
-        </ion-card-content>
-      </ion-card>
-    </ion-content>
-  </ng-template>
-</ion-modal> 
+          </ion-card-content>
+        </ion-card>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content> 

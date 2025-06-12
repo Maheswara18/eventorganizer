@@ -1,12 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+type FrontendPaymentStatus = 'pending' | 'paid' | 'failed';
+
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule, LoadingController, ToastController, AlertController, IonItemSliding, ModalController } from '@ionic/angular';
+import { IonicModule, LoadingController, ToastController, AlertController, ModalController } from '@ionic/angular';
 import { EventsService } from '../../services/events.service';
+import { PaymentService, BackendPaymentStatus } from '../../services/payment.service';
 import { CommonModule } from '@angular/common';
 import { RegisteredEvent } from '../../interfaces/event.interface';
 import { RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { QrCodeComponent } from '../../components/qr-code/qr-code.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -15,30 +19,79 @@ import { QrCodeComponent } from '../../components/qr-code/qr-code.component';
   styleUrls: ['./registered-events.page.scss'],
   imports: [CommonModule, IonicModule, RouterModule, QrCodeComponent]
 })
-export class RegisteredEventsPage implements OnInit {
+export class RegisteredEventsPage implements OnInit, OnDestroy {
   registeredEvents: RegisteredEvent[] = [];
   selectedEvent: RegisteredEvent | null = null;
   isLoading = true;
   environment = environment;
+  private paymentStatusSubscription: Subscription;
 
   constructor(
     private router: Router,
     private eventsService: EventsService,
+    private paymentService: PaymentService,
     private loadingController: LoadingController,
     private toastController: ToastController,
     private alertController: AlertController,
     private modalController: ModalController
-  ) {}
+  ) {
+    this.paymentStatusSubscription = this.paymentService.paymentStatus$.subscribe(
+      status => {
+        if (status) {
+          this.updateEventPaymentStatus(status.eventId, this.normalizePaymentStatus(status.status));
+          this.loadRegisteredEvents();
+        }
+      }
+    );
+  }
 
   ngOnInit() {
     this.loadRegisteredEvents();
   }
 
+  ngOnDestroy() {
+    if (this.paymentStatusSubscription) {
+      this.paymentStatusSubscription.unsubscribe();
+    }
+  }
+
+  private normalizePaymentStatus(status: BackendPaymentStatus): FrontendPaymentStatus {
+    switch (status) {
+      case 'completed':
+        return 'paid';
+      case 'pending':
+      case 'failed':
+        return status;
+      default:
+        return 'failed';
+    }
+  }
+
+  private updateEventPaymentStatus(eventId: number, status: FrontendPaymentStatus) {
+    this.registeredEvents = this.registeredEvents.map(event => {
+      if (event.id === eventId) {
+        return { ...event, payment_status: status };
+      }
+      return event;
+    });
+
+    if (this.selectedEvent && this.selectedEvent.id === eventId) {
+      this.selectedEvent = { ...this.selectedEvent, payment_status: status };
+    }
+
+    if (status === 'paid') {
+      this.showToast('Pembayaran berhasil diverifikasi', 'success');
+    }
+  }
+
   async loadRegisteredEvents() {
     this.isLoading = true;
     try {
-      this.registeredEvents = await this.eventsService.getRegisteredEvents();
-      console.log('Loaded events:', this.registeredEvents); // Debug log
+      const events = await this.eventsService.getRegisteredEvents();
+      this.registeredEvents = events.map(event => ({
+        ...event,
+        payment_status: this.normalizePaymentStatus(event.payment_status as BackendPaymentStatus)
+      }));
     } catch (error) {
       console.error('Error loading registered events:', error);
       this.showToast('Gagal memuat event terdaftar', 'danger');
@@ -88,37 +141,6 @@ export class RegisteredEventsPage implements OnInit {
     await alert.present();
   }
 
-  closeEventDetail() {
-    this.selectedEvent = null;
-  }
-
-  getPaymentStatusColor(status: string): string {
-    switch (status.toLowerCase()) {
-      case 'paid':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'unpaid':
-        return 'danger';
-      default:
-        return 'medium';
-    }
-  }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  }
-
-  viewEventDetails(eventId: number) {
-    this.closeEventDetail();
-    this.router.navigate(['/events', eventId]);
-  }
-
   async showQRCode(event: RegisteredEvent) {
     const modal = await this.modalController.create({
       component: QrCodeComponent,
@@ -132,8 +154,14 @@ export class RegisteredEventsPage implements OnInit {
   }
 
   goToPayments() {
-    this.closeEventDetail();
-    this.router.navigate(['/payments']);
+    if (this.selectedEvent) {
+      this.router.navigate(['/payments'], {
+        queryParams: { 
+          eventId: this.selectedEvent.id,
+          returnUrl: '/registered-events'
+        }
+      });
+    }
   }
 
   private async showToast(message: string, color: 'success' | 'danger' | 'warning') {
@@ -145,4 +173,11 @@ export class RegisteredEventsPage implements OnInit {
     });
     await toast.present();
   }
-} 
+
+  handleImageError(event: Event) {
+    const imgElement = event.target as HTMLImageElement;
+    if (imgElement) {
+      imgElement.src = this.environment.baseUrl + '/storage/images/default-event.jpg';
+    }
+  }
+}

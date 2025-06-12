@@ -33,16 +33,187 @@ ion-buttons[slot="end"] {
 }
 
 .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 200px;
-  color: var(--ion-color-medium);
+  padding: 32px 16px;
   text-align: center;
-
-  ion-icon {
+  
+  .empty-state-icon {
     font-size: 48px;
     margin-bottom: 16px;
+    color: var(--ion-color-medium);
+  }
+
+  h2 {
+    margin: 8px 0;
+    color: var(--ion-color-dark);
+    font-weight: 600;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    margin: 0;
+  }
+}
+
+// Styles untuk form pembayaran
+.preview-image {
+  margin: 16px 0;
+  text-align: center;
+  
+  img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+}
+
+form {
+  ion-item {
+    --background: transparent;
+    --border-color: var(--ion-color-medium);
+    --border-radius: 8px;
+    --border-width: 1px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    margin-bottom: 16px;
+
+    &.item-has-focus {
+      --border-color: var(--ion-color-primary);
+    }
+  }
+
+  ion-label {
+    color: var(--ion-color-dark);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  ion-input, ion-select {
+    --padding-start: 0;
+    margin-top: 8px;
+    font-size: 16px;
+  }
+
+  ion-input[type="file"] {
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  ion-col {
+    margin-bottom: 8px;
+  }
+
+  .preview-image img {
+    max-height: 150px;
+  }
+}
+
+// Payment history item styling
+.payment-history-item {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  margin: 8px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+  ion-thumbnail {
+    --size: 72px;
+    margin: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .event-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--ion-color-dark);
+  }
+
+  .event-details {
+    p {
+      display: flex;
+      align-items: center;
+      margin: 4px 0;
+      color: var(--ion-color-medium);
+      font-size: 14px;
+
+      .info-icon {
+        margin-right: 8px;
+        font-size: 16px;
+      }
+    }
+
+    .price-info {
+      color: var(--ion-color-primary);
+      font-weight: 500;
+    }
+  }
+
+  .status-badge {
+    margin-top: 8px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+}
+
+// Form styling
+ion-item {
+  --padding-start: 0;
+  --border-color: var(--ion-color-light);
+  margin-bottom: 16px;
+
+  ion-label {
+    color: var(--ion-color-medium);
+    font-weight: 500;
+  }
+
+  ion-input, ion-select {
+    --padding-start: 0;
+    margin-top: 8px;
+  }
+}
+
+// Segment styling
+ion-segment {
+  padding: 4px;
+  
+  ion-segment-button {
+    --color: var(--ion-color-medium);
+    --color-checked: var(--ion-color-primary);
+    --indicator-color: var(--ion-color-primary);
+  }
+}
+
+// Refresher styling
+ion-refresher {
+  background: var(--ion-background-color);
+}
+
+// Payment proof modal styling
+.proof-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  
+  img {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 } 

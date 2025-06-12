@@ -19,6 +19,10 @@ class Participant extends Model
         'payment_status' => 'pending'
     ];
 
+    protected $casts = [
+        'registration_date' => 'datetime'
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -42,5 +46,15 @@ class Participant extends Model
     public function formResponses()
     {
         return $this->hasMany(FormResponse::class);
+    }
+
+    public function updatePaymentStatus()
+    {
+        if ($this->payment) {
+            $this->payment_status = $this->payment->payment_status;
+            $this->status = $this->payment->payment_status;
+            $this->payment_date = $this->payment->paid_at;
+            $this->save();
+        }
     }
 }

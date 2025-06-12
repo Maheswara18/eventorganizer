@@ -43,12 +43,12 @@ export interface RegisteredEvent {
   title: string;
   description: string;
   location: string;
-  price: string;
   start_datetime: string;
   end_datetime: string;
-  image_path: string;
-  payment_status: string;
-  registration_date: string;
+  image_path?: string;
   max_participants: number;
   registered_participants: number;
+  payment_status: 'pending' | 'paid' | 'failed';
+  payment_date?: string;
+  registration_date: string;
 } 
