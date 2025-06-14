@@ -4,56 +4,75 @@
 
 .fullscreen-center {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
+  justify-content: center;    /* center horizontal */
+  align-items: center;        /* center vertical */
+  height: 100vh;
+  padding: 16px;              /* biar ada ruang saat di layar kecil */
+  box-sizing: border-box;
 }
 
 .login-container {
-  width: 100%;
-  max-width: 400px;
-  padding: 20px;
-  text-align: center;
-  background: transparent;
-}
-
-.header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 40px;
-
-  .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 10px; /* Jarak antara logo dan teks */
-  }
-
-  .logo-img {
-    width: 60px;
-  }
-
-  .app-name {
-    font-family: 'Engebrechtre', sans-serif;
-    font-size: 20px;
-    font-weight: normal;
-    color: white;
-    margin: 0;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .tagline {
-    font-size: 13px;
-    color: white;
-    margin-top: 6px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+  justify-content: center;
+  height: 85vh;
 }
 
-.form-section {
+/* Tambahan untuk ion-content agar full tinggi */
+ion-content {
+  height: 100%;
+}
+
+
+
+/* Logo dan teks */
+.header {
+  text-align: center;
+}
+
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.logo-img {
+  width: 60px;
+}
+
+.app-name {
+  font-family: 'Engebrechtre', sans-serif;
+  font-size: 20px;
+  font-weight: normal;
+  color: white;
+  margin: 0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.tagline {
+  font-size: 13px;
+  color: white;
+  margin-top: 6px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Form */
+form {
   width: 100%;
+  max-width: 400px;
+}
+
+.forgot-password {
+  text-align: right;
+}
+
+.register-link {
+  text-align: center;
 }
 
 .custom-input {
@@ -61,17 +80,17 @@
   --color: white;
   --border-radius: 12px;
   margin-bottom: 16px;
+}
 
-  ion-label {
-    color: #ffffffcc;
-    font-size: 12px;
-    letter-spacing: 1px;
-  }
+.custom-input ion-label {
+  color: #ffffffcc;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
 
-  ion-input {
-    color: white;
-    font-size: 14px;
-  }
+.custom-input ion-input {
+  color: white;
+  font-size: 14px;
 }
 
 .forgot-password {
@@ -93,9 +112,40 @@
   margin-top: 18px;
   font-size: 14px;
   color: white;
+  text-align: center;
+}
 
-  a {
-    color: white;
-    text-decoration: underline;
+.register-link a {
+  color: white;
+  text-decoration: underline;
+}
+
+.login-container ion-button {
+  width: 100%;
+  padding: 12px 0;
+}
+
+/* RESPONSIF: tampilan lebih kecil */
+@media screen and (max-width: 480px) {
+  .login-container {
+    padding: 20px 12px;
+  }
+
+  .logo-img {
+    width: 45px;
+  }
+
+  .app-name {
+    font-size: 16px;
+  }
+
+  .tagline {
+    font-size: 12px;
+  }
+
+  .forgot-password,
+  .register-link {
+    font-size: 12px;
   }
 }
+

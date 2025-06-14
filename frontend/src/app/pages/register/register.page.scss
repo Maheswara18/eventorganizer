@@ -17,11 +17,11 @@
 }
 
 .register-container {
-  width: 100%;
-  max-width: 400px;
-  padding: 20px;
-  text-align: center;
-  background: transparent;
+ display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 85vh;
 }
 
 .header {
