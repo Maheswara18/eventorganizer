@@ -175,8 +175,8 @@ ion-tab-bar {
 }
 
 .ticket-bg {
-  width: 72px;
-  height: 72px;
+  width: 75px;
+  height: 75px;
   background: url('/assets/tab-ticket.png') no-repeat center center;
   background-size: contain;
 
@@ -193,4 +193,40 @@ ion-tab-bar {
   font-weight: bold;
   color: #666;
   text-align: center;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.admin-grid ion-card {
+  padding: 8px;
+  border-radius: 10px;
+  text-align: center;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  transition: transform 0.2s ease-in-out;
+}
+.admin-grid ion-card:active {
+  transform: scale(0.95);
+}
+
+.admin-grid ion-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #003366;
+}
+
+.admin-grid ion-icon {
+  font-size: 24px;
+  color: #007bff;
 }

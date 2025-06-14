@@ -19,20 +19,28 @@
       </ion-toolbar>
     </ion-header>
 
-    <div class="welcome-card">
-      <h2>Selamat Datang, "{{ username }}"</h2>
-      <p>Siap menghadiri event menarik hari ini?</p>
+    <div class="welcome-card" *ngIf="isAdmin; else userWelcome">
+      <h2>Halo Admin, "{{ username }}"</h2>
+      <p>Kelola event dan pantau aktivitas peserta dengan mudah!</p>
     </div>
 
+    <ng-template #userWelcome>
+      <div class="welcome-card">
+        <h2>Selamat Datang, "{{ username }}"</h2>
+        <p>Siap menghadiri event menarik hari ini?</p>
+      </div>
+    </ng-template>
+
     <!-- Menu Admin -->
-    <div class="admin-menu" *ngIf="isAdmin">
+  <div class="admin-menu" *ngIf="isAdmin">
+    <div class="admin-grid">
       <ion-card button routerLink="/event-qr">
         <ion-card-content>
           <ion-icon name="qr-code-outline"></ion-icon>
           <span>Scan QR Event</span>
         </ion-card-content>
       </ion-card>
-      
+
       <ion-card button routerLink="/create-event">
         <ion-card-content>
           <ion-icon name="add-circle-outline"></ion-icon>
@@ -68,6 +76,7 @@
         </ion-card-content>
       </ion-card>
     </div>
+  </div>
 
     <!-- Event Rekomendasi untuk Peserta -->
     <div class="event-section" *ngIf="!isAdmin">
