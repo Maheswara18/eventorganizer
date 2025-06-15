@@ -2,6 +2,27 @@ ion-content {
   --background: #f5f5f5;
 }
 
+/* === HEADER (atas) biru tua === */
+ion-header,
+ion-toolbar {
+  --background: #003366 !important;
+  --color: white;
+  --ion-color-base: #003366;
+  --ion-toolbar-background: #003366;
+  --ion-toolbar-color: white;
+  color: white;
+}
+
+ion-title {
+  color: white;
+  font-weight: bold;
+}
+
+ion-back-button {
+  --color: white;
+}
+
+/* === CARD UMUM === */
 ion-card {
   margin: 16px 0;
   border-radius: 10px;
@@ -22,7 +43,7 @@ ion-card-title {
 
 ion-item {
   --padding-start: 0;
-  
+
   ion-icon {
     color: var(--ion-color-primary);
     font-size: 1.2rem;
@@ -55,12 +76,13 @@ ion-spinner {
   padding-bottom: 80px; // Space for fixed bottom toolbar
 }
 
+/* === HEADER GAMBAR EVENT DENGAN GRADASI BIRU TUA === */
 .event-header {
   position: relative;
   width: 100%;
   height: 250px;
   overflow: hidden;
-  
+
   .event-image {
     width: 100%;
     height: 100%;
@@ -73,7 +95,7 @@ ion-spinner {
     left: 0;
     right: 0;
     padding: 20px;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    background: linear-gradient(to top, rgba(0, 51, 102, 0.9), transparent); // biru tua gradien
     color: white;
 
     h1 {
@@ -90,6 +112,7 @@ ion-spinner {
   }
 }
 
+/* === QUICK INFO CARD === */
 .quick-info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -99,6 +122,8 @@ ion-spinner {
 
 .quick-info-card {
   margin: 0;
+  background-color: #d0e8ff; // biru muda
+  border-radius: 10px;
 
   ion-card-content {
     display: flex;
@@ -108,28 +133,26 @@ ion-spinner {
     ion-icon {
       font-size: 24px;
       margin-right: 12px;
+      color: #000; // ikon hitam
     }
 
     .info-text {
       display: flex;
       flex-direction: column;
 
-      small {
-        color: var(--ion-color-medium);
-        font-size: 12px;
-      }
-
+      small,
       strong {
-        color: var(--ion-color-dark);
-        font-size: 14px;
-        margin-top: 4px;
+        color: #000; // teks hitam
       }
     }
   }
 }
 
+/* === DESKRIPSI CARD === */
 .description-card {
   margin: 16px;
+  background-color: #d0e8ff; // biru muda
+  border-radius: 10px;
 
   ion-card-header {
     padding-bottom: 0;
@@ -138,27 +161,44 @@ ion-spinner {
   .description-text {
     white-space: pre-line;
     line-height: 1.6;
-    color: var(--ion-color-dark);
+    color: #000; // teks deskripsi hitam
   }
 }
 
+/* === TOOLBAR BAWAH / REGISTRASI === */
 .registration-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
-  background: var(--ion-background-color);
-  border-top: 1px solid var(--ion-color-light);
+  padding: 12px 16px;
+  background-color: #003366; // biru tua
+  border-top: none;
 
   .registration-info {
     display: flex;
     align-items: center;
     gap: 8px;
+    color: white;
+    font-size: 14px;
+
+    .status-text {
+      background-color: #00509e;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+    }
   }
 
   ion-button {
     margin: 0;
-    --padding-start: 24px;
-    --padding-end: 24px;
+    --padding-start: 20px;
+    --padding-end: 20px;
+    --background: #28a745; // hijau
+    --color: white;
+    --border-radius: 12px;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   }
-} 
+}
