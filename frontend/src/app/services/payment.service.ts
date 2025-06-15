@@ -29,7 +29,7 @@ export interface RegisteredEvent {
   price: number;
   start_datetime: string;
   image_path?: string;
-  payment_status?: 'pending' | 'completed' | 'failed' | 'paid';
+  payment_status: 'belum_bayar' | 'pending' | 'completed' | 'failed';
   registration_date?: string;
   payment_proof_path?: string;
 }
@@ -110,16 +110,19 @@ export class PaymentService {
 
   async submitPayment(eventId: number, formData: FormData): Promise<any> {
     try {
-      const headers = await this.getHeaders();
+      const headers = new HttpHeaders({
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      });
+
       const response = await firstValueFrom(
-        this.http.post(`${this.apiUrl}/payments/${eventId}`, formData, {
+        this.http.post(`${this.apiUrl}/payments`, formData, {
           headers,
           withCredentials: true
         })
       );
 
-      // Emit perubahan status setelah submit payment berhasil
-      this.paymentStatusSubject.next({ eventId, status: 'completed' });
+      this.paymentStatusSubject.next({ eventId, status: 'pending' });
       
       return response;
     } catch (error) {

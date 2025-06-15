@@ -48,7 +48,7 @@ export interface RegisteredEvent {
   image_path?: string;
   max_participants: number;
   registered_participants: number;
-  payment_status: 'pending' | 'paid' | 'failed';
+  payment_status: 'belum_bayar' | 'pending' | 'completed' | 'failed';
   payment_date?: string;
   registration_date: string;
 } 

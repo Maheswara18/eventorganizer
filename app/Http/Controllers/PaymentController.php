@@ -60,14 +60,28 @@ class PaymentController extends Controller
             'event_id' => 'required|exists:events,id',
             'amount' => 'required|numeric',
             'payment_method' => 'required|in:transfer,credit_card,e_wallet',
-            'payment_proof' => 'required|image|max:2048' // max 2MB
+            'payment_proof_path' => 'required|image|max:2048' // max 2MB
         ]);
 
         // Upload bukti pembayaran
         $paymentProofPath = null;
-        if ($request->hasFile('payment_proof')) {
-            $file = $request->file('payment_proof');
+        if ($request->hasFile('payment_proof_path')) {
+            $file = $request->file('payment_proof_path');
             $paymentProofPath = $file->store('payment_proofs', 'public');
+        }
+
+        // Cek apakah participant sudah ada
+        $participant = Participant::where('user_id', auth()->id())
+            ->where('event_id', $request->event_id)
+            ->first();
+
+        if (!$participant) {
+            return response()->json(['message' => 'Anda belum terdaftar di event ini'], 404);
+        }
+
+        // Cek status pembayaran sebelumnya
+        if ($participant->payment_status !== 'belum_bayar') {
+            return response()->json(['message' => 'Status pembayaran tidak valid'], 400);
         }
 
         $payment = new Payment();
@@ -80,15 +94,9 @@ class PaymentController extends Controller
         $payment->save();
 
         // Update participant payment_id and status
-        $participant = Participant::where('user_id', auth()->id())
-            ->where('event_id', $request->event_id)
-            ->first();
-
-        if ($participant) {
-            $participant->payment_id = $payment->id;
-            $participant->save();
-            $participant->updatePaymentStatus();
-        }
+        $participant->payment_id = $payment->id;
+        $participant->payment_status = 'pending';
+        $participant->save();
 
         // Load the payment with relationships for response
         $payment = Payment::with(['user', 'event'])->find($payment->id);
@@ -182,7 +190,7 @@ class PaymentController extends Controller
                     'price' => $event->price,
                     'start_datetime' => $event->start_datetime,
                     'image_path' => $event->image_path,
-                    'payment_status' => $participant->payment ? $participant->payment->payment_status : 'pending',
+                    'payment_status' => $participant->payment_status,
                     'registration_date' => $participant->payment ? $participant->payment->paid_at : $participant->registration_date,
                     'payment_proof_path' => $participant->payment ? $participant->payment->payment_proof_path : null
                 ];

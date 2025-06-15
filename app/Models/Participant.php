@@ -16,7 +16,7 @@ class Participant extends Model
 
     protected $attributes = [
         'attendance_status' => 'registered',
-        'payment_status' => 'pending'
+        'payment_status' => 'belum_bayar'
     ];
 
     protected $casts = [
@@ -54,6 +54,9 @@ class Participant extends Model
             $this->payment_status = $this->payment->payment_status;
             $this->status = $this->payment->payment_status;
             $this->payment_date = $this->payment->paid_at;
+            $this->save();
+        } else {
+            $this->payment_status = 'belum_bayar';
             $this->save();
         }
     }

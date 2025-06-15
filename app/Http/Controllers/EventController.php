@@ -263,7 +263,8 @@ class EventController extends Controller
                 'event_id' => $event->id,
                 'qr_code_data' => $qrData,
                 'qr_code_path' => str_replace('public/', 'storage/', $qrPath),
-                'attendance_status' => 'registered'
+                'attendance_status' => 'registered',
+                'payment_status' => 'belum_bayar'
             ]);
 
             \Log::info('Registration successful');

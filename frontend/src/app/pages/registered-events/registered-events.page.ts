@@ -1,4 +1,4 @@
-type FrontendPaymentStatus = 'pending' | 'paid' | 'failed';
+export type FrontendPaymentStatus = 'belum_bayar' | 'pending' | 'completed' | 'failed';
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
@@ -58,7 +58,7 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
   private normalizePaymentStatus(status: BackendPaymentStatus): FrontendPaymentStatus {
     switch (status) {
       case 'completed':
-        return 'paid';
+        return 'completed';
       case 'pending':
       case 'failed':
         return status;
@@ -79,7 +79,7 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
       this.selectedEvent = { ...this.selectedEvent, payment_status: status };
     }
 
-    if (status === 'paid') {
+    if (status === 'completed') {
       this.showToast('Pembayaran berhasil diverifikasi', 'success');
     }
   }
@@ -90,7 +90,7 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
       const events = await this.eventsService.getRegisteredEvents();
       this.registeredEvents = events.map(event => ({
         ...event,
-        payment_status: this.normalizePaymentStatus(event.payment_status as BackendPaymentStatus)
+        payment_status: event.payment_status || 'belum_bayar'
       }));
     } catch (error) {
       console.error('Error loading registered events:', error);
@@ -178,6 +178,36 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
     const imgElement = event.target as HTMLImageElement;
     if (imgElement) {
       imgElement.src = this.environment.baseUrl + '/storage/images/default-event.jpg';
+    }
+  }
+
+  getPaymentStatusColor(status: FrontendPaymentStatus): string {
+    switch (status) {
+      case 'completed':
+        return 'success';
+      case 'pending':
+        return 'warning';
+      case 'failed':
+        return 'danger';
+      case 'belum_bayar':
+        return 'medium';
+      default:
+        return 'medium';
+    }
+  }
+
+  getPaymentStatusText(status: FrontendPaymentStatus): string {
+    switch (status) {
+      case 'completed':
+        return 'Lunas';
+      case 'pending':
+        return 'Menunggu Verifikasi Admin';
+      case 'failed':
+        return 'Pembayaran Ditolak';
+      case 'belum_bayar':
+        return 'Belum Bayar';
+      default:
+        return 'Status Tidak Diketahui';
     }
   }
 }

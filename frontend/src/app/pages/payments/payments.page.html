@@ -63,8 +63,8 @@
           <h2>{{ event.title }}</h2>
           <p>{{ formatPrice(event.price) }}</p>
           <p>{{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}</p>
-          <ion-badge [color]="getStatusColor(event.payment_status || 'pending')">
-            {{ event.payment_status === 'failed' ? 'Pembayaran Gagal' : 'Menunggu Pembayaran' }}
+          <ion-badge [color]="getStatusColor(event.payment_status || 'belum_bayar')">
+            {{ getStatusText(event.payment_status || 'belum_bayar') }}
           </ion-badge>
         </ion-label>
         <ion-button 
@@ -83,7 +83,7 @@
   <!-- Riwayat pembayaran -->
   <div *ngIf="activeSegment === 'payments'">
     <!-- Empty state untuk riwayat pembayaran -->
-    <ion-list *ngIf="!isLoading && registeredEvents.length === 0">
+    <ion-list *ngIf="!isLoading && paymentHistory.length === 0">
       <ion-item lines="none" class="ion-text-center">
         <ion-label class="ion-text-center">
           <div class="empty-state">
@@ -96,8 +96,8 @@
     </ion-list>
 
     <!-- Daftar riwayat pembayaran -->
-    <ion-list *ngIf="!isLoading && registeredEvents.length > 0">
-      <ion-item *ngFor="let event of registeredEvents" class="payment-history-item">
+    <ion-list *ngIf="!isLoading && paymentHistory.length > 0">
+      <ion-item *ngFor="let event of paymentHistory" class="payment-history-item">
         <ion-thumbnail slot="start" *ngIf="event.image_path">
           <img [src]="environment.baseUrl + '/' + event.image_path" [alt]="event.title">
         </ion-thumbnail>
@@ -120,10 +120,8 @@
               {{ event.registration_date | date:'dd MMM yyyy HH:mm' }}
             </p>
           </div>
-          <ion-badge [color]="getStatusColor(event.payment_status || 'unknown')" class="status-badge">
-            {{ event.payment_status === 'completed' ? 'Lunas' : 
-               event.payment_status === 'pending' ? 'Menunggu Verifikasi' :
-               event.payment_status === 'failed' ? 'Pembayaran Gagal' : 'Menunggu Pembayaran' }}
+          <ion-badge [color]="getStatusColor(event.payment_status || 'belum_bayar')" class="status-badge">
+            {{ getStatusText(event.payment_status || 'belum_bayar') }}
           </ion-badge>
         </ion-label>
         <ion-button 

@@ -110,7 +110,7 @@ export class AuthService {
           headers,
           withCredentials: true
         }).pipe(
-          timeout(5000),
+          timeout(15000),
           catchError(error => {
             if (error instanceof TimeoutError) {
               throw new Error('Request timed out');

@@ -95,17 +95,30 @@ export class PaymentsPage implements OnInit {
     }
   }
 
+  async loadRegisteredEvents() {
+    this.isLoading = true;
+    try {
+      const events = await this.paymentService.getRegisteredEvents();
+      this.registeredEvents = events;
+    } catch (error) {
+      console.error('Error loading registered events:', error);
+      this.showToast('Gagal memuat event terdaftar', 'danger');
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
   get unpaidEvents(): RegisteredEvent[] {
     return this.registeredEvents.filter(event => 
-      !event.payment_status ||
-      event.payment_status === 'failed'
+      event.payment_status === 'belum_bayar'
     );
   }
 
-  get paidEvents(): RegisteredEvent[] {
+  get paymentHistory(): RegisteredEvent[] {
     return this.registeredEvents.filter(event => 
       event.payment_status === 'completed' || 
-      event.payment_status === 'paid'
+      event.payment_status === 'pending' ||
+      event.payment_status === 'failed'
     );
   }
 
@@ -116,8 +129,6 @@ export class PaymentsPage implements OnInit {
       amount: event.price,
       payment_method: 'transfer'
     };
-    this.selectedFile = null;
-    this.previewUrl = null;
     this.showPaymentModal = true;
   }
 
@@ -147,16 +158,21 @@ export class PaymentsPage implements OnInit {
     if (file) {
       this.selectedFile = file;
       const reader = new FileReader();
-      reader.onload = () => {
-        this.previewUrl = reader.result as string;
+      reader.onload = (e: any) => {
+        this.previewUrl = e.target.result;
       };
       reader.readAsDataURL(file);
     }
   }
 
   async submitPayment() {
-    if (!this.selectedFile || !this.eventId) {
+    if (!this.selectedFile) {
       this.showToast('Mohon pilih bukti pembayaran', 'warning');
+      return;
+    }
+
+    if (!this.selectedEvent) {
+      this.showToast('Event tidak ditemukan', 'warning');
       return;
     }
 
@@ -167,19 +183,29 @@ export class PaymentsPage implements OnInit {
 
     try {
       const formData = new FormData();
-      formData.append('payment_proof', this.selectedFile);
+      formData.append('event_id', this.selectedEvent.id.toString());
+      formData.append('amount', this.selectedEvent.price.toString());
+      formData.append('payment_method', this.paymentData.payment_method);
+      formData.append('payment_proof_path', this.selectedFile);
       
-      await this.paymentService.submitPayment(this.eventId, formData);
+      const response = await this.paymentService.submitPayment(this.selectedEvent.id, formData);
       
       this.showToast('Bukti pembayaran berhasil diunggah', 'success');
+      this.closePaymentModal();
+      this.loadRegisteredEvents();
       
       // Navigasi kembali ke halaman sebelumnya jika ada returnUrl
       if (this.returnUrl) {
         this.router.navigate([this.returnUrl]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting payment:', error);
-      this.showToast('Gagal mengunggah bukti pembayaran', 'danger');
+      if (error.error && error.error.errors) {
+        const errorMessages = Object.values(error.error.errors).flat();
+        this.showToast(errorMessages.join(', '), 'danger');
+      } else {
+        this.showToast('Gagal mengunggah bukti pembayaran', 'danger');
+      }
     } finally {
       await loading.dismiss();
     }
@@ -192,14 +218,30 @@ export class PaymentsPage implements OnInit {
   getStatusColor(status: string): string {
     switch (status) {
       case 'completed':
-      case 'paid':
         return 'success';
       case 'pending':
         return 'warning';
       case 'failed':
         return 'danger';
+      case 'belum_bayar':
+        return 'medium';
       default:
         return 'medium';
+    }
+  }
+
+  getStatusText(status: string): string {
+    switch (status) {
+      case 'completed':
+        return 'Lunas';
+      case 'pending':
+        return 'Menunggu Verifikasi Admin';
+      case 'failed':
+        return 'Pembayaran Ditolak';
+      case 'belum_bayar':
+        return 'Belum Bayar';
+      default:
+        return 'Status Tidak Diketahui';
     }
   }
 

@@ -49,8 +49,8 @@
             Terdaftar: {{ event.registration_date | date:'medium' }}
           </p>
         </ion-label>
-        <ion-badge [color]="event.payment_status === 'paid' ? 'success' : 'warning'" slot="end">
-          {{ event.payment_status === 'paid' ? 'Lunas' : 'Menunggu Pembayaran' }}
+        <ion-badge [color]="getPaymentStatusColor(event.payment_status)" slot="end">
+          {{ getPaymentStatusText(event.payment_status) }}
         </ion-badge>
       </ion-item>
 
@@ -122,20 +122,20 @@
                 <ion-icon name="cash-outline" slot="start"></ion-icon>
                 <ion-label>
                   <h3>Status Pembayaran</h3>
-                  <p>{{ selectedEvent.payment_status === 'paid' ? 'Lunas' : 'Menunggu Pembayaran' }}</p>
+                  <p>{{ getPaymentStatusText(selectedEvent.payment_status) }}</p>
                 </ion-label>
               </ion-item>
             </ion-list>
 
             <div class="ion-padding-top">
               <!-- Tombol Pembayaran -->
-              <ion-button expand="block" color="success" *ngIf="selectedEvent?.payment_status !== 'paid'" (click)="goToPayments()">
+              <ion-button expand="block" color="success" *ngIf="selectedEvent?.payment_status === 'belum_bayar'" (click)="goToPayments()">
                 <ion-icon name="wallet-outline" slot="start"></ion-icon>
                 Lanjutkan ke Pembayaran
               </ion-button>
 
               <!-- Tombol QR Code -->
-              <ion-button expand="block" color="primary" *ngIf="selectedEvent?.payment_status === 'paid'" (click)="showQRCode(selectedEvent)">
+              <ion-button expand="block" color="primary" *ngIf="selectedEvent?.payment_status === 'completed'" (click)="showQRCode(selectedEvent)">
                 <ion-icon name="qr-code-outline" slot="start"></ion-icon>
                 Lihat QR Code Saya
               </ion-button>

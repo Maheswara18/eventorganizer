@@ -68,7 +68,7 @@ export class AdminPaymentsPage implements OnInit {
 
   viewPaymentProof(payment: any) {
     if (payment.payment_proof_path) {
-      this.selectedPaymentProof = `${environment.baseUrl}/${payment.payment_proof_path}`;
+      this.selectedPaymentProof = `${environment.baseUrl}/storage/${payment.payment_proof_path}`;
       this.isModalOpen = true;
     }
   }
