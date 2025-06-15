@@ -1,23 +1,22 @@
-<ion-content fullscreen>
-  <div class="page-container">
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-button [routerLink]="['/profile']">
-            <ion-icon name="person-circle-outline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-        <div class="logo-container">
-          <img src="assets/logo-rundexo.png" class="logo" />
-          <span class="logo-text">Rundexo</span>
-        </div>
-        <ion-buttons slot="end">
-          <ion-button (click)="logout()">
-            <ion-icon name="log-out-outline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
+<ion-content #pageContent fullscreen scrollEvents="true">
+  <ion-header>
+    <ion-toolbar [class.scrolled]="scrolled">
+      <ion-buttons slot="start">
+        <ion-button [routerLink]="['/profile']">
+          <ion-icon name="person-circle-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+      <div class="logo-container">
+        <img src="assets/logo-rundexo.png" class="logo" />
+        <span class="logo-text">Rundexo</span>
+      </div>
+      <ion-buttons slot="end">
+        <ion-button (click)="logout()">
+          <ion-icon name="log-out-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
 
     <div class="welcome-card" *ngIf="isAdmin; else userWelcome">
       <h2>Halo Admin, "{{ username }}"</h2>
@@ -104,7 +103,6 @@
         </ion-card-content>
       </ion-card>
     </div>
-  </div>
 </ion-content>
 
 <ion-footer>

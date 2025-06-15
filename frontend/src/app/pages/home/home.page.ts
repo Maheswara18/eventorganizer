@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, IonContent } from '@ionic/angular';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
@@ -19,13 +19,16 @@ import { Event } from '../../interfaces/event.interface';
     RouterLink
   ]
 })
-export class HomePage implements OnInit, OnDestroy {
+export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   username: string = '';
   isAdmin: boolean = false;
   unpaidEventsCount = 0;
+  scrolled: boolean = false;
   private userSubscription: Subscription | undefined;
   recommendedEvents: Event[] = [];
   isLoading = false;
+
+  @ViewChild(IonContent) pageContent?: IonContent;
 
   constructor(
     private authService: AuthService,
@@ -41,10 +44,14 @@ export class HomePage implements OnInit, OnDestroy {
     }
   }
 
+  ngAfterViewInit() {
+    this.pageContent?.ionScroll.subscribe((event: any) => {
+      this.scrolled = event.detail.scrollTop > 10;
+    });
+  }
+
   ngOnDestroy() {
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe();
-    }
+    this.userSubscription?.unsubscribe();
   }
 
   private async loadUserData() {
@@ -72,7 +79,7 @@ export class HomePage implements OnInit, OnDestroy {
   async loadUnpaidEventsCount() {
     try {
       const registeredEvents = await this.paymentService.getRegisteredEvents();
-      this.unpaidEventsCount = registeredEvents.filter(event => 
+      this.unpaidEventsCount = registeredEvents.filter(event =>
         !event.payment_status || event.payment_status === 'pending' || event.payment_status === 'failed'
       ).length;
     } catch (error) {
