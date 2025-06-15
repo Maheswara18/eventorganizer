@@ -12,43 +12,53 @@
 
     <!-- Form -->
     <form>
-    <div class="form-section" >
 
-      <ion-item lines="none" class="custom-input">
-        <ion-label position="floating">Nama</ion-label>
-        <ion-input [(ngModel)]="name"></ion-input>
-      </ion-item>
+      <div class="form-section">
 
-      <ion-item lines="none" class="custom-input">
-        <ion-label position="floating">Email</ion-label>
-        <ion-input type="email" [(ngModel)]="email"></ion-input>
-      </ion-item>
+        <!-- Nama -->
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="floating">Nama</ion-label>
+          <ion-input [(ngModel)]="name" name="name" required></ion-input>
+        </ion-item>
 
-      <ion-item lines="none" class="custom-input">
-        <ion-label position="floating">Password</ion-label>
-        <ion-input type="password" [(ngModel)]="password"></ion-input>
-      </ion-item>
+        <!-- Email -->
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="floating">Email</ion-label>
+          <ion-input type="email" [(ngModel)]="email" name="email" required></ion-input>
+        </ion-item>
 
-      <ion-item lines="none" class="custom-input">
-        <ion-label position="floating">Konfirmasi Password</ion-label>
-        <ion-input type="password" [(ngModel)]="password_confirmation"></ion-input>
-      </ion-item>
+        <!-- Password -->
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="floating">Password</ion-label>
+          <ion-input type="password" [(ngModel)]="password" name="password" required></ion-input>
+        </ion-item>
 
-      <ion-item lines="none" class="custom-input">
-        <ion-label>Role</ion-label>
-        <ion-select [(ngModel)]="role">
-          <ion-select-option value="admin">Admin</ion-select-option>
-          <ion-select-option value="participant">Participant</ion-select-option>
-        </ion-select>
-      </ion-item>
+        <!-- Konfirmasi Password -->
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="floating">Konfirmasi Password</ion-label>
+          <ion-input type="password" [(ngModel)]="password_confirmation" name="password_confirmation" required></ion-input>
+        </ion-item>
 
-      <ion-button expand="block" class="register-button" (click)="register()">REGISTER</ion-button>
+        <!-- Role -->
+        <ion-item lines="none" class="custom-input">
+          <ion-label>Role</ion-label>
+          <ion-select [(ngModel)]="role" name="role" placeholder="Pilih Role" required>
+            <ion-select-option value="admin">Admin</ion-select-option>
+            <ion-select-option value="participant">Participant</ion-select-option>
+          </ion-select>
+        </ion-item>
 
-      <p class="login-link">Sudah punya akun? 
-        <a routerLink="/login">Kembali ke halaman login</a>
-      </p>
+        <!-- Tombol Register -->
+        <ion-button expand="block" class="register-button" (click)="register()">REGISTER</ion-button>
 
-    </div>
+        <!-- Link ke Login -->
+        <p class="login-link">
+          Sudah punya akun?
+          <a routerLink="/login">Kembali ke halaman login</a>
+        </p>
+
+      </div>
+      
     </form>
 
   </div>
