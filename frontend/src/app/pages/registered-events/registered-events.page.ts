@@ -17,7 +17,7 @@ import { Subscription } from 'rxjs';
   selector: 'app-registered-events',
   templateUrl: './registered-events.page.html',
   styleUrls: ['./registered-events.page.scss'],
-  imports: [CommonModule, IonicModule, RouterModule, QrCodeComponent]
+  imports: [CommonModule, IonicModule, RouterModule]
 })
 export class RegisteredEventsPage implements OnInit, OnDestroy {
   registeredEvents: RegisteredEvent[] = [];

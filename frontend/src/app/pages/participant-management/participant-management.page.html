@@ -44,46 +44,46 @@
   </div>
 
   <!-- Data List -->
-  <ion-list *ngIf="!loading && participants.length > 0">
-    <ion-item-sliding *ngFor="let participant of participants">
-      <ion-item>
-        <ion-label>
-          <h2>{{ participant.user?.name }}</h2>
-          <p>{{ participant.user?.email }}</p>
-          <p *ngIf="participant.event && participant.event.title">
-            Event: {{ participant.event.title }}
-          </p>
-          <ion-badge [color]="getStatusColor(participant.attendance_status)">
-            {{ participant.attendance_status | titlecase }}
+  <div class="participant-cards-container" *ngIf="!loading && participants.length > 0">
+    <ion-card *ngFor="let participant of participants" class="participant-card">
+      <ion-card-header>
+        <ion-card-title>{{ participant.user?.name }}</ion-card-title>
+        <ion-card-subtitle>{{ participant.user?.email }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="event-info">
+          <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
+          <p><strong>Event:</strong> {{ participant.event?.title }}</p>
+        </div>
+        <p *ngIf="participant.notes" class="notes">{{ participant.notes }}</p>
+        <div class="status-badges">
+          <ion-badge [color]="getPaymentStatusColor(participant.payment_status)">
+            {{ getPaymentStatusText(participant.payment_status) }}
           </ion-badge>
-        </ion-label>
-      </ion-item>
-
-      <ion-item-options side="end">
-        <ion-item-option 
-          color="success" 
-          (click)="updateAttendanceStatus(participant, 'present')" 
-          *ngIf="participant.attendance_status !== 'present'">
-          <ion-icon slot="icon-only" name="checkmark"></ion-icon>
-        </ion-item-option>
-        <ion-item-option 
-          color="warning" 
-          (click)="updateAttendanceStatus(participant, 'registered')" 
-          *ngIf="participant.attendance_status !== 'registered'">
-          <ion-icon slot="icon-only" name="time"></ion-icon>
-        </ion-item-option>
-        <ion-item-option 
-          color="danger" 
-          (click)="updateAttendanceStatus(participant, 'absent')" 
-          *ngIf="participant.attendance_status !== 'absent'">
-          <ion-icon slot="icon-only" name="close"></ion-icon>
-        </ion-item-option>
-        <ion-item-option color="danger" (click)="deleteParticipant(participant)">
-          <ion-icon slot="icon-only" name="trash"></ion-icon>
-        </ion-item-option>
-      </ion-item-options>
-    </ion-item-sliding>
-  </ion-list>
+          <ion-badge *ngIf="['paid', 'completed'].includes(participant.payment_status)"
+                     [color]="getStatusColor(participant.attendance_status)">
+            {{ participant.attendance_status === 'present' ? 'Hadir' :
+               participant.attendance_status === 'absent' ? 'Tidak Hadir' : 'Terdaftar' }}
+          </ion-badge>
+        </div>
+      </ion-card-content>
+      <ion-footer class="action-buttons ion-no-border">
+        <ion-toolbar>
+          <ion-buttons slot="end">
+            <ion-button *ngIf="['paid', 'completed'].includes(participant.payment_status)"
+                        fill="clear"
+                        (click)="updateAttendanceStatus(participant, participant.attendance_status === 'present' ? 'absent' : 'present')">
+              <ion-icon slot="icon-only" [name]="participant.attendance_status === 'present' ? 'close-circle' : 'checkmark-circle'"
+                        [color]="participant.attendance_status === 'present' ? 'warning' : 'success'"></ion-icon>
+            </ion-button>
+            <ion-button fill="clear" color="danger" (click)="deleteParticipant(participant)">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-footer>
+    </ion-card>
+  </div>
 
   <!-- Empty State -->
   <div *ngIf="!loading && participants.length === 0" class="ion-text-center ion-padding">

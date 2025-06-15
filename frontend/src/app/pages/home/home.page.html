@@ -32,51 +32,51 @@
     </ng-template>
 
     <!-- Menu Admin -->
-  <div class="admin-menu" *ngIf="isAdmin">
-    <div class="admin-grid">
-      <ion-card button routerLink="/event-qr">
-        <ion-card-content>
-          <ion-icon name="qr-code-outline"></ion-icon>
-          <span>Scan QR Event</span>
-        </ion-card-content>
-      </ion-card>
+    <div class="admin-menu" *ngIf="isAdmin">
+      <div class="admin-grid">
+        <ion-card button routerLink="/event-qr">
+          <ion-card-content>
+            <ion-icon name="qr-code-outline"></ion-icon>
+            <span>Scan QR Event</span>
+          </ion-card-content>
+        </ion-card>
 
-      <ion-card button routerLink="/create-event">
-        <ion-card-content>
-          <ion-icon name="add-circle-outline"></ion-icon>
-          <span>Buat Event</span>
-        </ion-card-content>
-      </ion-card>
+        <ion-card button routerLink="/create-event">
+          <ion-card-content>
+            <ion-icon name="add-circle-outline"></ion-icon>
+            <span>Buat Event</span>
+          </ion-card-content>
+        </ion-card>
 
-      <ion-card button routerLink="/admin/payments">
-        <ion-card-content>
-          <ion-icon name="cash-outline"></ion-icon>
-          <span>Manajemen Pembayaran</span>
-        </ion-card-content>
-      </ion-card>
+        <ion-card button routerLink="/admin/payments">
+          <ion-card-content>
+            <ion-icon name="cash-outline"></ion-icon>
+            <span>Manajemen Pembayaran</span>
+          </ion-card-content>
+        </ion-card>
 
-      <ion-card button routerLink="/certificates">
-        <ion-card-content>
-          <ion-icon name="ribbon-outline"></ion-icon>
-          <span>Sertifikat</span>
-        </ion-card-content>
-      </ion-card>
+        <ion-card button routerLink="/certificates">
+          <ion-card-content>
+            <ion-icon name="ribbon-outline"></ion-icon>
+            <span>Sertifikat</span>
+          </ion-card-content>
+        </ion-card>
 
-      <ion-card button routerLink="/participant-management">
-        <ion-card-content>
-          <ion-icon name="people-outline"></ion-icon>
-          <span>Manajemen Peserta</span>
-        </ion-card-content>
-      </ion-card>
+        <ion-card button routerLink="/participant-management">
+          <ion-card-content>
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Manajemen Peserta</span>
+          </ion-card-content>
+        </ion-card>
 
-      <ion-card button routerLink="/admin/statistics">
-        <ion-card-content>
-          <ion-icon name="bar-chart-outline"></ion-icon>
-          <span>Statistik Event</span>
-        </ion-card-content>
-      </ion-card>
+        <ion-card button routerLink="/admin/statistics">
+          <ion-card-content>
+            <ion-icon name="bar-chart-outline"></ion-icon>
+            <span>Statistik Event</span>
+          </ion-card-content>
+        </ion-card>
+      </div>
     </div>
-  </div>
 
     <!-- Event Rekomendasi untuk Peserta -->
     <div class="event-section" *ngIf="!isAdmin">
@@ -87,6 +87,13 @@
         </ion-button>
       </div>
 
+      <!-- Loading State -->
+      <div class="ion-text-center" *ngIf="isLoading">
+        <ion-spinner name="circular"></ion-spinner>
+        <p>Memuat event rekomendasi...</p>
+      </div>
+
+      <!-- Event List -->
       <ion-card *ngFor="let event of recommendedEvents" class="animate-click" [routerLink]="['/event-detail', event.id]">
         <ion-card-content>
           <h4>{{ event.title }}</h4>
@@ -113,7 +120,6 @@
         <ion-label>Event Saya</ion-label>
       </ion-tab-button>
 
-      <!-- SPACER UNTUK MENGOSONGKAN POSISI TENGAH -->
       <ion-tab-button disabled class="empty-tab"></ion-tab-button>
 
       <ion-tab-button tab="pembayaran" routerLink="/payments">
@@ -127,7 +133,6 @@
       </ion-tab-button>
     </ion-tab-bar>
 
-    <!-- Tombol Tengah Float -->
     <div class="floating-button" routerLink="/events">
       <div class="ticket-bg"></div>
       <div class="ticket-label">Lihat Event</div>

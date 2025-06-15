@@ -42,3 +42,963 @@
   font-weight: normal;
   font-style: normal;
 }
+
+/* Custom styles */
+:root {
+  --ion-color-primary: #3880ff;
+  --ion-color-primary-rgb: 56, 128, 255;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #3171e0;
+  --ion-color-primary-tint: #4c8dff;
+}
+
+/* Optimasi transisi halaman */
+ion-page {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.page-transition ion-page {
+  opacity: 0;
+}
+
+/* Optimasi scrolling */
+ion-content {
+  --overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optimasi animasi */
+.animate-click {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.animate-click:active {
+  transform: scale(0.95);
+}
+
+/* Optimasi loading */
+ion-spinner {
+  transform: scale(1.2);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Optimasi card */
+ion-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
+}
+
+ion-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Optimasi button */
+ion-button {
+  transition: opacity 0.2s ease-in-out;
+}
+
+ion-button:active {
+  opacity: 0.8;
+}
+
+/* Optimasi list */
+ion-list {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Optimasi toolbar */
+ion-toolbar {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Optimasi tab bar */
+ion-tab-bar {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+/* Optimasi floating button */
+.floating-button {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
+}
+
+.floating-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Optimasi skeleton loading */
+ion-skeleton-text {
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+/* Optimasi toast */
+ion-toast {
+  --min-width: 250px;
+  --max-width: 90%;
+  --border-radius: 8px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Optimasi modal */
+ion-modal {
+  --height: auto;
+  --border-radius: 16px;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Optimasi alert */
+ion-alert {
+  --min-width: 300px;
+  --max-width: 90%;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Optimasi loading */
+ion-loading {
+  --min-width: 120px;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Optimasi infinite scroll */
+ion-infinite-scroll {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Optimasi refresher */
+ion-refresher {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Optimasi searchbar */
+ion-searchbar {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Optimasi select */
+ion-select {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Optimasi toggle */
+ion-toggle {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Optimasi checkbox */
+ion-checkbox {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Optimasi radio */
+ion-radio {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Optimasi range */
+ion-range {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Optimasi datetime */
+ion-datetime {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Optimasi picker */
+ion-picker {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Optimasi popover */
+ion-popover {
+  --min-width: 200px;
+  --max-width: 90%;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Optimasi action sheet */
+ion-action-sheet {
+  --min-width: 300px;
+  --max-width: 90%;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Optimasi menu */
+ion-menu {
+  --width: 300px;
+  --border-radius: 0 16px 16px 0;
+  --box-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Optimasi split pane */
+ion-split-pane {
+  --border: 1px solid var(--ion-color-light);
+}
+
+/* Optimasi grid */
+ion-grid {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Optimasi row */
+ion-row {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Optimasi col */
+ion-col {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Optimasi item */
+ion-item {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Optimasi label */
+ion-label {
+  transition: color 0.3s ease-in-out;
+}
+
+/* Optimasi note */
+ion-note {
+  transition: color 0.3s ease-in-out;
+}
+
+/* Optimasi badge */
+ion-badge {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Optimasi icon */
+ion-icon {
+  transition: color 0.3s ease-in-out;
+}
+
+/* Optimasi avatar */
+ion-avatar {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Optimasi thumbnail */
+ion-thumbnail {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Optimasi img */
+img {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Optimasi text */
+p, h1, h2, h3, h4, h5, h6 {
+  transition: color 0.3s ease-in-out;
+}
+
+/* Optimasi link */
+a {
+  transition: color 0.3s ease-in-out;
+}
+
+/* Optimasi input */
+input, textarea {
+  transition: border-color 0.3s ease-in-out;
+}
+
+/* Optimasi select native */
+select {
+  transition: border-color 0.3s ease-in-out;
+}
+
+/* Optimasi button native */
+button {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Optimasi scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ion-color-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ion-color-medium);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ion-color-medium-shade);
+}
+
+/* Optimasi selection */
+::selection {
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+}
+
+/* Optimasi focus */
+:focus {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+/* Optimasi disabled */
+[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Optimasi loading overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Optimasi error message */
+.error-message {
+  color: var(--ion-color-danger);
+  font-size: 0.9rem;
+  margin: 8px 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Optimasi success message */
+.success-message {
+  color: var(--ion-color-success);
+  font-size: 0.9rem;
+  margin: 8px 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Optimasi warning message */
+.warning-message {
+  color: var(--ion-color-warning);
+  font-size: 0.9rem;
+  margin: 8px 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Optimasi info message */
+.info-message {
+  color: var(--ion-color-info);
+  font-size: 0.9rem;
+  margin: 8px 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Optimasi tooltip */
+.tooltip {
+  position: absolute;
+  background: var(--ion-color-dark);
+  color: var(--ion-color-light);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  z-index: 1000;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Optimasi badge */
+.badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--ion-color-danger);
+  color: var(--ion-color-light);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Optimasi ripple effect */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform 0.5s, opacity 1s;
+}
+
+.ripple:active::after {
+  transform: scale(0, 0);
+  opacity: 0.3;
+  transition: 0s;
+}
+
+/* Optimasi skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Optimasi fade in */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Optimasi slide in */
+.slide-in {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Optimasi scale in */
+.scale-in {
+  animation: scaleIn 0.3s ease-in-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Optimasi bounce in */
+.bounce-in {
+  animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(0.9);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Optimasi rotate in */
+.rotate-in {
+  animation: rotateIn 0.5s ease-in-out;
+}
+
+@keyframes rotateIn {
+  from {
+    transform: rotate(-180deg) scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Optimasi flip in */
+.flip-in {
+  animation: flipIn 0.5s ease-in-out;
+  backface-visibility: visible;
+}
+
+@keyframes flipIn {
+  from {
+    transform: perspective(400px) rotateY(90deg);
+    opacity: 0;
+  }
+  40% {
+    transform: perspective(400px) rotateY(-10deg);
+    opacity: 0.8;
+  }
+  70% {
+    transform: perspective(400px) rotateY(10deg);
+    opacity: 0.9;
+  }
+  to {
+    transform: perspective(400px) rotateY(0);
+    opacity: 1;
+  }
+}
+
+/* Optimasi zoom in */
+.zoom-in {
+  animation: zoomIn 0.3s ease-in-out;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Optimasi slide up */
+.slide-up {
+  animation: slideUp 0.3s ease-in-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Optimasi slide down */
+.slide-down {
+  animation: slideDown 0.3s ease-in-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Optimasi slide left */
+.slide-left {
+  animation: slideLeft 0.3s ease-in-out;
+}
+
+@keyframes slideLeft {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Optimasi slide right */
+.slide-right {
+  animation: slideRight 0.3s ease-in-out;
+}
+
+@keyframes slideRight {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Optimasi pulse */
+.pulse {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Optimasi shake */
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Optimasi wobble */
+.wobble {
+  animation: wobble 0.5s ease-in-out;
+}
+
+@keyframes wobble {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(-5px) rotate(-5deg);
+  }
+  30% {
+    transform: translateX(3px) rotate(3deg);
+  }
+  45% {
+    transform: translateX(-3px) rotate(-3deg);
+  }
+  60% {
+    transform: translateX(2px) rotate(2deg);
+  }
+  75% {
+    transform: translateX(-1px) rotate(-1deg);
+  }
+}
+
+/* Optimasi tada */
+.tada {
+  animation: tada 0.5s ease-in-out;
+}
+
+@keyframes tada {
+  0% {
+    transform: scale(1);
+  }
+  10%, 20% {
+    transform: scale(0.9) rotate(-3deg);
+  }
+  30%, 50%, 70%, 90% {
+    transform: scale(1.1) rotate(3deg);
+  }
+  40%, 60%, 80% {
+    transform: scale(1.1) rotate(-3deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+/* Optimasi flash */
+.flash {
+  animation: flash 0.5s ease-in-out;
+}
+
+@keyframes flash {
+  0%, 50%, 100% {
+    opacity: 1;
+  }
+  25%, 75% {
+    opacity: 0;
+  }
+}
+
+/* Optimasi rubber band */
+.rubber-band {
+  animation: rubberBand 0.5s ease-in-out;
+}
+
+@keyframes rubberBand {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.25, 0.75);
+  }
+  40% {
+    transform: scale(0.75, 1.25);
+  }
+  50% {
+    transform: scale(1.15, 0.85);
+  }
+  65% {
+    transform: scale(0.95, 1.05);
+  }
+  75% {
+    transform: scale(1.05, 0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Optimasi hinge */
+.hinge {
+  animation: hinge 0.5s ease-in-out;
+  transform-origin: top left;
+}
+
+@keyframes hinge {
+  0% {
+    transform: rotate(0);
+    opacity: 1;
+  }
+  20%, 60% {
+    transform: rotate(80deg);
+    opacity: 1;
+  }
+  40% {
+    transform: rotate(60deg);
+    opacity: 1;
+  }
+  80% {
+    transform: rotate(60deg) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(700px);
+    opacity: 0;
+  }
+}
+
+/* Optimasi roll in */
+.roll-in {
+  animation: rollIn 0.5s ease-in-out;
+}
+
+@keyframes rollIn {
+  0% {
+    transform: translateX(-100%) rotate(-120deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) rotate(0);
+    opacity: 1;
+  }
+}
+
+/* Optimasi roll out */
+.roll-out {
+  animation: rollOut 0.5s ease-in-out;
+}
+
+@keyframes rollOut {
+  0% {
+    transform: translateX(0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) rotate(120deg);
+    opacity: 0;
+  }
+}
+
+/* Optimasi light speed in */
+.light-speed-in {
+  animation: lightSpeedIn 0.5s ease-in-out;
+}
+
+@keyframes lightSpeedIn {
+  0% {
+    transform: translateX(100%) skewX(-30deg);
+    opacity: 0;
+  }
+  60% {
+    transform: translateX(-20%) skewX(30deg);
+    opacity: 0.8;
+  }
+  80% {
+    transform: translateX(0) skewX(-15deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(0) skewX(0);
+    opacity: 1;
+  }
+}
+
+/* Optimasi light speed out */
+.light-speed-out {
+  animation: lightSpeedOut 0.5s ease-in-out;
+}
+
+@keyframes lightSpeedOut {
+  0% {
+    transform: translateX(0) skewX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) skewX(30deg);
+    opacity: 0;
+  }
+}
+
+/* Optimasi swing */
+.swing {
+  animation: swing 0.5s ease-in-out;
+  transform-origin: top center;
+}
+
+@keyframes swing {
+  20% {
+    transform: rotate(15deg);
+  }
+  40% {
+    transform: rotate(-10deg);
+  }
+  60% {
+    transform: rotate(5deg);
+  }
+  80% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+/* Optimasi jello */
+.jello {
+  animation: jello 0.5s ease-in-out;
+  transform-origin: center;
+}
+
+@keyframes jello {
+  0%, 11.1%, 100% {
+    transform: none;
+  }
+  22.2% {
+    transform: skewX(-12.5deg) skewY(-12.5deg);
+  }
+  33.3% {
+    transform: skewX(6.25deg) skewY(6.25deg);
+  }
+  44.4% {
+    transform: skewX(-3.125deg) skewY(-3.125deg);
+  }
+  55.5% {
+    transform: skewX(1.5625deg) skewY(1.5625deg);
+  }
+  66.6% {
+    transform: skewX(-0.78125deg) skewY(-0.78125deg);
+  }
+  77.7% {
+    transform: skewX(0.390625deg) skewY(0.390625deg);
+  }
+  88.8% {
+    transform: skewX(-0.1953125deg) skewY(-0.1953125deg);
+  }
+}
+
+/* Optimasi heart beat */
+.heart-beat {
+  animation: heartBeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.3);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.3);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+/*
+ * Fix for aria-hidden accessibility warning
+ * ----------------------------------------------------------------------------
+ * Hides non-active views with display: none to prevent focus issues.
+ */
+ion-router-outlet:not(.hydrated) ~ .ion-page.ion-page-hidden {
+  display: none;
+}

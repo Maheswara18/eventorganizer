@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { PaginatedParticipants } from '../interfaces/participant.interface';
+import { PaginatedParticipants, Participant } from '../interfaces/participant.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -28,6 +28,22 @@ export class ParticipantService {
     }
 
     return this.http.get<PaginatedParticipants>(this.apiUrl, { params });
+  }
+
+  getParticipantsByEvent(eventId: number): Observable<Participant[]> {
+    return this.http.get<Participant[]>(`${this.apiUrl}/event/${eventId}`);
+  }
+
+  getParticipant(id: number): Observable<Participant> {
+    return this.http.get<Participant>(`${this.apiUrl}/${id}`);
+  }
+
+  createParticipant(participant: Partial<Participant>): Observable<Participant> {
+    return this.http.post<Participant>(this.apiUrl, participant);
+  }
+
+  updateParticipant(participant: Participant): Observable<Participant> {
+    return this.http.put<Participant>(`${this.apiUrl}/${participant.id}`, participant);
   }
 
   updateStatus(id: number, status: 'registered' | 'present' | 'absent'): Observable<any> {

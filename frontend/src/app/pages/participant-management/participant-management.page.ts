@@ -10,13 +10,15 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSpinner,
-  IonList,
-  IonItemSliding,
+  IonBadge,
   IonItem,
   IonLabel,
-  IonBadge,
-  IonItemOptions,
-  IonItemOption,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardSubtitle,
+  IonCardContent,
+  IonFooter,
   IonIcon,
   IonText,
   IonInfiniteScroll,
@@ -29,7 +31,7 @@ import {
   IonSelectOption,
   IonButton
 } from '@ionic/angular/standalone';
-import { LoadingController, ToastController } from '@ionic/angular';
+import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { ParticipantService } from '../../services/participant.service';
 import { EventsService } from '../../services/events.service';
 import { Participant } from '../../interfaces/participant.interface';
@@ -37,7 +39,6 @@ import { Event } from '../../interfaces/event.interface';
 import { finalize } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TitleCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 
 @Component({
@@ -48,7 +49,6 @@ import { Router } from '@angular/router';
   imports: [
     CommonModule,
     FormsModule,
-    TitleCasePipe,
     IonHeader,
     IonToolbar,
     IonButtons,
@@ -59,13 +59,7 @@ import { Router } from '@angular/router';
     IonRefresher,
     IonRefresherContent,
     IonSpinner,
-    IonList,
-    IonItemSliding,
-    IonItem,
-    IonLabel,
     IonBadge,
-    IonItemOptions,
-    IonItemOption,
     IonIcon,
     IonText,
     IonInfiniteScroll,
@@ -76,7 +70,15 @@ import { Router } from '@angular/router';
     IonToast,
     IonSelect,
     IonSelectOption,
-    IonButton
+    IonButton,
+    IonItem,
+    IonLabel,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardSubtitle,
+    IonCardContent,
+    IonFooter
   ]
 })
 export class ParticipantManagementPage implements OnInit {
@@ -94,7 +96,8 @@ export class ParticipantManagementPage implements OnInit {
     private eventsService: EventsService,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private router: Router
+    private router: Router,
+    private alertCtrl: AlertController
   ) {}
 
   async ngOnInit() {
@@ -167,12 +170,15 @@ export class ParticipantManagementPage implements OnInit {
     }
   }
 
-  async updateAttendanceStatus(participant: Participant, status: 'registered' | 'present' | 'absent') {
+  async updateAttendanceStatus(participant: Participant, status: 'present' | 'absent' | 'registered') {
+    if (participant.payment_status !== 'paid' && participant.payment_status !== 'completed') {
+      await this.showErrorToast('Hanya peserta yang sudah membayar yang dapat diubah status kehadirannya');
+      return;
+    }
     const loading = await this.loadingCtrl.create({
       message: 'Memperbarui status...'
     });
     await loading.present();
-
     try {
       const response = await this.participantService.updateStatus(participant.id, status).toPromise();
       participant.attendance_status = status;
@@ -185,21 +191,60 @@ export class ParticipantManagementPage implements OnInit {
     }
   }
 
-  async deleteParticipant(participant: Participant) {
-    const loading = await this.loadingCtrl.create({
-      message: 'Menghapus peserta...'
-    });
-    await loading.present();
-
-    try {
-      await this.participantService.deleteParticipant(participant.id);
-      this.participants = this.participants.filter(p => p.id !== participant.id);
-      await this.showToast('Peserta berhasil dihapus');
-    } catch (error: any) {
-      await this.showErrorToast(error.message || 'Gagal menghapus peserta');
-    } finally {
-      await loading.dismiss();
+  getPaymentStatusText(status: string): string {
+    switch (status) {
+      case 'paid':
+      case 'completed':
+        return 'Lunas';
+      case 'pending':
+        return 'Menunggu Verifikasi';
+      case 'failed':
+        return 'Ditolak';
+      case 'belum_bayar':
+      case 'unpaid':
+      default:
+        return 'Belum Lunas';
     }
+  }
+
+  getPaymentStatusColor(status: string): string {
+    return (status === 'paid' || status === 'completed') ? 'success' : (status === 'failed' ? 'danger' : 'warning');
+  }
+
+  async deleteParticipant(participant: Participant) {
+    const alert = await this.alertCtrl.create({
+      header: 'Konfirmasi Hapus',
+      message: `Apakah Anda yakin ingin menghapus peserta "${participant.user?.name}"?`,
+      buttons: [
+        {
+          text: 'Batal',
+          role: 'cancel',
+        },
+        {
+          text: 'Hapus',
+          role: 'confirm',
+          cssClass: 'alert-button-danger',
+          handler: async () => {
+            const loading = await this.loadingCtrl.create({
+              message: 'Menghapus peserta...'
+            });
+            await loading.present();
+        
+            try {
+              await this.participantService.deleteParticipant(participant.id).toPromise();
+              this.participants = this.participants.filter(p => p.id !== participant.id);
+              await this.showToast('Peserta berhasil dihapus');
+            } catch (error: any) {
+              await this.showErrorToast(error.message || 'Gagal menghapus peserta');
+            } finally {
+              await loading.dismiss();
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   loadMore(event: any) {

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from './services/auth.service';
 import { Router } from '@angular/router';
-import { Platform } from '@ionic/angular';
+import { Platform, NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-root',
@@ -15,15 +15,33 @@ export class AppComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private platform: Platform
+    private platform: Platform,
+    private navCtrl: NavController
   ) {
     this.initializeApp();
+    this.setupPageTransitions();
   }
 
   private async initializeApp() {
     this.platform.ready().then(async () => {
       await this.authService.initialize();
       this.initializeAdminMenu();
+    });
+  }
+
+  private setupPageTransitions() {
+    // Konfigurasi transisi halaman
+    this.navCtrl.setDirection('forward');
+    
+    // Tambahkan event listener untuk transisi
+    this.router.events.subscribe(() => {
+      // Gunakan requestAnimationFrame untuk transisi yang lebih smooth
+      requestAnimationFrame(() => {
+        document.body.classList.add('page-transition');
+        setTimeout(() => {
+          document.body.classList.remove('page-transition');
+        }, 300);
+      });
     });
   }
 

@@ -6,7 +6,9 @@ export interface Participant {
     email: string;
     phone: string;
     status: ParticipantStatus;
-    attendance_status: 'registered' | 'present' | 'absent';
+    attendance_status: 'present' | 'absent' | 'late' | 'registered';
+    payment_status: 'belum_bayar' | 'pending' | 'completed' | 'failed' | 'paid';
+    notes?: string;
     created_at: string;
     updated_at: string;
     event?: {
@@ -22,16 +24,6 @@ export interface Participant {
 
 export type ParticipantStatus = 'pending' | 'approved' | 'rejected';
 
-export interface Participant {
-  id: number;
-  name: string;
-  email: string;
-  status: ParticipantStatus;
-  events?: {
-    id?: number;
-    title?: string;
-  };
-}
 
 export interface PaginatedParticipants {
   data: Participant[];
