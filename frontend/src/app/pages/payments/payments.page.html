@@ -200,7 +200,21 @@
 
           <ion-item>
             <ion-label position="stacked">Bukti Pembayaran</ion-label>
-            <ion-input type="file" (change)="onFileSelected($event)" accept="image/*" required></ion-input>
+            <div class="file-input-container">
+              <input 
+                type="file" 
+                (change)="onFileSelected($event)" 
+                accept="image/*" 
+                required
+                #fileInput
+                class="file-input"
+              >
+              <ion-button fill="outline" (click)="fileInput.click()">
+                <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+                Pilih File
+              </ion-button>
+              <span class="file-name" *ngIf="selectedFile">{{ selectedFile.name }}</span>
+            </div>
           </ion-item>
 
           <div class="preview-image" *ngIf="selectedFile">

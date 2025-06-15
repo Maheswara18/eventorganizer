@@ -5,6 +5,8 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
 import { PaymentService } from '../../services/payment.service';
+import { EventsService } from '../../services/events.service';
+import { Event } from '../../interfaces/event.interface';
 
 @Component({
   selector: 'app-home',
@@ -22,23 +24,20 @@ export class HomePage implements OnInit, OnDestroy {
   isAdmin: boolean = false;
   unpaidEventsCount = 0;
   private userSubscription: Subscription | undefined;
-
-  // 🔽 Tambahan: Dummy list event rekomendasi
-  recommendedEvents = [
-    { title: 'Tech Conference 2025', date: '10 Juni 2025' },
-    { title: 'Workshop UI/UX', date: '12 Juni 2025' },
-    { title: 'Festival Musik', date: '15 Juni 2025' }
-  ];
+  recommendedEvents: Event[] = [];
+  isLoading = false;
 
   constructor(
     private authService: AuthService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private eventsService: EventsService
   ) {}
 
   async ngOnInit() {
     await this.loadUserData();
     if (!this.isAdmin) {
       this.loadUnpaidEventsCount();
+      this.loadRecommendedEvents();
     }
   }
 
@@ -53,6 +52,17 @@ export class HomePage implements OnInit, OnDestroy {
       this.username = user?.name || '';
       this.isAdmin = user?.role === 'admin';
     });
+  }
+
+  async loadRecommendedEvents() {
+    try {
+      this.isLoading = true;
+      this.recommendedEvents = await this.eventsService.getRandomEvents().toPromise() || [];
+    } catch (error) {
+      console.error('Error loading recommended events:', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   logout() {
@@ -73,6 +83,7 @@ export class HomePage implements OnInit, OnDestroy {
   ionViewWillEnter() {
     if (!this.isAdmin) {
       this.loadUnpaidEventsCount();
+      this.loadRecommendedEvents();
     }
   }
 }

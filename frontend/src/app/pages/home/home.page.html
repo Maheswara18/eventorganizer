@@ -87,12 +87,12 @@
         </ion-button>
       </div>
 
-      <ion-card *ngFor="let event of recommendedEvents" class="animate-click">
+      <ion-card *ngFor="let event of recommendedEvents" class="animate-click" [routerLink]="['/event-detail', event.id]">
         <ion-card-content>
           <h4>{{ event.title }}</h4>
           <p>
             <ion-icon name="calendar-outline"></ion-icon>
-            {{ event.date }}
+            {{ event.start_datetime | date:'dd MMMM yyyy' }}
           </p>
         </ion-card-content>
       </ion-card>

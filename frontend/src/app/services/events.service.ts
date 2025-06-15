@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, catchError, of } from 'rxjs';
 import { AuthService } from './auth.service';
-import { Event as EventModel, EventResponse, RegisteredEvent } from '../interfaces/event.interface';
+import { Event, EventResponse, RegisteredEvent } from '../interfaces/event.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -24,11 +24,11 @@ export class EventsService {
     return headers;
   }
 
-  async getEvents(): Promise<EventModel[]> {
+  async getEvents(): Promise<Event[]> {
     try {
       const headers = await this.getHeaders();
       const response = await firstValueFrom(
-        this.http.get<EventModel[]>(`${this.apiUrl}/events`, {
+        this.http.get<Event[]>(`${this.apiUrl}/events`, {
           headers,
           withCredentials: true
         })
@@ -41,11 +41,11 @@ export class EventsService {
     }
   }
 
-  async getEvent(id: number): Promise<EventModel> {
+  async getEvent(id: number): Promise<Event> {
     try {
       const headers = await this.getHeaders();
       const response = await firstValueFrom(
-        this.http.get<EventModel>(`${this.apiUrl}/events/${id}`, {
+        this.http.get<Event>(`${this.apiUrl}/events/${id}`, {
           headers,
           withCredentials: true
         })
@@ -57,14 +57,14 @@ export class EventsService {
     } catch (error) {
       console.error('Error fetching event:', error);
       throw error;
-  }
+    }
   }
 
-  async createEvent(eventData: FormData): Promise<EventModel> {
+  async createEvent(eventData: FormData): Promise<Event> {
     try {
       const headers = await this.getHeaders(true);
       return firstValueFrom(
-        this.http.post<EventModel>(`${this.apiUrl}/events`, eventData, {
+        this.http.post<Event>(`${this.apiUrl}/events`, eventData, {
           headers,
           withCredentials: true
         })
@@ -75,12 +75,12 @@ export class EventsService {
     }
   }
 
-  async updateEvent(id: number, eventData: FormData): Promise<EventModel> {
+  async updateEvent(id: number, eventData: FormData): Promise<Event> {
     try {
       const headers = await this.getHeaders(true);
       eventData.append('_method', 'PUT');
       return firstValueFrom(
-        this.http.post<EventModel>(`${this.apiUrl}/events/${id}`, eventData, {
+        this.http.post<Event>(`${this.apiUrl}/events/${id}`, eventData, {
           headers,
           withCredentials: true
         })
@@ -189,5 +189,14 @@ export class EventsService {
       throw new Error('User not authenticated');
     }
     return currentUser.id;
+  }
+
+  getRandomEvents(): Observable<Event[]> {
+    return this.http.get<Event[]>(`${this.apiUrl}/events/random`).pipe(
+      catchError(error => {
+        console.error('Error fetching random events:', error);
+        return of([]);
+      })
+    );
   }
 } 

@@ -13,6 +13,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class EventController extends Controller
 {
@@ -558,6 +559,43 @@ class EventController extends Controller
             \Log::error($e->getTraceAsString());
             return response()->json([
                 'message' => 'Error getting event statistics',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getRandomEvents()
+    {
+        try {
+            \Log::info('Fetching random events');
+            
+            // Gunakan query builder dengan inRandomOrder
+            $randomEvents = Event::select([
+                'id',
+                'title',
+                'description',
+                'image_path',
+                'location',
+                'price',
+                'start_datetime',
+                'end_datetime',
+                'max_participants',
+                'status'
+            ])
+            ->where('status', 'active')
+            ->inRandomOrder()
+            ->limit(3)
+            ->get();
+
+            \Log::info('Found ' . $randomEvents->count() . ' random events');
+
+            return response()->json($randomEvents);
+        } catch (\Exception $e) {
+            \Log::error('Error in getRandomEvents: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            
+            return response()->json([
+                'message' => 'Error fetching random events',
                 'error' => $e->getMessage()
             ], 500);
         }

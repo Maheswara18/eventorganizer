@@ -41,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events', [EventController::class, 'index']);
     Route::get('/events/registered', [EventController::class, 'getRegisteredEvents']);
+    Route::get('/events/random', [EventController::class, 'getRandomEvents']);
     Route::get('/events/{id}', [EventController::class, 'show']);
     Route::post('/events', [EventController::class, 'store']);
     Route::put('/events/{id}', [EventController::class, 'update']);
