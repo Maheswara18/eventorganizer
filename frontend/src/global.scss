@@ -161,13 +161,6 @@ ion-toast {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Optimasi modal */
-ion-modal {
-  --height: auto;
-  --border-radius: 16px;
-  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
 /* Optimasi alert */
 ion-alert {
   --min-width: 300px;
