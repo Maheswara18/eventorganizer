@@ -1,7 +1,7 @@
 <ion-header translucent>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-button routerLink="/home">
+      <ion-button (click)="goHome()">
         <ion-icon slot="icon-only" name="home-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -30,8 +30,13 @@
         </ion-item>
 
         <ion-item class="mb-3">
+          <ion-checkbox slot="start" [(ngModel)]="event.isFree" name="isFree" (ionChange)="onFreeChange()"></ion-checkbox>
+          <ion-label>Gratis</ion-label>
+        </ion-item>
+
+        <ion-item class="mb-3">
           <ion-label position="floating">Price</ion-label>
-          <ion-input [(ngModel)]="event.price" name="price" type="number" required></ion-input>
+          <ion-input [(ngModel)]="event.price" name="price" type="number" required [disabled]="event.isFree"></ion-input>
         </ion-item>
 
         <ion-item class="mb-3">

@@ -48,7 +48,17 @@ export class EditEventPage implements OnInit {
       start_datetime: ['', Validators.required],
       end_datetime: ['', Validators.required],
       provides_certificate: [false],
-      status: ['draft']
+      status: ['draft'],
+      isFree: [false]
+    });
+
+    this.eventForm.get('isFree')?.valueChanges.subscribe((isFree) => {
+      if (isFree) {
+        this.eventForm.get('price')?.setValue(0);
+        this.eventForm.get('price')?.disable();
+      } else {
+        this.eventForm.get('price')?.enable();
+      }
     });
   }
 
@@ -77,7 +87,8 @@ export class EditEventPage implements OnInit {
         start_datetime: event.start_datetime,
         end_datetime: event.end_datetime,
         provides_certificate: event.provides_certificate,
-        status: event.status
+        status: event.status,
+        isFree: event.price == 0
       });
 
       if (event.image_path) {

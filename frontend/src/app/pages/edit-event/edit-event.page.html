@@ -34,8 +34,13 @@
     </ion-item>
 
     <ion-item>
+      <ion-checkbox slot="start" formControlName="isFree"></ion-checkbox>
+      <ion-label>Gratis</ion-label>
+    </ion-item>
+
+    <ion-item>
       <ion-label position="stacked">Harga</ion-label>
-      <ion-input type="number" formControlName="price"></ion-input>
+      <ion-input type="number" formControlName="price" [disabled]="eventForm.get('isFree')?.value"></ion-input>
       <ion-note color="danger" *ngIf="eventForm.get('price')?.touched && eventForm.get('price')?.errors?.['required']">
         Harga event wajib diisi
       </ion-note>

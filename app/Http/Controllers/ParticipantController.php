@@ -16,7 +16,7 @@ class ParticipantController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $query = Participant::with(['user', 'event']);
+        $query = Participant::with(['user', 'event', 'formResponses.field']);
         
         // Filter berdasarkan event jika ada
         if ($request->has('event_id')) {
@@ -47,7 +47,7 @@ class ParticipantController extends Controller
     // ✅ Detail 1 partisipasi
     public function show($id)
     {
-        $participant = Participant::with(['user', 'event'])->findOrFail($id);
+        $participant = Participant::with(['user', 'event', 'formResponses.field'])->findOrFail($id);
 
         if (Auth::user()->role !== 'admin' && $participant->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);

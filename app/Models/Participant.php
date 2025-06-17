@@ -14,6 +14,8 @@ class Participant extends Model
         'registration_date', 'qr_code_path', 'qr_code_data', 'attendance_status', 'payment_status'
     ];
 
+    protected $with = ['formResponses.field'];
+
     protected $attributes = [
         'attendance_status' => 'registered',
         'payment_status' => 'belum_bayar'

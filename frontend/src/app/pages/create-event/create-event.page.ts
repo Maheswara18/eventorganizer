@@ -25,6 +25,7 @@ export class CreateEventPage {
     max_participants: 0,
     start_datetime: '',
     end_datetime: '',
+    isFree: false
   };
 
   selectedImage: File | null = null;
@@ -116,5 +117,15 @@ export class CreateEventPage {
       color: 'primary'
     });
     toast.present();
+  }
+
+  onFreeChange() {
+    if (this.event.isFree) {
+      this.event.price = 0;
+    }
+  }
+
+  goHome() {
+    this.router.navigate(['/home']);
   }
 }

@@ -46,8 +46,10 @@
       </ion-thumbnail>
       <ion-label>
         <h2>{{ event.title }}</h2>
+        <ion-badge *ngIf="event.provides_certificate == 1" color="success" class="cert-badge">Dapat Sertifikat</ion-badge>
+        <ion-badge *ngIf="event.provides_certificate == 0" color="medium" class="cert-badge">Tidak Dapat Sertifikat</ion-badge>
         <p>{{ event.location }}</p>
-          <p>{{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}</p>
+        <p>{{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}</p>
       </ion-label>
         <ion-note slot="end" color="primary">
           Rp {{ formatPrice(event.price) | number:'1.0-0' }}

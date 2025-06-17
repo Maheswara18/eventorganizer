@@ -20,6 +20,22 @@ export interface Participant {
         name: string;
         email: string;
     };
+    form_responses?: FormResponse[];
+}
+
+export interface FormResponse {
+  id: number;
+  participant_id: number;
+  form_field_id: number;
+  value: string;
+  field?: {
+    id: number;
+    label: string;
+    type: string;
+    options?: string[];
+    is_required: boolean;
+    order: number;
+  };
 }
 
 export type ParticipantStatus = 'pending' | 'approved' | 'rejected';

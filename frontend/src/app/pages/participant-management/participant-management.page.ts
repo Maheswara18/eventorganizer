@@ -29,13 +29,16 @@ import {
   IonToast,
   IonSelect,
   IonSelectOption,
-  IonButton
+  IonButton,
+  IonModal,
+  IonList
 } from '@ionic/angular/standalone';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { ParticipantService } from '../../services/participant.service';
 import { EventsService } from '../../services/events.service';
 import { Participant } from '../../interfaces/participant.interface';
 import { Event } from '../../interfaces/event.interface';
+import { FormResponse } from '../../interfaces/participant.interface';
 import { finalize } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -71,6 +74,8 @@ import { Router } from '@angular/router';
     IonSelect,
     IonSelectOption,
     IonButton,
+    IonModal,
+    IonList,
     IonItem,
     IonLabel,
     IonCard,
@@ -90,6 +95,7 @@ export class ParticipantManagementPage implements OnInit {
   currentPage = 1;
   lastPage = 1;
   searchTerm = '';
+  selectedParticipantResponses: FormResponse[] | null = null;
 
   constructor(
     private participantService: ParticipantService,
@@ -312,5 +318,20 @@ export class ParticipantManagementPage implements OnInit {
 
   goHome() {
     this.router.navigate(['/home']);
+  }
+
+  showFormResponses(participant: Participant) {
+    console.log('Participant selected:', participant);
+    console.log('Form Responses:', participant.form_responses);
+    this.selectedParticipantResponses = participant.form_responses || null;
+    if (this.selectedParticipantResponses) {
+      console.log('Modal should open with responses:', this.selectedParticipantResponses);
+    } else {
+      console.log('No form responses found for this participant.');
+    }
+  }
+
+  closeFormResponsesModal() {
+    this.selectedParticipantResponses = null;
   }
 }

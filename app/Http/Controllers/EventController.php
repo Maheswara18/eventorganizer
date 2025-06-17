@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use App\Models\FormResponse;
 
 class EventController extends Controller
 {
@@ -208,7 +209,7 @@ class EventController extends Controller
         }
     }
 
-    public function register($event)
+    public function register(Request $request, $event)
     {
         try {
             \Log::info('Starting event registration for event ID: ' . $event);
@@ -218,6 +219,13 @@ class EventController extends Controller
             
             $user = Auth::user();
             \Log::info('User authenticated: ' . $user->name);
+
+            // Validate incoming request for responses
+            $request->validate([
+                'responses' => 'array',
+                'responses.*.field_id' => 'required|exists:form_fields,id',
+                'responses.*.value' => 'nullable|string',
+            ]);
 
             // Cek apakah event masih aktif
             if ($event->status !== 'active') {
@@ -267,6 +275,18 @@ class EventController extends Controller
                 'attendance_status' => 'registered',
                 'payment_status' => 'belum_bayar'
             ]);
+
+            // Simpan jawaban form jika ada
+            if ($request->has('responses') && is_array($request->responses)) {
+                foreach ($request->responses as $formResponseData) {
+                    FormResponse::create([
+                        'participant_id' => $participant->id,
+                        'form_field_id' => $formResponseData['field_id'],
+                        'value' => $formResponseData['value'] ?? null,
+                    ]);
+                }
+                \Log::info('Form responses saved for participant: ' . $participant->id);
+            }
 
             \Log::info('Registration successful');
             return response()->json([

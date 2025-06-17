@@ -150,3 +150,39 @@
 - Folder permissions sudah diset dengan benar
 - Default images sediakan di public/storage/images/ dengan nama default-event.jpg
 - Environment variables sudah dikonfigurasi dengan benar
+
+---
+
+### UPDATE STATUS & SARAN PENGEMBANGAN
+
+#### **Fitur Utama yang SUDAH SESUAI:**
+- Semua alur utama (buat event, daftar, pembayaran, generate sertifikat) sudah berjalan end-to-end.
+- Tidak ada data dummy, semua fitur terhubung ke backend nyata.
+- CRUD event, manajemen peserta, pembayaran, kehadiran, dan sertifikat sudah berjalan baik.
+
+#### **Fitur yang PERLU DITINGKATKAN / DITAMBAH:**
+1. **Sertifikat:**
+   - Selesaikan fitur template builder & preview sertifikat.
+   - Tingkatkan kualitas PDF & bulk generation.
+2. **UI/UX:**
+   - Tambahkan skeleton loading, feedback validasi form, notifikasi sukses/error, dan error handling yang lebih baik.
+3. **Performance:**
+   - Implementasi image optimization, lazy loading, dan API response caching.
+4. **Security:**
+   - Perkuat validasi input, validasi file upload, rate limiting, dan error logging.
+5. **Payment:**
+   - Integrasi payment gateway (midtrans, xendit, dsb) & verifikasi otomatis.
+6. **Push Notification:**
+   - Tambahkan push notification untuk reminder event (opsional).
+7. **Fitur Minor:**
+   - Dark mode, multi-language, social sharing, PWA (prioritas rendah).
+
+#### **SARAN PENGEMBANGAN SELANJUTNYA:**
+- **Uji end-to-end seluruh alur utama secara manual dan otomatis (E2E test).**
+- **Pastikan semua error handling user-friendly dan informatif.**
+- **Lakukan audit keamanan (input, file, API).**
+- **Optimalkan performa gambar dan loading data.**
+- **Selesaikan fitur sertifikat builder agar sistem lebih fleksibel.**
+- **Dokumentasikan API dan alur utama untuk memudahkan pengembangan selanjutnya.**
+
+---
