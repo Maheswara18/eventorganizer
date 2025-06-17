@@ -13,8 +13,8 @@ import { CreateEventPage } from './create-event.page';
     CommonModule,
     FormsModule,
     IonicModule,
-    CreateEventPageRoutingModule
-  ],
-  declarations: [CreateEventPage]
+    CreateEventPageRoutingModule,
+    CreateEventPage
+  ]
 })
 export class CreateEventPageModule {}

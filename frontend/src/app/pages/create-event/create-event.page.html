@@ -61,13 +61,31 @@
           </ion-datetime>
         </ion-item>
 
-        <ion-item lines="none" class="mb-4">
-          <ion-label>Image</ion-label>
-          <input type="file" class="form-control" (change)="onImageSelected($event)" accept="image/*" />
+        <ion-item class="mb-3">
+          <ion-label position="stacked">Event Image</ion-label>
+          <input type="file" (change)="onImageSelected($event)" accept="image/*">
+          <ion-thumbnail *ngIf="imagePreview" slot="end">
+            <img [src]="imagePreview" alt="Preview">
+          </ion-thumbnail>
         </ion-item>
 
-        <ion-button expand="block" type="submit" color="success">Create Event</ion-button>
+        <ion-button expand="block" type="submit" class="ion-margin-top">
+          Create Event
+        </ion-button>
       </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Form Template Section -->
+  <ion-card class="ion-margin-top">
+    <ion-card-header>
+      <ion-card-title>Form Pendaftaran</ion-card-title>
+      <ion-card-subtitle>Buat form pendaftaran untuk event ini</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-button expand="block" (click)="createFormTemplate()">
+        Buat Form Pendaftaran
+      </ion-button>
     </ion-card-content>
   </ion-card>
 </ion-content>

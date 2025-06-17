@@ -155,12 +155,16 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
 
   goToPayments() {
     if (this.selectedEvent) {
-      this.router.navigate(['/payments'], {
-        queryParams: { 
-          eventId: this.selectedEvent.id,
-          returnUrl: '/registered-events'
-        }
-      });
+      const eventId = this.selectedEvent.id;
+      this.selectedEvent = null;
+      setTimeout(() => {
+        this.router.navigate(['/payments'], {
+          queryParams: {
+            eventId: eventId,
+            returnUrl: '/registered-events'
+          }
+        });
+      }, 200);
     }
   }
 
