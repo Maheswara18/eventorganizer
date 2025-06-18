@@ -16,5 +16,9 @@
         "@capacitor/filesystem": "^7.0.1",
         "angularx-qrcode": "^20.0.0",
         "html5-qrcode": "^2.3.8"
+    },
+    "require": {
+        "ext-imagick": "*"
     }
+
 }

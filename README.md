@@ -36,6 +36,13 @@ Aplikasi Event Organizer ini dikembangkan menggunakan **Laravel (PHP)** sebagai 
 
 ## 🚀 Instalasi
 
+### Imagick (Backend)
+1. Untuk menginstall Imagick bisa diikuti langkah yang ada di link dibawah ini:
+
+    ```bash
+    https://mlocati.github.io/articles/php-windows-imagick.html
+    ```
+    Disarankan untuk menggunakan PHP versi 8.2 atau 8.1 (lebih banyak imagick build tersedia)
 ### Backend (Laravel)
 
 1. Clone repositori ini:
