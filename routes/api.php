@@ -80,6 +80,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/participants/{id}', [ParticipantController::class, 'update']);
     Route::patch('/participants/{id}/status', [ParticipantController::class, 'updateStatus']);
     Route::get('/participants/event/{eventId}/me', [\App\Http\Controllers\ParticipantController::class, 'getMyParticipantByEvent']);
+    Route::get('/events/{eventId}/participant-status', [ParticipantController::class, 'getParticipantStatus']);
 });
 
 

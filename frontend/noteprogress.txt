@@ -23,6 +23,12 @@
    - [x] Default image handling
    - [x] Form builder untuk kustomisasi pendaftaran
    - [x] Pengaturan sertifikat per event
+   - [x] Browse events
+   - [x] Detail event
+   - [x] Filter dan pencarian
+   - [x] Registrasi event
+   - [x] Status kehadiran dan sertifikat
+   - [x] Download sertifikat langsung dari halaman event
 
 3. Manajemen Peserta ✅
    - [x] Daftar peserta per event
@@ -47,11 +53,11 @@
    - [x] Riwayat transaksi
    - [x] Bukti pembayaran handling
 
-7. Sertifikat ⚠️ (Parsial)
-   - [x] Generate sertifikat otomatis
-   - [x] Sistem verifikasi dengan QR
-   - [ ] Template builder (planned)
-   - [ ] Preview sertifikat (planned)
+7. Sertifikat ✅ (Selesai)
+   - [x] Generate sertifikat otomatis saat status present
+   - [x] Download sertifikat oleh peserta
+   - [x] Verifikasi sertifikat dengan QR
+   - [x] Sistem notifikasi ke peserta
 
 ### Role Peserta
 1. Autentikasi ✅
@@ -79,30 +85,40 @@
 
 ## PERBAIKAN YANG SEDANG DIKERJAKAN
 
-1. UI/UX Enhancement
+1. UI/UX Enhancement (Prioritas Tinggi)
    - [ ] Skeleton loading screens
    - [ ] Better error handling
    - [ ] Form validation feedback
    - [ ] Loading states
    - [ ] Success/error notifications
+   - [ ] Responsive design improvements
 
-2. Performance Optimization
-   - [ ] Image optimization
+2. Performance Optimization (Prioritas Tinggi)
+   - [x] Image optimization
+     - Implementasi service optimasi gambar
+     - Resize otomatis untuk gambar besar
+     - Kompresi gambar dengan kualitas optimal
+     - Fallback untuk gambar default
+   - [x] API response caching
+     - Implementasi middleware API cache
+     - Cache untuk response GET requests
+     - TTL configurable per endpoint
    - [ ] Lazy loading implementation
-   - [ ] API response caching
    - [ ] Code splitting
+   - [ ] Database query optimization
 
-3. Sertifikat Enhancement
-   - [ ] Template customization
-   - [ ] Multiple template support
-   - [ ] Better PDF generation
-   - [ ] Preview feature
+3. Sertifikat Enhancement (Selesai)
+   - [x] Generate otomatis saat status present
+   - [x] PDF quality
+   - [x] QR code verification
+   - [x] Download handling
 
-4. Security Enhancement
+4. Security Enhancement (Prioritas Tinggi)
    - [ ] Input validation
    - [ ] File upload validation
    - [ ] Rate limiting
    - [ ] Error logging
+   - [ ] XSS & CSRF protection
 
 ## KNOWN ISSUES
 1. Image handling perlu optimasi untuk:
@@ -120,35 +136,9 @@
    - Automatic verification
    - Payment gateway integration
 
-4. Sertifikat generation perlu perbaikan untuk:
-   - Template customization
-   - PDF quality
-   - Bulk generation
-
-## NEXT DEVELOPMENT PRIORITIES
-
-1. High Priority
-   - [ ] Sertifikat template builder
-   - [ ] Image optimization system
-   - [ ] Enhanced error handling
-   - [ ] Form validation improvement
-
-2. Medium Priority
-   - [ ] Push notifications
-   - [ ] Email notifications
-   - [ ] Bulk actions (export, sertifikat)
-   - [ ] Advanced search filters
-
-3. Low Priority
-   - [ ] Dark mode
-   - [ ] Multiple language support
-   - [ ] Social media sharing
-   - [ ] PWA implementation
-
 ## DEPLOYMENT NOTES
 - Pastikan storage:link sudah dijalankan
 - Folder permissions sudah diset dengan benar
-- Default images sediakan di public/storage/images/ dengan nama default-event.jpg
 - Environment variables sudah dikonfigurasi dengan benar
 
 ---
@@ -162,27 +152,40 @@
 
 #### **Fitur yang PERLU DITINGKATKAN / DITAMBAH:**
 1. **Sertifikat:**
-   - Selesaikan fitur template builder & preview sertifikat.
-   - Tingkatkan kualitas PDF & bulk generation.
+   - Optimasi performa generate sertifikat ✅
+   - Perbaikan kualitas PDF ✅
+   - Peningkatan keamanan QR code ✅
+   - Integrasi status sertifikat di halaman event ✅
+   - Status kehadiran & sertifikat di halaman daftar event (Event Saya) ✅
 2. **UI/UX:**
-   - Tambahkan skeleton loading, feedback validasi form, notifikasi sukses/error, dan error handling yang lebih baik.
+   - Implementasi skeleton loading ✅
+   - Status kehadiran & sertifikat di daftar event peserta ✅
+   - Perbaikan feedback validasi form
+   - Notifikasi sukses/error yang lebih informatif
+   - Error handling yang lebih user-friendly
 3. **Performance:**
-   - Implementasi image optimization, lazy loading, dan API response caching.
+   - Optimasi gambar dan lazy loading ✅
+   - Implementasi API caching ✅
+   - Optimasi query database
 4. **Security:**
-   - Perkuat validasi input, validasi file upload, rate limiting, dan error logging.
+   - Validasi input dan file upload
+   - Implementasi rate limiting
+   - Logging dan monitoring
 5. **Payment:**
-   - Integrasi payment gateway (midtrans, xendit, dsb) & verifikasi otomatis.
+   - Integrasi payment gateway
+   - Sistem verifikasi otomatis
+   - Notifikasi pembayaran
 6. **Push Notification:**
-   - Tambahkan push notification untuk reminder event (opsional).
-7. **Fitur Minor:**
-   - Dark mode, multi-language, social sharing, PWA (prioritas rendah).
+   - Sistem notifikasi real-time
+   - Reminder event
+   - Status update notifications
 
 #### **SARAN PENGEMBANGAN SELANJUTNYA:**
-- **Uji end-to-end seluruh alur utama secara manual dan otomatis (E2E test).**
-- **Pastikan semua error handling user-friendly dan informatif.**
-- **Lakukan audit keamanan (input, file, API).**
-- **Optimalkan performa gambar dan loading data.**
-- **Selesaikan fitur sertifikat builder agar sistem lebih fleksibel.**
-- **Dokumentasikan API dan alur utama untuk memudahkan pengembangan selanjutnya.**
+- **Fokus pada penyelesaian fitur sertifikat di Sprint 1**
+- **Implementasi sistem testing (Unit, Integration, E2E)**
+- **Dokumentasi API dan user guide**
+- **Monitoring dan logging system**
+- **Backup dan recovery system**
+- **Performance monitoring**
 
 ---

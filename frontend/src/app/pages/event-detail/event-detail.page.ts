@@ -38,6 +38,14 @@ interface Event {
   };
 }
 
+interface ParticipantStatus {
+  attendance_status: string;
+  attendance_updated_at: string;
+  certificate_status: 'ready' | 'not_ready';
+  certificate_download_url: string | null;
+  certificate_issued_at: string | null;
+}
+
 @Component({
   selector: 'app-event-detail',
   templateUrl: './event-detail.page.html',
@@ -58,6 +66,7 @@ export class EventDetailPage implements OnInit {
   environment = environment;
   participant: Participant | null = null;
   isPresent: boolean = false;
+  participantStatus: ParticipantStatus | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -101,6 +110,7 @@ export class EventDetailPage implements OnInit {
       if (this.event) {
         this.isRegistered = await this.eventsService.checkRegistration(this.event.id);
       }
+      await this.loadParticipantStatus(Number(id));
     } catch (error) {
       console.error('Error loading event:', error);
       const toast = await this.toastController.create({
@@ -190,26 +200,71 @@ export class EventDetailPage implements OnInit {
     }
   }
 
-  async downloadCertificate() {
-    if (!this.participant) return;
+  async loadParticipantStatus(eventId: number) {
     try {
-      const loading = await this.loadingController.create({ message: 'Mengunduh sertifikat...' });
-      await loading.present();
-      const blob = await firstValueFrom(this.certificateService.downloadCertificate(this.participant.id));
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `sertifikat-event-${this.event.id}.pdf`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-      await loading.dismiss();
-      this.showToast('Sertifikat berhasil diunduh', 'success');
-    } catch (err) {
-      this.showToast('Gagal mengunduh sertifikat', 'danger');
+      this.participantStatus = await this.participantService.getParticipantStatus(eventId).toPromise();
+    } catch (error) {
+      console.error('Error loading participant status:', error);
     }
   }
 
-  private async showToast(message: string, color: 'success' | 'danger' | 'warning') {
+  getAttendanceStatusText(status: string): string {
+    switch (status) {
+      case 'present':
+        return 'Hadir';
+      case 'absent':
+        return 'Tidak Hadir';
+      default:
+        return 'Belum Dikonfirmasi';
+    }
+  }
+
+  getCertificateStatusText(status: string): string {
+    switch (status) {
+      case 'ready':
+        return 'Sertifikat Siap Diunduh';
+      case 'not_ready':
+        return 'Sertifikat Belum Tersedia';
+      default:
+        return 'Status Tidak Diketahui';
+    }
+  }
+
+  async downloadCertificate() {
+    if (!this.participantStatus?.certificate_download_url) return;
+
+    const loading = await this.loadingController.create({
+      message: 'Mengunduh sertifikat...'
+    });
+    await loading.present();
+
+    try {
+      const eventId = this.route.snapshot.params['id'];
+      const blob = await this.certificateService.downloadCertificate(eventId).toPromise();
+      
+      if (!blob) {
+        throw new Error('File tidak ditemukan');
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sertifikat-${this.event.title}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      this.showToast('Sertifikat berhasil diunduh', 'success');
+    } catch (error) {
+      console.error('Error downloading certificate:', error);
+      this.showToast('Gagal mengunduh sertifikat', 'danger');
+    } finally {
+      loading.dismiss();
+    }
+  }
+
+  private async showToast(message: string, color: string = 'primary') {
     const toast = await this.toastController.create({
       message,
       duration: 2000,

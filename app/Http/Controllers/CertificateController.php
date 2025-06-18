@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\CertificateTemplate;
+use App\Notifications\CertificateGenerated;
 
 class CertificateController extends Controller
 {
@@ -55,6 +56,15 @@ class CertificateController extends Controller
             'event_id' => 'required|exists:events,id',
         ]);
 
+        // Check if certificate already exists
+        $existingCertificate = Certificate::where('participant_id', $validated['participant_id'])
+            ->where('event_id', $validated['event_id'])
+            ->first();
+
+        if ($existingCertificate) {
+            return response()->json(['message' => 'Certificate already exists', 'certificate' => $existingCertificate], 200);
+        }
+
         // Eager load user and event for participant
         $participant = Participant::with(['user', 'event'])->findOrFail($validated['participant_id']);
 
@@ -75,14 +85,15 @@ class CertificateController extends Controller
 
         // Generate unique verification code
         $code = strtoupper(Str::random(10));
-        // Assuming frontend has a verification route like /certificates/verify
         $verificationLink = url('/certificates/verify?code=' . $code);
 
         // Generate QR Code as base64 to embed directly in HTML
-        $qrCodeBase64 = base64_encode(\SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')->size(100)->generate($verificationLink));
+        $qrCodeBase64 = base64_encode(\SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+            ->size(100)
+            ->errorCorrection('H') // High error correction for better scanning
+            ->generate($verificationLink));
 
-        // Build HTML content from template elements (simplified for now)
-        // In a full template builder, this would be more dynamic based on $certificateTemplate->elements
+        // Build HTML content from template elements
         $html = "
             <!DOCTYPE html>
             <html>
@@ -90,28 +101,66 @@ class CertificateController extends Controller
                 <meta charset=\"utf-8\">
                 <title>Sertifikat Partisipasi</title>
                 <style>
-                    body { font-family: sans-serif; text-align: center; margin: 0; padding: 0; }
+                    @page { margin: 0; }
+                    body { 
+                        font-family: 'Arial', sans-serif; 
+                        text-align: center; 
+                        margin: 0; 
+                        padding: 0; 
+                        background-color: #ffffff;
+                    }
                     .certificate-container { 
-                        width: 297mm; /* A4 width */
-                        height: 210mm; /* A4 height */
-                        margin: 0; padding: 0;
-                        background-color: #f0f0f0;
-                        box-sizing: border-box;
+                        width: 297mm;
+                        height: 210mm;
+                        margin: 0;
+                        padding: 0;
                         position: relative;
                         overflow: hidden;
                     }
                     .content { 
                         position: absolute; 
-                        top: 50%; left: 50%; 
+                        top: 50%; 
+                        left: 50%; 
                         transform: translate(-50%, -50%);
                         width: 80%;
                     }
-                    h1 { color: #003366; font-size: 2.5em; margin-bottom: 20px; }
-                    p { font-size: 1.2em; margin-bottom: 10px; }
-                    .name { font-size: 2.2em; font-weight: bold; margin: 30px 0; color: #333; }
-                    .event-title { font-size: 1.8em; color: #555; margin-bottom: 30px; }
-                    .verification-code { margin-top: 40px; font-size: 1em; color: #777; }
-                    .qr-code-img { margin-top: 20px; width: 100px; height: 100px; }
+                    h1 { 
+                        color: #003366; 
+                        font-size: 2.5em; 
+                        margin-bottom: 20px;
+                        font-weight: bold;
+                    }
+                    p { 
+                        font-size: 1.2em; 
+                        margin-bottom: 10px;
+                        line-height: 1.5;
+                    }
+                    .name { 
+                        font-size: 2.2em; 
+                        font-weight: bold; 
+                        margin: 30px 0; 
+                        color: #333;
+                        text-transform: uppercase;
+                    }
+                    .event-title { 
+                        font-size: 1.8em; 
+                        color: #555; 
+                        margin-bottom: 30px;
+                        font-style: italic;
+                    }
+                    .verification-code { 
+                        margin-top: 40px; 
+                        font-size: 1em; 
+                        color: #777;
+                        font-family: monospace;
+                    }
+                    .qr-code-img { 
+                        margin-top: 20px; 
+                        width: 100px; 
+                        height: 100px;
+                        image-rendering: -webkit-optimize-contrast;
+                        image-rendering: crisp-edges;
+                    }
                 </style>
             </head>
             <body>
@@ -131,20 +180,46 @@ class CertificateController extends Controller
             </html>
         ";
 
-        $pdf = Pdf::loadHtml($html)->setPaper('A4', 'landscape');
+        try {
+            // Generate PDF with higher quality settings
+            $pdf = Pdf::loadHtml($html)
+                ->setPaper('A4', 'landscape')
+                ->setOptions([
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled' => true,
+                    'dpi' => 300,
+                    'defaultFont' => 'Arial'
+                ]);
 
-        // Generate unique filename for PDF
-        $filename = 'certificates/' . $code . '.pdf';
-        Storage::put('public/' . $filename, $pdf->output()); // Save PDF to storage
+            // Generate unique filename for PDF
+            $filename = 'certificates/' . $code . '.pdf';
+            
+            // Save PDF to storage
+            Storage::put('public/' . $filename, $pdf->output());
 
-        $certificate = Certificate::create([
-            'participant_id' => $validated['participant_id'],
-            'event_id' => $validated['event_id'],
-            'certificate_path' => $filename, // Path to the saved PDF
-            'verification_code' => $code,
-        ]);
+            // Create certificate record
+            $certificate = Certificate::create([
+                'participant_id' => $validated['participant_id'],
+                'event_id' => $validated['event_id'],
+                'certificate_path' => $filename,
+                'verification_code' => $code,
+            ]);
 
-        return response()->json($certificate, 201);
+            // Send notification to participant
+            $participant->user->notify(new CertificateGenerated($certificate));
+
+            return response()->json([
+                'message' => 'Certificate generated successfully',
+                'certificate' => $certificate
+            ], 201);
+
+        } catch (\Exception $e) {
+            \Log::error('Certificate generation failed: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to generate certificate',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     // ✅ Download sertifikat

@@ -73,4 +73,8 @@ export class ParticipantService {
   getMyParticipantByEvent(eventId: number): Observable<Participant> {
     return this.http.get<Participant>(`${this.apiUrl}/event/${eventId}/me`);
   }
+
+  getParticipantStatus(eventId: number): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/events/${eventId}/participant-status`);
+  }
 }

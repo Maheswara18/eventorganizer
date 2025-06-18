@@ -48,6 +48,24 @@
             <ion-icon name="time-outline"></ion-icon>
             Terdaftar: {{ event.registration_date | date:'medium' }}
           </p>
+          <!-- Tambahan: Status Kehadiran & Sertifikat -->
+          <div class="status-badges" *ngIf="participantStatuses[event.id]">
+            <ion-badge color="success" *ngIf="participantStatuses[event.id]?.attendance_status === 'present'">
+              Hadir
+            </ion-badge>
+            <ion-badge color="medium" *ngIf="participantStatuses[event.id]?.attendance_status === 'pending'">
+              Belum Hadir
+            </ion-badge>
+            <ion-badge color="danger" *ngIf="participantStatuses[event.id]?.attendance_status === 'absent'">
+              Tidak Hadir
+            </ion-badge>
+            <ion-badge color="success" *ngIf="participantStatuses[event.id]?.certificate_status === 'ready'">
+              Sertifikat Siap
+            </ion-badge>
+            <ion-badge color="medium" *ngIf="participantStatuses[event.id]?.certificate_status === 'not_ready'">
+              Sertifikat Belum Siap
+            </ion-badge>
+          </div>
         </ion-label>
         <ion-badge [color]="getPaymentStatusColor(event.payment_status)" slot="end">
           {{ getPaymentStatusText(event.payment_status) }}

@@ -14,6 +14,15 @@ import { Subscription } from 'rxjs';
 import { ParticipantService } from '../../services/participant.service';
 import { CertificateService } from '../../services/certificate.service';
 
+// Tambahkan di luar class
+export interface ParticipantStatus {
+  attendance_status: string;
+  attendance_updated_at?: string;
+  certificate_status: string;
+  certificate_download_url?: string;
+  certificate_issued_at?: string;
+}
+
 @Component({
   standalone: true,
   selector: 'app-registered-events',
@@ -28,6 +37,7 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
   isLoading = true;
   environment = environment;
   private paymentStatusSubscription: Subscription;
+  participantStatuses: { [eventId: number]: ParticipantStatus | null } = {};
 
   constructor(
     private router: Router,
@@ -96,6 +106,15 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
       this.registeredEvents = events.map(event => ({
         ...event,
         payment_status: event.payment_status || 'belum_bayar'
+      }));
+      // Ambil status peserta untuk setiap event
+      await Promise.all(this.registeredEvents.map(async (event) => {
+        try {
+          const status = await this.participantService.getParticipantStatus(event.id).toPromise();
+          this.participantStatuses[event.id] = status;
+        } catch (err) {
+          this.participantStatuses[event.id] = null;
+        }
       }));
     } catch (error) {
       console.error('Error loading registered events:', error);
@@ -175,7 +194,6 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
         }
       ]
     });
-
     await alert.present();
   }
 
@@ -187,7 +205,6 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
         eventTitle: event.title
       }
     });
-
     await modal.present();
   }
 
@@ -197,12 +214,9 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
       this.selectedEvent = null;
       setTimeout(() => {
         this.router.navigate(['/payments'], {
-          queryParams: {
-            eventId: eventId,
-            returnUrl: '/registered-events'
-          }
+          queryParams: { eventId }
         });
-      }, 200);
+      }, 300);
     }
   }
 
@@ -211,16 +225,14 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
       message,
       duration: 2000,
       color,
-      position: 'bottom'
+      position: 'top'
     });
-    await toast.present();
+    toast.present();
   }
 
   handleImageError(event: Event) {
     const imgElement = event.target as HTMLImageElement;
-    if (imgElement) {
-      imgElement.src = this.environment.baseUrl + '/storage/images/default-event.jpg';
-    }
+    imgElement.src = this.environment.baseUrl + '/storage/images/default-event.jpg';
   }
 
   getPaymentStatusColor(status: FrontendPaymentStatus): string {
@@ -231,8 +243,6 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
         return 'warning';
       case 'failed':
         return 'danger';
-      case 'belum_bayar':
-        return 'medium';
       default:
         return 'medium';
     }
@@ -243,13 +253,26 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
       case 'completed':
         return 'Lunas';
       case 'pending':
-        return 'Menunggu Verifikasi Admin';
+        return 'Menunggu';
       case 'failed':
-        return 'Pembayaran Ditolak';
+        return 'Gagal';
       case 'belum_bayar':
         return 'Belum Bayar';
       default:
-        return 'Status Tidak Diketahui';
+        return '-';
     }
+  }
+
+  getAttendanceStatusText(status: string): string {
+    if (status === 'present') return 'Hadir';
+    if (status === 'absent') return 'Tidak Hadir';
+    if (status === 'pending') return 'Belum Hadir';
+    return '-';
+  }
+
+  getCertificateStatusText(status: string): string {
+    if (status === 'ready') return 'Sertifikat Siap';
+    if (status === 'not_ready') return 'Belum Siap';
+    return '-';
   }
 }

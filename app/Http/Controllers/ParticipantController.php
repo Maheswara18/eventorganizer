@@ -281,4 +281,28 @@ class ParticipantController extends Controller
 
         return response()->json($participant);
     }
+
+    public function getParticipantStatus($eventId)
+    {
+        $user = auth()->user();
+        
+        $participant = Participant::with(['event', 'certificate'])
+            ->where('user_id', $user->id)
+            ->where('event_id', $eventId)
+            ->first();
+
+        if (!$participant) {
+            return response()->json(['message' => 'Participant not found'], 404);
+        }
+
+        $status = [
+            'attendance_status' => $participant->attendance_status,
+            'attendance_updated_at' => $participant->attendance_updated_at,
+            'certificate_status' => $participant->certificate ? 'ready' : 'not_ready',
+            'certificate_download_url' => $participant->certificate ? url('/certificates/' . $participant->certificate->id . '/download') : null,
+            'certificate_issued_at' => $participant->certificate ? $participant->certificate->issued_at : null
+        ];
+
+        return response()->json($status);
+    }
 }

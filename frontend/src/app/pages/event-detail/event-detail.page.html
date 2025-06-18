@@ -9,15 +9,15 @@
 
 <ion-content>
   <div *ngIf="isLoading" class="ion-padding">
-    <ion-skeleton-text animated style="width: 100%; height: 200px;"></ion-skeleton-text>
-    <ion-skeleton-text animated style="width: 60%; margin-top: 16px;"></ion-skeleton-text>
-    <ion-skeleton-text animated style="width: 80%;"></ion-skeleton-text>
+    <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+    <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+    <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
   </div>
 
   <div *ngIf="!isLoading && event" class="event-detail-container">
     <!-- Event Header Image -->
     <div class="event-header">
-      <img [src]="environment.baseUrl + '/' + event.image_path" 
+      <img [src]="event.image_url" 
            [alt]="event.title"
            class="event-image"
            onError="this.src='assets/default-event.jpg'">
@@ -34,7 +34,7 @@
           <ion-icon name="calendar-outline" color="primary"></ion-icon>
           <div class="info-text">
             <small>Tanggal Mulai</small>
-            <strong>{{ formatDate(event.start_datetime) }}</strong>
+            <strong>{{ event.start_datetime | date:'longDate' }}</strong>
           </div>
         </ion-card-content>
       </ion-card>
@@ -54,7 +54,7 @@
           <ion-icon name="cash-outline" color="primary"></ion-icon>
           <div class="info-text">
             <small>Biaya</small>
-            <strong>Rp {{ formatPrice(event.price) | number:'1.0-0' }}</strong>
+            <strong>Rp {{ event.price | number:'1.0-0' }}</strong>
           </div>
         </ion-card-content>
       </ion-card>
@@ -77,6 +77,43 @@
       </ion-card-header>
       <ion-card-content>
         <p class="description-text">{{ event.description }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Participant Status -->
+    <ion-card *ngIf="participantStatus" class="status-card">
+      <ion-card-header>
+        <ion-card-title>Status Kehadiran</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item>
+            <ion-label>
+              <h2>Status Kehadiran</h2>
+              <p>{{ getAttendanceStatusText(participantStatus.attendance_status) }}</p>
+              <p *ngIf="participantStatus.attendance_updated_at">
+                Diperbarui: {{ participantStatus.attendance_updated_at | date:'medium' }}
+              </p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h2>Status Sertifikat</h2>
+              <p>{{ getCertificateStatusText(participantStatus.certificate_status) }}</p>
+              <p *ngIf="participantStatus.certificate_issued_at">
+                Diterbitkan: {{ participantStatus.certificate_issued_at | date:'medium' }}
+              </p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="participantStatus.certificate_status === 'ready'">
+            <ion-button expand="block" (click)="downloadCertificate()">
+              <ion-icon name="download-outline" slot="start"></ion-icon>
+              Unduh Sertifikat
+            </ion-button>
+          </ion-item>
+        </ion-list>
       </ion-card-content>
     </ion-card>
   </div>
