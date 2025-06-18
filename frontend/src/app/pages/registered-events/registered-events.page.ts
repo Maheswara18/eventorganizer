@@ -11,6 +11,8 @@ import { RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { QrCodeComponent } from '../../components/qr-code/qr-code.component';
 import { Subscription } from 'rxjs';
+import { ParticipantService } from '../../services/participant.service';
+import { CertificateService } from '../../services/certificate.service';
 
 @Component({
   standalone: true,
@@ -22,6 +24,7 @@ import { Subscription } from 'rxjs';
 export class RegisteredEventsPage implements OnInit, OnDestroy {
   registeredEvents: RegisteredEvent[] = [];
   selectedEvent: RegisteredEvent | null = null;
+  selectedParticipant: any = null;
   isLoading = true;
   environment = environment;
   private paymentStatusSubscription: Subscription;
@@ -33,7 +36,9 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
     private loadingController: LoadingController,
     private toastController: ToastController,
     private alertController: AlertController,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private participantService: ParticipantService,
+    private certificateService: CertificateService
   ) {
     this.paymentStatusSubscription = this.paymentService.paymentStatus$.subscribe(
       status => {
@@ -100,8 +105,38 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
     }
   }
 
-  showEventDetail(event: RegisteredEvent) {
+  async showEventDetail(event: RegisteredEvent) {
     this.selectedEvent = event;
+    try {
+      this.selectedParticipant = await this.participantService.getMyParticipantByEvent(event.id).toPromise();
+    } catch (err) {
+      this.selectedParticipant = null;
+    }
+  }
+
+  async downloadCertificate() {
+    if (!this.selectedParticipant) return;
+    const loading = await this.loadingController.create({ message: 'Mengunduh sertifikat...' });
+    await loading.present();
+    try {
+      const blob = await this.certificateService.downloadCertificate(this.selectedParticipant.id).toPromise();
+      if (!blob) {
+        this.showToast('File sertifikat tidak ditemukan', 'danger');
+        await loading.dismiss();
+        return;
+      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sertifikat-event-${this.selectedEvent?.id}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      this.showToast('Sertifikat berhasil diunduh', 'success');
+    } catch (err) {
+      this.showToast('Gagal mengunduh sertifikat', 'danger');
+    } finally {
+      await loading.dismiss();
+    }
   }
 
   async unregisterFromEvent(eventId: number) {
@@ -125,7 +160,10 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
             try {
               await this.eventsService.unregisterFromEvent(eventId);
               this.registeredEvents = this.registeredEvents.filter(event => event.id !== eventId);
-              this.selectedEvent = null;
+              if (this.selectedEvent && this.selectedEvent.id === eventId) {
+                this.selectedEvent = null;
+                this.selectedParticipant = null;
+              }
               this.showToast('Pendaftaran berhasil dibatalkan', 'success');
             } catch (error) {
               console.error('Error unregistering from event:', error);

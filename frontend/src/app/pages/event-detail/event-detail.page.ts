@@ -9,6 +9,9 @@ import { RegistrationFormComponent } from '../../components/registration-form/re
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
+import { CertificateService } from '../../services/certificate.service';
+import { ParticipantService } from '../../services/participant.service';
+import { Participant } from '../../interfaces/participant.interface';
 
 interface Event {
   id: number;
@@ -53,6 +56,8 @@ export class EventDetailPage implements OnInit {
   isRegistered = false;
   isAdmin = false;
   environment = environment;
+  participant: Participant | null = null;
+  isPresent: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -63,12 +68,15 @@ export class EventDetailPage implements OnInit {
     private alertController: AlertController,
     private modalCtrl: ModalController,
     private formTemplateService: FormTemplateService,
-    private authService: AuthService
+    private authService: AuthService,
+    private certificateService: CertificateService,
+    private participantService: ParticipantService
   ) {}
 
   async ngOnInit() {
     await this.checkAdminStatus();
     await this.loadEvent();
+    await this.loadParticipant();
   }
 
   private async checkAdminStatus() {
@@ -169,5 +177,78 @@ export class EventDetailPage implements OnInit {
 
   formatPrice(price: string): number {
     return parseFloat(price);
+  }
+
+  async loadParticipant() {
+    if (!this.event) return;
+    try {
+      this.participant = await firstValueFrom(this.participantService.getMyParticipantByEvent(this.event.id));
+      this.isPresent = this.participant.attendance_status === 'present';
+    } catch (err) {
+      this.participant = null;
+      this.isPresent = false;
+    }
+  }
+
+  async downloadCertificate() {
+    if (!this.participant) return;
+    try {
+      const loading = await this.loadingController.create({ message: 'Mengunduh sertifikat...' });
+      await loading.present();
+      const blob = await firstValueFrom(this.certificateService.downloadCertificate(this.participant.id));
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sertifikat-event-${this.event.id}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      await loading.dismiss();
+      this.showToast('Sertifikat berhasil diunduh', 'success');
+    } catch (err) {
+      this.showToast('Gagal mengunduh sertifikat', 'danger');
+    }
+  }
+
+  private async showToast(message: string, color: 'success' | 'danger' | 'warning') {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2000,
+      color,
+      position: 'bottom'
+    });
+    await toast.present();
+  }
+
+  async batalkanPendaftaran() {
+    if (!this.event) return;
+    const alert = await this.alertController.create({
+      header: 'Konfirmasi',
+      message: 'Apakah Anda yakin ingin membatalkan pendaftaran event ini?',
+      buttons: [
+        {
+          text: 'Batal',
+          role: 'cancel'
+        },
+        {
+          text: 'Ya, Batalkan',
+          role: 'confirm',
+          handler: async () => {
+            const loading = await this.loadingController.create({ message: 'Membatalkan pendaftaran...' });
+            await loading.present();
+            try {
+              await this.eventsService.unregisterFromEvent(this.event.id);
+              this.isRegistered = false;
+              await this.loadParticipant();
+              this.showToast('Pendaftaran berhasil dibatalkan', 'success');
+            } catch (err) {
+              this.showToast('Gagal membatalkan pendaftaran', 'danger');
+            } finally {
+              await loading.dismiss();
+            }
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 } 

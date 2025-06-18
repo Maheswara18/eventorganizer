@@ -85,7 +85,11 @@ const routes: Routes = [
     path: 'admin/payments',
     loadComponent: () => import('./pages/admin/payments/admin-payments.page').then(m => m.AdminPaymentsPage),
     canActivate: [AuthGuard, AdminGuard]
-  }
+  },
+  {
+    path: 'settings',
+    loadComponent: () => import('./pages/settings/settings.page').then(m => m.SettingsPage)
+  },
 ];
 
 @NgModule({

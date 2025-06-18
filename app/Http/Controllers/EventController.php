@@ -101,7 +101,7 @@ class EventController extends Controller
                 'title' => 'required|string',
                 'description' => 'required|string',
                 'provides_certificate' => 'boolean',
-                'price' => 'required|numeric|min:0',
+                'price' => 'nullable|numeric|min:0',
                 'location' => 'required|string',
                 'status' => 'required|in:active,ended',
                 'max_participants' => 'required|integer|min:1',

@@ -265,4 +265,20 @@ class ParticipantController extends Controller
             'participant' => $participant
         ]);
     }
+
+    // Mendapatkan data participant berdasarkan event dan user yang sedang login
+    public function getMyParticipantByEvent($eventId)
+    {
+        $user = Auth::user();
+        $participant = Participant::with(['user', 'event', 'formResponses.field'])
+            ->where('user_id', $user->id)
+            ->where('event_id', $eventId)
+            ->first();
+
+        if (!$participant) {
+            return response()->json(['message' => 'Not registered'], 404);
+        }
+
+        return response()->json($participant);
+    }
 }

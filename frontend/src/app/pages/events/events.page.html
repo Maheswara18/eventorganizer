@@ -52,7 +52,8 @@
         <p>{{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}</p>
       </ion-label>
         <ion-note slot="end" color="primary">
-          Rp {{ formatPrice(event.price) | number:'1.0-0' }}
+          <span *ngIf="event.price === 0">Gratis</span>
+          <span *ngIf="event.price > 0">Rp {{ formatPrice(event.price) | number:'1.0-0' }}</span>
         </ion-note>
     </ion-item>
 

@@ -123,10 +123,13 @@ export class EditEventPage implements OnInit {
 
       try {
         const formData = new FormData();
-        const eventData = this.eventForm.value;
+        const eventData = this.eventForm.getRawValue();
 
         // Append form fields to FormData
         Object.keys(eventData).forEach(key => {
+          if (key === 'isFree') {
+            return;
+          }
           if (key === 'provides_certificate') {
             formData.append(key, eventData[key] ? '1' : '0');
           } else {

@@ -87,14 +87,17 @@
       <div class="registration-toolbar">
         <div class="registration-info">
           <ion-text color="medium">Status:</ion-text>
-          <ion-badge [color]="isRegistered ? 'success' : 'primary'">
-            {{ isRegistered ? 'Terdaftar' : 'Belum Terdaftar' }}
+          <ion-badge [color]="participant?.attendance_status === 'present' ? 'success' : (isRegistered ? 'primary' : 'medium')">
+            {{ participant?.attendance_status === 'present' ? 'Hadir' : (isRegistered ? 'Terdaftar' : 'Belum Terdaftar') }}
           </ion-badge>
         </div>
-        <ion-button 
-          *ngIf="!isRegistered"
-          (click)="showRegistrationForm()" 
-          expand="block">
+        <ion-button *ngIf="participant?.attendance_status === 'present'" (click)="downloadCertificate()" expand="block" color="success">
+          Download Sertifikat
+        </ion-button>
+        <ion-button *ngIf="isRegistered && participant?.attendance_status !== 'present'" color="danger" expand="block" (click)="batalkanPendaftaran()">
+          Batalkan Daftar
+        </ion-button>
+        <ion-button *ngIf="!isRegistered && (!participant || participant?.attendance_status !== 'present')" (click)="showRegistrationForm()" expand="block">
           Daftar Sekarang
         </ion-button>
       </div>

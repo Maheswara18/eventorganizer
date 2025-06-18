@@ -125,6 +125,14 @@
                   <p>{{ getPaymentStatusText(selectedEvent.payment_status) }}</p>
                 </ion-label>
               </ion-item>
+
+              <ion-item *ngIf="selectedParticipant">
+                <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
+                <ion-label>
+                  <h3>Status Kehadiran</h3>
+                  <p>{{ selectedParticipant.attendance_status === 'present' ? 'Hadir' : (selectedParticipant.attendance_status === 'absent' ? 'Tidak Hadir' : 'Belum Hadir') }}</p>
+                </ion-label>
+              </ion-item>
             </ion-list>
 
             <div class="ion-padding-top">
@@ -140,7 +148,14 @@
                 Lihat QR Code Saya
               </ion-button>
 
-              <ion-button expand="block" color="danger" (click)="unregisterFromEvent(selectedEvent.id)">
+              <!-- Tombol Download Sertifikat jika sudah hadir -->
+              <ion-button expand="block" color="success" *ngIf="selectedParticipant?.attendance_status === 'present'" (click)="downloadCertificate()">
+                <ion-icon name="download-outline" slot="start"></ion-icon>
+                Download Sertifikat
+              </ion-button>
+
+              <!-- Tombol Batalkan jika belum hadir -->
+              <ion-button expand="block" color="danger" *ngIf="selectedParticipant && selectedParticipant.attendance_status !== 'present'" (click)="unregisterFromEvent(selectedEvent.id)">
                 <ion-icon name="trash-outline" slot="start"></ion-icon>
                 Batalkan Pendaftaran
               </ion-button>
