@@ -16,29 +16,32 @@
   <ion-list>
     <ion-item *ngFor="let certificate of certificates">
       <ion-label>
-        <h2>{{ certificate.event_name }}</h2>
-        <p>Diterbitkan: {{ certificate.issued_date | date }}</p>
+        <h2>{{ certificate.event?.title || 'Event Tidak Dikenal' }}</h2>
+        <p>Diterbitkan: {{ certificate.issued_at | date:'dd MMMM yyyy' }}</p>
+        <p>Kode Verifikasi: {{ certificate.verification_code }}</p>
       </ion-label>
-      <ion-button slot="end" (click)="downloadCertificate(certificate.id)">
-        <ion-icon slot="icon-only" name="download-outline"></ion-icon>
-      </ion-button>
-      <ion-button slot="end" (click)="verifyCertificate(certificate.id)">
-        <ion-icon slot="icon-only" name="shield-checkmark-outline"></ion-icon>
-      </ion-button>
+      <ion-buttons slot="end">
+        <ion-button (click)="downloadCertificate(certificate.id)" color="primary">
+          <ion-icon slot="icon-only" name="download-outline"></ion-icon>
+        </ion-button>
+        <ion-button (click)="verifyCertificate(certificate.id)" color="success">
+          <ion-icon slot="icon-only" name="shield-checkmark-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
     </ion-item>
   </ion-list>
 
   <ion-list *ngIf="!loading && certificates.length === 0">
     <ion-item>
       <ion-label class="ion-text-center">
-        Belum ada sertifikat yang diterbitkan.
+        <p>Belum ada sertifikat yang diterbitkan.</p>
       </ion-label>
     </ion-item>
   </ion-list>
 
   <ion-spinner *ngIf="loading" class="ion-margin-top ion-text-center"></ion-spinner>
 
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="isAdmin">
     <ion-fab-button routerLink="/create-certificate">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>

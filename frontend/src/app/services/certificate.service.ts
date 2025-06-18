@@ -34,7 +34,7 @@ export class CertificateService {
   }
 
   generateCertificate(eventId: number, participantId: number): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/generate`, {
+    return this.http.post(this.apiUrl, {
       event_id: eventId,
       participant_id: participantId
     }, {

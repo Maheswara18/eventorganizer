@@ -79,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/participants/{id}', [ParticipantController::class, 'show']);
     Route::put('/participants/{id}', [ParticipantController::class, 'update']);
     Route::patch('/participants/{id}/status', [ParticipantController::class, 'updateStatus']);
+    Route::get('/participants/event/{eventId}/me', [\App\Http\Controllers\ParticipantController::class, 'getMyParticipantByEvent']);
 });
 
 
@@ -88,6 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/certificates', [CertificateController::class, 'index']);
     Route::post('/certificates', [CertificateController::class, 'store']);
     Route::get('/certificates/{id}', [CertificateController::class, 'show']);
+    Route::get('/certificates/{id}/download', [CertificateController::class, 'download']);
 });
 
 // endpoint publik untuk verifikasi sertifikat

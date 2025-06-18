@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('certificate_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('html_content');
-            $table->json('fields')->nullable();
+            $table->json('elements')->nullable();
+            $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
     }

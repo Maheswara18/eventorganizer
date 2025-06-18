@@ -33,8 +33,8 @@ export class EventsPage implements OnInit {
     private authService: AuthService
   ) {}
 
-  formatPrice(price: number): number {
-    return price;
+  formatPrice(price: any): number {
+    return Number(price) || 0;
   }
 
   async ngOnInit() {
@@ -78,10 +78,13 @@ export class EventsPage implements OnInit {
       console.log('Events loaded:', events); // Debug log
 
       if (Array.isArray(events)) {
-        this.events = events;
-        this.originalEvents = [...events];
+        this.events = events.map(event => ({
+          ...event,
+          price: Number(event.price)
+        }));
+        this.originalEvents = [...this.events];
         
-        if (events.length === 0) {
+        if (this.events.length === 0) {
           this.error = 'Tidak ada event yang tersedia';
         }
       } else {

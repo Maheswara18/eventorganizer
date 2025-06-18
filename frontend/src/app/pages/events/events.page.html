@@ -15,7 +15,8 @@
     </ion-buttons>
   </ion-toolbar>
 
-  <ion-toolbar>
+  <!-- Toolbar khusus searchbar -->
+  <ion-toolbar class="search-toolbar">
     <ion-searchbar
       placeholder="Cari event..."
       (ionInput)="searchEvents($event)"
@@ -38,34 +39,44 @@
   </ion-item>
 
   <!-- Events List -->
-  <ion-list *ngIf="!isLoading && events.length > 0">
-    <ion-item-sliding *ngFor="let event of events">
-      <ion-item [routerLink]="['/event-detail', event.id]" detail>
-      <ion-thumbnail slot="start" *ngIf="event.image_path">
-        <img [src]="environment.baseUrl + '/' + event.image_path" [alt]="event.title">
-      </ion-thumbnail>
-      <ion-label>
-        <h2>{{ event.title }}</h2>
-        <ion-badge *ngIf="event.provides_certificate == 1" color="success" class="cert-badge">Dapat Sertifikat</ion-badge>
-        <ion-badge *ngIf="event.provides_certificate == 0" color="medium" class="cert-badge">Tidak Dapat Sertifikat</ion-badge>
-        <p>{{ event.location }}</p>
-        <p>{{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}</p>
-      </ion-label>
-        <ion-note slot="end" color="primary">
-          Rp {{ formatPrice(event.price) | number:'1.0-0' }}
-        </ion-note>
-    </ion-item>
+  <div *ngIf="!isLoading && events.length > 0">
+    <ion-card *ngFor="let event of events" class="event-card" [routerLink]="['/event-detail', event.id]">
+      <ion-card-content class="event-card-content" style="display: flex; gap: 12px; align-items: center;">
+        <ion-thumbnail slot="start" *ngIf="event.image_path">
+          <img [src]="environment.baseUrl + '/' + event.image_path" [alt]="event.title">
+        </ion-thumbnail>
 
-      <ion-item-options side="end" *ngIf="isAdmin">
-        <ion-item-option color="primary" (click)="editEvent(event.id)">
-          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
-        </ion-item-option>
-        <ion-item-option color="danger" (click)="deleteEvent(event.id)">
-          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-        </ion-item-option>
-      </ion-item-options>
-    </ion-item-sliding>
-  </ion-list>
+        <ion-label>
+          <h2>{{ event.title }}</h2>
+          <ion-badge *ngIf="event.provides_certificate == 1" color="success" class="cert-badge">
+            Dapat Sertifikat
+          </ion-badge>
+          <ion-badge *ngIf="event.provides_certificate == 0" color="medium" class="cert-badge">
+            Tidak Dapat Sertifikat
+          </ion-badge>
+          <p>{{ event.location }}</p>
+          <p>{{ event.start_datetime | date:'dd MMM yyyy HH:mm' }}</p>
+        </ion-label>
+
+        <ion-note color="primary">
+          <span *ngIf="event.price === 0">Gratis</span>
+          <span *ngIf="event.price > 0">Rp {{ formatPrice(event.price) | number:'1.0-0' }}</span>
+        </ion-note>
+      </ion-card-content>
+
+      <!-- Admin Actions -->
+      <ion-grid *ngIf="isAdmin">
+        <ion-row class="ion-justify-content-end ion-padding-end">
+          <ion-button size="small" fill="clear" color="primary" (click)="editEvent(event.id)">
+            <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+          <ion-button size="small" fill="clear" color="danger" (click)="deleteEvent(event.id)">
+            <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-row>
+      </ion-grid>
+    </ion-card>
+  </div>
 
   <!-- No Events Message -->
   <ion-item *ngIf="!isLoading && !error && events.length === 0" lines="none">
@@ -74,6 +85,7 @@
     </ion-label>
   </ion-item>
 
+  <!-- FAB Button -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="isAdmin">
     <ion-fab-button routerLink="/create-event">
       <ion-icon name="add"></ion-icon>

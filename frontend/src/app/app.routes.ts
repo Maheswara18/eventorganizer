@@ -63,6 +63,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard, AdminGuard]
   },
   {
+    path: 'create-certificate',
+    loadComponent: () => import('./pages/certificates/certificate-templates/certificate-templates.page').then(m => m.CertificateTemplatesPage),
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
     path: 'profile',
     loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage),
     canActivate: [AuthGuard]
@@ -84,10 +89,6 @@ export const routes: Routes = [
   {
     path: 'event-qr',
     loadComponent: () => import('./pages/event-qr/event-qr.page').then(m => m.EventQrPage)
-  },
-  {
-    path: 'settings',
-    loadComponent: () => import('./pages/settings/settings.page').then(m => m.SettingsPage)
   },
   {
     path: 'admin/payments',

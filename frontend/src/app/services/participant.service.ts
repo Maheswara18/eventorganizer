@@ -69,4 +69,8 @@ export class ParticipantService {
       responseType: 'blob'
     });
   }
+
+  getMyParticipantByEvent(eventId: number): Observable<Participant> {
+    return this.http.get<Participant>(`${this.apiUrl}/event/${eventId}/me`);
+  }
 }

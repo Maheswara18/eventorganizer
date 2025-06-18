@@ -39,15 +39,6 @@
           <ion-input type="password" [(ngModel)]="password_confirmation" name="password_confirmation" required></ion-input>
         </ion-item>
 
-        <!-- Role -->
-        <ion-item lines="none" class="custom-input">
-          <ion-label>Role</ion-label>
-          <ion-select [(ngModel)]="role" name="role" placeholder="Pilih Role" required>
-            <ion-select-option value="admin">Admin</ion-select-option>
-            <ion-select-option value="participant">Participant</ion-select-option>
-          </ion-select>
-        </ion-item>
-
         <!-- Tombol Register -->
         <ion-button expand="block" class="register-button" (click)="register()">REGISTER</ion-button>
 

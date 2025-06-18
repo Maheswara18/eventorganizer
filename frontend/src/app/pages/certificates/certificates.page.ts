@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CertificateService } from '../../services/certificate.service';
-import { LoadingController, IonicModule, ToastController } from '@ionic/angular';
+import { LoadingController, IonicModule, ToastController, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -25,7 +25,8 @@ export class CertificatesPage implements OnInit {
     private certificateService: CertificateService,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private authService: AuthService
+    private authService: AuthService,
+    private alertCtrl: AlertController
   ) { }
 
   ngOnInit() {
@@ -56,6 +57,38 @@ export class CertificatesPage implements OnInit {
     }
   }
 
+  async verifyCertificate(certificateId: number) {
+    const loading = await this.loadingCtrl.create({
+      message: 'Memverifikasi sertifikat...'
+    });
+    await loading.present();
+
+    try {
+      const certificate = this.certificates.find(c => c.id === certificateId);
+      if (!certificate) {
+        throw new Error('Sertifikat tidak ditemukan');
+      }
+
+      const result = await this.certificateService.verifyCertificate({ 
+        verification_code: certificate.verification_code 
+      }).toPromise();
+
+      const alert = await this.alertCtrl.create({
+        header: result.valid ? 'Sertifikat Valid' : 'Sertifikat Tidak Valid',
+        message: result.valid ? 
+          `Sertifikat ini diterbitkan untuk ${result.certificate.participant_name} pada acara "${result.certificate.event_title}"` :
+          result.message,
+        buttons: ['OK']
+      });
+      await alert.present();
+    } catch (error) {
+      console.error('Error verifying certificate:', error);
+      this.showToast('Gagal memverifikasi sertifikat', 'danger');
+    } finally {
+      loading.dismiss();
+    }
+  }
+
   async downloadCertificate(certificateId: number) {
     const loading = await this.loadingCtrl.create({
       message: 'Mengunduh sertifikat...'
@@ -66,40 +99,22 @@ export class CertificatesPage implements OnInit {
       const blob = await this.certificateService.downloadCertificate(certificateId).toPromise();
 
       if (!blob) {
-        throw new Error('File tidak ditemukan.');
+        throw new Error('File tidak ditemukan');
       }
 
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `certificate-${certificateId}.pdf`;
+      link.download = `sertifikat-${certificateId}.pdf`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
       this.showToast('Sertifikat berhasil diunduh', 'success');
     } catch (error) {
       console.error('Error downloading certificate:', error);
       this.showToast('Gagal mengunduh sertifikat', 'danger');
-    } finally {
-      loading.dismiss();
-    }
-  }
-
-  async verifyCertificate(certificateId: number) {
-    const loading = await this.loadingCtrl.create({
-      message: 'Memverifikasi sertifikat...'
-    });
-    await loading.present();
-
-    try {
-      const result = await this.certificateService.verifyCertificate({ certificateId }).toPromise();
-      this.showToast(
-        result.valid ? 'Sertifikat valid' : 'Sertifikat tidak valid',
-        result.valid ? 'success' : 'warning'
-      );
-    } catch (error) {
-      console.error('Error verifying certificate:', error);
-      this.showToast('Gagal memverifikasi sertifikat', 'danger');
     } finally {
       loading.dismiss();
     }
