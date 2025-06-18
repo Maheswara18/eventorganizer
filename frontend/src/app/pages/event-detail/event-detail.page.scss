@@ -5,10 +5,10 @@ ion-content {
 /* === HEADER (atas) biru tua === */
 ion-header,
 ion-toolbar {
-  --background: #003366 !important;
+  --background: #3880ff !important;
   --color: white;
-  --ion-color-base: #003366;
-  --ion-toolbar-background: #003366;
+  --ion-color-base: #3880ff;
+  --ion-toolbar-background: #3880ff;
   --ion-toolbar-color: white;
   color: white;
 }
@@ -95,7 +95,7 @@ ion-spinner {
     left: 0;
     right: 0;
     padding: 20px;
-    background: linear-gradient(to top, rgba(0, 51, 102, 0.9), transparent); // biru tua gradien
+    background: linear-gradient(to top, #3880ff, transparent); // biru tua gradien
     color: white;
 
     h1 {
@@ -171,7 +171,7 @@ ion-spinner {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background-color: #003366; // biru tua
+  background-color: #3880ff;
   border-top: none;
 
   .registration-info {
