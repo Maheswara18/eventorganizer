@@ -1,0 +1,87 @@
+:host {
+  --ion-background-color: #ffffff;
+  --ion-text-color: #1a1a1a;
+}
+
+ion-header {
+  ion-toolbar {
+    --background: #007bff; // Biru utama
+    --color: #ffffff;
+
+    ion-title {
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    ion-back-button {
+      color: #ffffff;
+    }
+  }
+}
+
+ion-content {
+  --background: #ffffff;
+
+  ion-list {
+    margin-bottom: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.1);
+
+    ion-item {
+      --background: #ffffff;
+      --color: #000000;
+      --inner-border-width: 0;
+
+      border-bottom: 1px solid #e0e0e0;
+
+      ion-icon {
+        color: #007bff;
+        font-size: 22px;
+      }
+
+      ion-label {
+        font-size: 16px;
+      }
+
+      ion-toggle {
+        --handle-background: #ffffff;
+        --handle-background-checked: #ffffff;
+        --background: #b0cfff;
+        --background-checked: #007bff;
+      }
+
+      ion-select {
+        --placeholder-color: #999;
+        --color: #007bff;
+      }
+
+      ion-note {
+        color: #007bff;
+        font-weight: 500;
+      }
+    }
+
+    ion-list-header {
+      background-color: #ffffff;
+      ion-label {
+        color: #007bff;
+        font-weight: bold;
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+    }
+  }
+
+  ion-button {
+    --background: #dc3545; // Warna merah untuk tombol logout
+    --background-activated: #c82333;
+    --color: #ffffff;
+    font-weight: 600;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+}
