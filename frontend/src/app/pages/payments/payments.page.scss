@@ -1,14 +1,52 @@
-ion-content {
-  --padding-top: 16px;
-  --padding-bottom: 16px;
+:host {
+  ion-content {
+    --background: #ffffff !important;
+    background-color: #ffffff !important;
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+  }
 }
 
+/* Toolbar */
+ion-toolbar {
+  --background: var(--ion-color-primary);
+  --color: #ffffff;
+}
+
+/* Back button */
+ion-back-button {
+  color: #ffffff;
+  font-size: 20px;
+}
+
+/* Segment */
+ion-segment {
+  background-color: #e0e0e0;
+  border-radius: 8px;
+  margin: 8px;
+
+  ion-segment-button {
+    --color: #666666;
+    --color-checked: #ffffff;
+    --background-checked: var(--ion-color-primary);
+    --indicator-color: transparent;
+    font-weight: 500;
+    font-size: 15px;
+    border-radius: 6px;
+  }
+}
+
+/* Default ion-item */
 ion-item {
   --padding-start: 16px;
   --padding-end: 16px;
   --padding-top: 8px;
   --padding-bottom: 8px;
-  margin-bottom: 8px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  --background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
   h2 {
     font-weight: bold;
@@ -22,39 +60,65 @@ ion-item {
   }
 }
 
+/* No-border items (empty state) */
+ion-item.no-border {
+  border: none !important;
+  box-shadow: none !important;
+  --background: transparent !important;
+  background-color: transparent !important;
+}
+
+ion-label.ion-text-center {
+  background-color: transparent !important;
+}
+
+/* Empty state styling */
+.empty-state {
+  background-color: #f8f8f8;
+  border-radius: 12px;
+  padding: 32px 16px;
+  text-align: center;
+  box-shadow: none !important;
+  border: none;
+
+  .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #666;
+  }
+
+  h2 {
+    margin: 8px 0;
+    color: #333;
+    font-weight: 600;
+  }
+
+  p {
+    color: #666;
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+/* List cleanup */
+ion-list {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Badge */
 ion-badge {
   text-transform: capitalize;
   padding: 4px 8px;
   border-radius: 4px;
 }
 
+/* End button spacing */
 ion-buttons[slot="end"] {
   margin-left: 8px;
 }
 
-.empty-state {
-  padding: 32px 16px;
-  text-align: center;
-  
-  .empty-state-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    color: var(--ion-color-medium);
-  }
-
-  h2 {
-    margin: 8px 0;
-    color: var(--ion-color-dark);
-    font-weight: 600;
-  }
-
-  p {
-    color: var(--ion-color-medium);
-    margin: 0;
-  }
-}
-
-// Styles untuk form pembayaran
+/* File Upload */
 .file-input-container {
   position: relative;
   display: flex;
@@ -89,18 +153,20 @@ ion-buttons[slot="end"] {
   }
 }
 
+/* Preview Image */
 .preview-image {
   margin: 16px 0;
   text-align: center;
-  
+
   img {
     max-width: 100%;
     max-height: 200px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 }
 
+/* Form */
 form {
   ion-item {
     --background: transparent;
@@ -122,7 +188,8 @@ form {
     margin-bottom: 8px;
   }
 
-  ion-input, ion-select {
+  ion-input,
+  ion-select {
     --padding-start: 0;
     margin-top: 8px;
     font-size: 16px;
@@ -134,7 +201,7 @@ form {
   }
 }
 
-// Responsive adjustments
+/* Responsive */
 @media (max-width: 768px) {
   ion-col {
     margin-bottom: 8px;
@@ -145,7 +212,7 @@ form {
   }
 }
 
-// Payment history item styling
+/* Payment history styling */
 .payment-history-item {
   --padding-start: 8px;
   --padding-end: 8px;
@@ -153,7 +220,8 @@ form {
   --padding-bottom: 12px;
   margin: 8px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
   ion-thumbnail {
     --size: 72px;
@@ -203,51 +271,71 @@ form {
   }
 }
 
-// Form styling
-ion-item {
-  --padding-start: 0;
-  --border-color: var(--ion-color-light);
-  margin-bottom: 16px;
-
-  ion-label {
-    color: var(--ion-color-medium);
-    font-weight: 500;
-  }
-
-  ion-input, ion-select {
-    --padding-start: 0;
-    margin-top: 8px;
-  }
-}
-
-// Segment styling
-ion-segment {
-  padding: 4px;
-  
-  ion-segment-button {
-    --color: var(--ion-color-medium);
-    --color-checked: var(--ion-color-primary);
-    --indicator-color: var(--ion-color-primary);
-  }
-}
-
-// Refresher styling
+/* Refresher */
 ion-refresher {
-  background: var(--ion-background-color);
+  background: #ffffff;
 }
 
-// Payment proof modal styling
+/* Modal bukti pembayaran */
 .proof-image-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 200px;
-  
+
   img {
     max-width: 100%;
     max-height: 80vh;
     object-fit: contain;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
-} 
+}
+
+.no-background,
+.no-background ion-label,
+.no-background ion-item,
+.no-background ion-list {
+  background: transparent !important;
+  --background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.empty-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh; /* agar vertical center */
+  padding: 16px;
+}
+
+.custom-empty-card {
+  background-color: #eaeaea;
+  border: 2px solid #000000;
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  width: 100%;
+  max-width: 320px;
+  box-sizing: border-box;
+
+  .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #000;
+  }
+
+  h2 {
+    margin: 8px 0;
+    color: #000;
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  p {
+    color: #333;
+    margin: 0;
+    font-size: 14px;
+  }
+}

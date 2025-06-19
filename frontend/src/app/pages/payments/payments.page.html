@@ -38,17 +38,13 @@
   <!-- Event yang belum dibayar -->
   <div *ngIf="activeSegment === 'registered'">
     <!-- Empty state untuk event yang belum dibayar -->
-    <ion-list *ngIf="!isLoading && unpaidEvents.length === 0">
-      <ion-item lines="none" class="ion-text-center">
-        <ion-label class="ion-text-center">
-          <div class="empty-state">
-            <ion-icon name="calendar-outline" class="empty-state-icon"></ion-icon>
-            <h2>Tidak Ada Event</h2>
-            <p>Semua event Anda sudah dibayar</p>
-          </div>
-        </ion-label>
-      </ion-item>
-    </ion-list>
+    <div class="empty-wrapper" *ngIf="!isLoading && unpaidEvents.length === 0">
+      <div class="custom-empty-card">
+        <ion-icon name="calendar-outline" class="empty-state-icon"></ion-icon>
+        <h2>Tidak Ada Event</h2>
+        <p>Semua event Anda sudah dibayar</p>
+      </div>
+    </div>
 
     <!-- Daftar event yang belum dibayar -->
     <ion-list *ngIf="!isLoading && unpaidEvents.length > 0">
@@ -83,17 +79,13 @@
   <!-- Riwayat pembayaran -->
   <div *ngIf="activeSegment === 'payments'">
     <!-- Empty state untuk riwayat pembayaran -->
-    <ion-list *ngIf="!isLoading && paymentHistory.length === 0">
-      <ion-item lines="none" class="ion-text-center">
-        <ion-label class="ion-text-center">
-          <div class="empty-state">
-            <ion-icon name="receipt-outline" class="empty-state-icon"></ion-icon>
-            <h2>Belum Ada Pembayaran</h2>
-            <p>Riwayat pembayaran Anda akan muncul di sini</p>
-          </div>
-        </ion-label>
-      </ion-item>
-    </ion-list>
+    <div class="empty-wrapper" *ngIf="!isLoading && paymentHistory.length === 0">
+      <div class="custom-empty-card">
+        <ion-icon name="receipt-outline" class="empty-state-icon"></ion-icon>
+        <h2>Belum Ada Pembayaran</h2>
+        <p>Riwayat pembayaran Anda akan muncul di sini</p>
+      </div>
+    </div>
 
     <!-- Daftar riwayat pembayaran -->
     <ion-list *ngIf="!isLoading && paymentHistory.length > 0">

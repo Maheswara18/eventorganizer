@@ -14,7 +14,7 @@
   </div>
 
   <!-- Empty State -->
-  <ion-card *ngIf="!isLoading && registeredEvents.length === 0">
+  <ion-card class="empty-card" *ngIf="!isLoading && registeredEvents.length === 0">
     <ion-card-content class="ion-text-center">
       <ion-icon name="calendar-outline" style="font-size: 48px; margin: 16px 0;"></ion-icon>
       <h2>Belum Ada Event</h2>
