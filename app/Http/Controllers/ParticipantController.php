@@ -77,9 +77,11 @@ class ParticipantController extends Controller
             return response()->json(['message' => 'Already registered for this event'], 409);
         }
 
-        // Generate kode unik
-        $qrData = 'QR_' . Str::uuid();
-        $qrPath = 'public/qrcodes/' . $qrData . '.png';
+        $userId = Auth::id();
+        $eventId = $validated['event_id'];
+        $qrData = "participant-{$userId}-{$eventId}";
+        $uuid = Str::uuid();
+        $qrPath = "public/qrcodes/participant-{$userId}-{$eventId}-{$uuid}.png";
 
         // Simpan QR code ke file
         $qrImage = QrCode::format('png')->size(300)->generate($qrData);
@@ -126,6 +128,9 @@ class ParticipantController extends Controller
 
         $qrData = Str::uuid()->toString();
         $qrPath = 'qrcodes/' . $qrData . '.png';
+        $qrData = "participant-{$user->id}-{$event->id}";
+        $uuid = Str::uuid();
+        $qrPath = "qrcodes/participant-{$user->id}-{$event->id}-{$uuid}.png";
         QrCode::format('png')->size(300)->generate($qrData, public_path('storage/' . $qrPath));
 
         $participant = Participant::create([

@@ -48,7 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/events/{id}', [EventController::class, 'destroy']);
     Route::post('/events/{event}/register', [EventController::class, 'register']);
     Route::delete('/events/{event}/unregister', [EventController::class, 'unregister']);
-    Route::get('/events/{id}/check-registration', [EventController::class, 'checkRegistration']);
+    Route::get('/events/{event}/check-registration', [EventController::class, 'checkRegistration']);
     Route::get('/events/{id}/statistics', [EventController::class, 'getStatistics']);
     Route::get('/registered-events', [EventController::class, 'getRegisteredEvents']);
     Route::delete('/events/{id}/registration', [EventController::class, 'cancelRegistration']);

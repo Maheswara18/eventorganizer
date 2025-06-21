@@ -251,8 +251,9 @@ class EventController extends Controller
 
             // Generate QR code dengan data unik
             \Log::info('Generating QR code');
-            $qrData = 'QR_' . Str::uuid();
-            $qrPath = 'public/qrcodes/' . $qrData . '.png';
+            $qrData = "participant-{$user->id}-{$event->id}";
+            $uuid = Str::uuid();
+            $qrPath = "public/qrcodes/participant-{$user->id}-{$event->id}-{$uuid}.png";
 
             // Setup QR code generator
             $generator = QrCode::format('png');
@@ -303,6 +304,11 @@ class EventController extends Controller
 
     public function checkRegistration(Event $event)
     {
+        \Log::info('Check registration', [
+            'user_id' => auth()->id(),
+            'event_id' => $event->id,
+            'found' => $event->participants()->where('user_id', auth()->id())->exists()
+        ]);
         $isRegistered = $event->participants()->where('user_id', auth()->id())->exists();
         return response()->json(['registered' => $isRegistered]);
     }

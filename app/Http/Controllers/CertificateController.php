@@ -198,12 +198,12 @@ class CertificateController extends Controller
             Storage::put('public/' . $filename, $pdf->output());
 
             // Create certificate record
-            $certificate = Certificate::create([
-                'participant_id' => $validated['participant_id'],
-                'event_id' => $validated['event_id'],
+        $certificate = Certificate::create([
+            'participant_id' => $validated['participant_id'],
+            'event_id' => $validated['event_id'],
                 'certificate_path' => $filename,
-                'verification_code' => $code,
-            ]);
+            'verification_code' => $code,
+        ]);
 
             // Send notification to participant
             $participant->user->notify(new CertificateGenerated($certificate));
@@ -277,14 +277,14 @@ class CertificateController extends Controller
     }
 
     public function myCertificates()
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
 
-        $certificates = Certificate::with('event')
-            ->whereHas('participant', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })->get();
+    $certificates = Certificate::with('event')
+        ->whereHas('participant', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->get();
 
-        return response()->json($certificates);
-    }
+    return response()->json($certificates);
+}
 }
