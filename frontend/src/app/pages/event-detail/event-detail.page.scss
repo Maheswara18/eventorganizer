@@ -218,11 +218,25 @@ ion-spinner {
 }
 
 .status-card {
-  margin: 0 10px;
+  margin: 0 10px 20px;
+  background-color: #d0e7ff !important;
+  border-radius: 10px;
+
+  ion-card-header,
+  ion-card-content,
+  ion-item,
+  ion-label,
+  ion-text,
+  h2,
+  p,
+  ion-icon {
+    color: #000 !important;
+  }
 
   ion-item {
-    --padding-start: 0;
-    --inner-padding-end: 0;
+    --background: transparent;
+    --color: #000;
+    --inner-border-width: 0;
 
     h2 {
       font-size: 16px;
@@ -232,12 +246,11 @@ ion-spinner {
 
     p {
       margin: 0;
-      color: var(--ion-color-medium);
       font-size: 14px;
     }
-  }
 
-  ion-button {
-    margin: 10px 0;
+    ion-button {
+      margin-top: 10px;
+    }
   }
 }

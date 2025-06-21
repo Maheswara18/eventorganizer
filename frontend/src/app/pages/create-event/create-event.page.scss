@@ -1,22 +1,115 @@
+:host {
+  --primary-color: #007bff;
+  --background-color: #ffffff;
+  --text-color: #000000;
+  --card-bg-color: #d0e7ff;
+}
+
+ion-content {
+  --background: var(--background-color);
+  color: var(--text-color);
+  padding: 16px;
+}
+
+ion-header {
+  ion-toolbar {
+    --background: var(--primary-color);
+    --color: #ffffff;
+  }
+
+  ion-title {
+    color: #ffffff !important;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  ion-button {
+    margin-left: 4px;
+    padding: 8px;
+  }
+
+  ion-icon {
+    font-size: 22px;
+    color: #ffffff;
+  }
+}
+
 ion-card {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: var(--card-bg-color);
   border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-ion-item {
-  margin-bottom: 16px;
-  --inner-padding-end: 12px;
-  --highlight-color-focused: var(--ion-color-primary);
+ion-card-header {
+  padding-bottom: 0;
 }
 
-ion-label {
-  font-weight: 500;
-  font-size: 14px;
+ion-card-title {
+  color: var(--text-color);
+  font-size: 18px;
+  font-weight: bold;
+}
+
+ion-card-subtitle {
+  color: #666;
+  font-size: 13px;
+}
+
+ion-card-content {
+  padding-top: 0;
 }
 
 form {
-  .form-control {
-    font-size: 14px;
-    padding: 8px;
+  .mb-3 {
+    margin-bottom: 16px;
   }
+
+  ion-item {
+    --background: transparent;
+    --color: var(--text-color);
+    --highlight-color-focused: var(--primary-color);
+    border-bottom: 1px solid var(--input-border-color);
+    border-radius: 6px;
+  }
+
+  ion-label {
+    color: var(--text-color);
+  }
+
+  ion-input,
+  ion-datetime {
+    color: var(--text-color);
+    background: var(--input-bg-color);
+    font-size: 14px;
+  }
+
+  input[type="file"] {
+    margin-top: 8px;
+    color: var(--text-color);
+    font-size: 14px;
+  }
+
+  ion-thumbnail img {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  ion-button {
+    --background: var(--primary-color);
+    --color: #ffffff;
+    font-weight: bold;
+    border-radius: 12px;
+  }
+}
+
+ion-checkbox {
+  margin-right: 8px;
+}
+
+.form-title {
+  color: var(--text-color) !important;
+  font-size: 20px;
+  font-weight: bold;
 }

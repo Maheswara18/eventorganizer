@@ -17,7 +17,7 @@
   <div *ngIf="!isLoading && event" class="event-detail-container">
     <!-- Event Header Image -->
     <div class="event-header">
-      <img [src]="event.image_url" 
+      <img [src]="environment.baseUrl + '/' + event.image_path" 
            [alt]="event.title"
            class="event-image"
            onError="this.src='assets/default-event.jpg'">

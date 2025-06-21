@@ -1,3 +1,15 @@
+:host {
+  --background-color: #ffffff;
+  --primary-color: #007bff; // biru utama
+  --text-color: #1c1c1c;
+  --medium-text-color: #4b4b4b;
+}
+
+ion-content {
+  --background: var(--background-color);
+  color: var(--text-color);
+}
+
 .qr-container {
   display: flex;
   justify-content: center;
@@ -9,7 +21,7 @@
   display: flex;
   justify-content: center;
   margin: 20px 0;
-  
+
   img {
     max-width: 250px;
     width: 100%;
@@ -21,15 +33,17 @@
   margin: 20px 0;
   font-size: 1.1em;
   font-weight: bold;
+  color: var(--text-color);
 }
 
 ion-note {
   display: block;
   margin-top: 20px;
-  
+
   p {
     margin: 5px 0;
     font-size: 0.9em;
+    color: var(--medium-text-color);
   }
 }
 
@@ -44,7 +58,7 @@ ion-note {
 
   .qr-icon {
     font-size: 100px;
-    color: var(--ion-color-primary);
+    color: var(--primary-color);
     margin-bottom: 20px;
   }
 
@@ -52,11 +66,11 @@ ion-note {
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 10px;
-    color: var(--ion-color-dark);
+    color: var(--text-color);
   }
 
   p {
-    color: var(--ion-color-medium);
+    color: var(--medium-text-color);
     margin-bottom: 30px;
   }
 }
@@ -65,7 +79,7 @@ ion-note {
   width: 100%;
   max-width: 600px;
   margin: 0 auto 20px;
-  
+
   &.hidden {
     display: none;
   }
@@ -83,7 +97,7 @@ ion-note {
   left: 0;
   right: 0;
   padding: 20px;
-  background: rgba(var(--ion-background-color-rgb), 0.9);
+  background: rgba(255, 255, 255, 0.9); // putih semi transparan
   z-index: 1000;
 
   .stop-button {
@@ -97,7 +111,7 @@ ion-note {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(255, 255, 255, 0.9); // overlay putih transparan
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -108,7 +122,7 @@ ion-note {
     width: 80%;
     max-width: 300px;
     height: 300px;
-    border: 2px solid var(--ion-color-primary);
+    border: 2px solid var(--primary-color);
     border-radius: 10px;
     margin-bottom: 20px;
     position: relative;
@@ -120,7 +134,7 @@ ion-note {
       left: 0;
       right: 0;
       height: 2px;
-      background: var(--ion-color-primary);
+      background: var(--primary-color);
       animation: scan 2s linear infinite;
     }
   }
@@ -130,6 +144,8 @@ ion-note {
     bottom: 40px;
     width: 90%;
     max-width: 300px;
+    --background: var(--primary-color);
+    --color: #ffffff;
   }
 }
 
@@ -140,4 +156,4 @@ ion-note {
   100% {
     transform: translateY(100px);
   }
-} 
+}
