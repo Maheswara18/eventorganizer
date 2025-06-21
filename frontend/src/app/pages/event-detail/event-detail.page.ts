@@ -91,8 +91,8 @@ export class EventDetailPage implements OnInit {
   private async checkAdminStatus() {
     this.authService.currentUser.subscribe(user => {
       this.isAdmin = user?.role === 'admin';
-    });
-  }
+  });
+}
 
   async loadEvent() {
     const loading = await this.loadingController.create({
@@ -107,10 +107,6 @@ export class EventDetailPage implements OnInit {
       }
 
       this.event = await this.eventsService.getEvent(Number(id));
-      if (!this.event.image_url) {
-        this.event.image_url = 'assets/default-event.jpg';
-      }
-
       if (this.event) {
         this.isRegistered = await this.eventsService.checkRegistration(this.event.id);
       }
@@ -126,12 +122,6 @@ export class EventDetailPage implements OnInit {
     } finally {
       await loading.dismiss();
       this.isLoading = false;
-    }
-  }
-
-  handleImageError(event: Event | any) {
-    if (event?.target instanceof HTMLImageElement) {
-      event.target.src = 'assets/default-event.jpg';
     }
   }
 
@@ -159,6 +149,7 @@ export class EventDetailPage implements OnInit {
 
       const { data } = await modal.onWillDismiss();
       if (data?.responses) {
+        // Register the participant with the form responses
         await this.eventsService.registerForEvent(this.event.id, { responses: data.responses });
         this.isRegistered = true;
         const toast = await this.toastController.create({
@@ -199,21 +190,25 @@ export class EventDetailPage implements OnInit {
   }
 
   async loadParticipant() {
-    if (!this.event) return;
+    if (!this.event || this.isAdmin) return;
     try {
       this.participant = await firstValueFrom(this.participantService.getMyParticipantByEvent(this.event.id));
       this.isPresent = this.participant.attendance_status === 'present';
     } catch (err) {
+      // It's okay if participant is not found, it means they are not registered
       this.participant = null;
       this.isPresent = false;
     }
   }
 
   async loadParticipantStatus(eventId: number) {
+    if (this.isAdmin) return;
     try {
       this.participantStatus = await this.participantService.getParticipantStatus(eventId).toPromise();
     } catch (error) {
-      console.error('Error loading participant status:', error);
+      // It's okay if not found, means user is not a participant
+      console.log('Participant status not found, user is likely not registered for this event.');
+      this.participantStatus = null;
     }
   }
 
@@ -250,7 +245,7 @@ export class EventDetailPage implements OnInit {
     try {
       const eventId = this.route.snapshot.params['id'];
       const blob = await this.certificateService.downloadCertificate(eventId).toPromise();
-
+      
       if (!blob) {
         throw new Error('File tidak ditemukan');
       }
@@ -315,4 +310,4 @@ export class EventDetailPage implements OnInit {
     });
     await alert.present();
   }
-}
+} 
