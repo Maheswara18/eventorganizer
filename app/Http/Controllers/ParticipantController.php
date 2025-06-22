@@ -84,8 +84,10 @@ class ParticipantController extends Controller
         $qrPath = "public/qrcodes/participant-{$userId}-{$eventId}-{$uuid}.png";
 
         // Simpan QR code ke file
-        $qrImage = QrCode::format('png')->size(300)->generate($qrData);
-        Storage::put($qrPath, $qrImage);
+        QrCode::format('png')
+    ->size(300)
+    ->errorCorrection('M')
+    ->generate($qrData, Storage::path($qrPath));
 
         $participant = Participant::create([
             'user_id' => Auth::id(),
@@ -131,7 +133,10 @@ class ParticipantController extends Controller
         $qrData = "participant-{$user->id}-{$event->id}";
         $uuid = Str::uuid();
         $qrPath = "qrcodes/participant-{$user->id}-{$event->id}-{$uuid}.png";
-        QrCode::format('png')->size(300)->generate($qrData, public_path('storage/' . $qrPath));
+        QrCode::format('png')
+    ->size(300)
+    ->errorCorrection('M')
+    ->generate($qrData, public_path('storage/' . $qrPath));
 
         $participant = Participant::create([
             'user_id' => $user->id,
@@ -284,6 +289,16 @@ class ParticipantController extends Controller
             return response()->json(['message' => 'Not registered'], 404);
         }
 
+        // Ambil QR code yang sudah ada dari storage dan encode ke base64
+        if ($participant->qr_code_path) {
+            $path = str_replace('storage/', 'public/', $participant->qr_code_path);
+            if (Storage::exists($path)) {
+                $fileContent = Storage::get($path);
+                // Tambahkan properti baru ke objek participant untuk dikirim ke frontend
+                $participant->qr_code_base64 = 'data:image/png;base64,' . base64_encode($fileContent);
+            }
+        }
+
         return response()->json($participant);
     }
 
@@ -310,4 +325,44 @@ class ParticipantController extends Controller
 
         return response()->json($status);
     }
+    public function verifyQrCode(Request $request)
+{
+    // Pastikan hanya admin yang bisa melakukan scan
+    if (Auth::user()->role !== 'admin') {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    $validated = $request->validate([
+        'qr_code_data' => 'required|string'
+    ]);
+
+    $qrData = $validated['qr_code_data'];
+
+    // Cari partisipan berdasarkan data QR yang unik
+    $participant = Participant::with(['user', 'event'])
+        ->where('qr_code_data', $qrData)
+        ->first();
+
+    if ($participant) {
+        // Jika ditemukan, kirim kembali data lengkapnya
+        return response()->json([
+            'success' => true,
+            'participant' => [
+                'id' => $participant->id,
+                'name' => $participant->user->name,
+                'email' => $participant->user->email,
+                'event_id' => $participant->event->id,
+                'event_title' => $participant->event->title,
+                'attendance_status' => $participant->attendance_status,
+                'payment_status' => $participant->payment ? $participant->payment->payment_status : 'free' // asumsikan free jika tidak ada payment
+            ]
+        ]);
+    } else {
+        // Jika tidak ditemukan
+        return response()->json([
+            'success' => false,
+            'message' => 'Participant not found for the given QR code.'
+        ], 404);
+    }
+}
 }
