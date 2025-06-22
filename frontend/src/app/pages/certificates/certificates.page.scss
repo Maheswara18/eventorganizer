@@ -1,12 +1,121 @@
-// Styling untuk halaman certificates
 :host {
   ion-content {
-    --background: var(--ion-color-light);
+    --background: #ffffff;
+    color: #000;
   }
 
-  ion-card {
-    margin: 16px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  /* Toolbar Atas */
+  ion-toolbar {
+    --background: #007bff;
+    --color: #ffffff;
   }
-} 
+
+  ion-title {
+    font-weight: 600;
+    font-size: 18px;
+    color: #ffffff;
+  }
+
+  ion-back-button {
+    color: #ffffff;
+    font-size: 20px;
+  }
+
+  ion-buttons[slot="end"] ion-button {
+    color: #ffffff;
+  }
+
+  /* List Sertifikat */
+  ion-list {
+    background: transparent;
+    margin: 0;
+    padding: 0;
+  }
+
+  ion-item {
+    --background: #ffffff;
+    border-radius: 8px;
+    margin: 8px 12px;
+    padding: 8px 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    ion-label {
+      h2 {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 6px;
+        color: #007bff;
+      }
+
+      p {
+        font-size: 14px;
+        color: var(--ion-color-medium);
+        margin: 2px 0;
+      }
+    }
+
+    ion-buttons[slot="end"] ion-button {
+      margin-left: 4px;
+      --padding-start: 0;
+      --padding-end: 0;
+
+      ion-icon {
+        font-size: 20px;
+      }
+    }
+  }
+
+  /* Empty State */
+  ion-list:has(ion-item) {
+    box-shadow: none;
+    border: none;
+  }
+
+  ion-list:has(ion-item):empty {
+    display: none;
+  }
+
+  ion-item:has(ion-label.ion-text-center) {
+    --background: #f0f8ff;
+    border-radius: 8px;
+    margin: 24px 16px;
+    text-align: center;
+    box-shadow: none;
+
+    ion-label p {
+      font-size: 15px;
+      color: #007bff;
+    }
+  }
+
+  /* Spinner */
+  ion-spinner {
+    display: block;
+    margin: 32px auto;
+    color: #007bff;
+  }
+
+  /* FAB Admin */
+  ion-fab-button {
+    --background: #007bff;
+    --color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  ion-fab-button:hover {
+    filter: brightness(1.1);
+  }
+}
+
+/* Responsive Grid */
+@media (max-width: 768px) {
+  ion-item {
+    flex-direction: column;
+    align-items: flex-start;
+
+    ion-buttons[slot="end"] {
+      margin-top: 8px;
+      align-self: flex-end;
+    }
+  }
+}

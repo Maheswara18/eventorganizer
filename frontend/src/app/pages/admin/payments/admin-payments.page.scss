@@ -1,26 +1,66 @@
 ion-content {
-  --background: #f5f5f5;
+  --background: #ffffff;
   --padding-top: 16px;
   --padding-bottom: 16px;
+  color: #000;
 }
 
+/* Toolbar atas */
+ion-toolbar {
+  --background: #007bff !important;
+  --color: #ffffff;
+}
+
+/* Tombol kembali */
+ion-back-button {
+  color: #ffffff;
+  font-size: 20px;
+}
+
+/* Judul halaman */
+ion-title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #ffffff;
+}
+
+/* Segmen filter */
+ion-segment {
+  background-color: #e0f0ff; /* Biru muda */
+  border-radius: 8px;
+  margin: 8px 12px;
+
+  ion-segment-button {
+    --color: #007bff;
+    --color-checked: #ffffff;
+    --background-checked: #007bff;
+    --indicator-color: transparent;
+    font-weight: 500;
+    font-size: 15px;
+    border-radius: 6px;
+  }
+}
+
+/* Daftar pembayaran */
 ion-list {
   background: transparent;
 }
 
+/* Item pembayaran */
 ion-item {
   --background: #ffffff;
   margin-bottom: 8px;
   border-radius: 8px;
-  --border-radius: 8px;
   --padding-start: 16px;
   --padding-end: 16px;
   --padding-top: 8px;
   --padding-bottom: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
   h2 {
     font-weight: bold;
     margin-bottom: 4px;
+    color: #007bff;
   }
 
   p {
@@ -35,56 +75,71 @@ ion-item {
   }
 }
 
+/* Badge status */
 ion-badge {
   text-transform: capitalize;
   padding: 4px 8px;
   border-radius: 4px;
+  font-size: 13px;
 }
 
+/* Tombol lihat bukti */
+ion-button {
+  font-size: 14px;
+}
+
+/* Modal bukti pembayaran */
 .image-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 200px;
   padding: 16px;
-  
+
   img {
     max-width: 100%;
     max-height: 80vh;
     object-fit: contain;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 }
 
+/* Loading */
+.ion-text-center ion-spinner {
+  margin-top: 24px;
+  color: #007bff;
+}
+
+.ion-text-center p {
+  margin-top: 8px;
+  color: #333;
+}
+
+/* Empty state (jika tidak ada pembayaran) */
+.ion-text-center.ion-padding {
+  padding: 48px 16px;
+
+  ion-icon {
+    font-size: 48px;
+    color: #007bff !important;
+    margin-bottom: 12px;
+  }
+
+  p {
+    font-size: 15px;
+    color: #333;
+  }
+}
+
+/* Tombol kanan atas modal */
+ion-buttons[slot="end"] {
+  margin-left: 8px;
+}
+
+/* Responsive grid */
 @media (max-width: 768px) {
   ion-col {
     margin-bottom: 8px;
   }
 }
-
-ion-buttons[slot="end"] {
-  margin-left: 8px;
-}
-
-.empty-state {
-  padding: 32px 16px;
-  text-align: center;
-  
-  .empty-state-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    color: var(--ion-color-medium);
-  }
-
-  h2 {
-    margin: 8px 0;
-    color: var(--ion-color-dark);
-    font-weight: 600;
-  }
-
-  p {
-    color: var(--ion-color-medium);
-    margin: 0;
-  }
-} 

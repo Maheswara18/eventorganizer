@@ -1,11 +1,19 @@
 :host {
   --card-border-radius: 16px;
   --icon-wrapper-size: 48px;
+  --background: #ffffff; // background halaman putih
+  background: var(--background);
+  display: block;
+}
+
+ion-content {
+  --background: #ffffff !important; // untuk memastikan background content putih
 }
 
 .dashboard-card {
   margin: 8px;
   border-radius: var(--card-border-radius);
+  background: #d0e7ff; 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   position: relative;
@@ -53,74 +61,61 @@
         margin: 0;
         font-size: 1rem;
         font-weight: 500;
-        color: var(--ion-color-medium);
+        color: var(--ion-color-light);
       }
 
       .stat-number {
         margin: 8px 0 0;
         font-size: 2rem;
         font-weight: bold;
-        color: var(--ion-color-dark);
+        color: var(--ion-color-light);
       }
     }
   }
 }
 
-.chart-card {
-  margin: 8px;
-  border-radius: var(--card-border-radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-
-  ion-card-header {
-    padding: 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-
-    ion-card-title {
-      display: flex;
-      align-items: center;
-      font-size: 1.2rem;
-      
-      ion-icon {
-        margin-right: 8px;
-        font-size: 1.4rem;
-      }
-    }
-
-    ion-card-subtitle {
-      margin-top: 4px;
-      color: var(--ion-color-medium);
-    }
-  }
-
-  ion-card-content {
-    padding: 16px;
-  }
-}
-
+.chart-card,
 .activity-card {
   margin: 8px;
   border-radius: var(--card-border-radius);
+  background: #d0e7ff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  color: #000;
+}
 
-  ion-card-header {
-    padding: 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+.chart-card ion-card-header,
+.activity-card ion-card-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
-    ion-card-title {
-      display: flex;
-      align-items: center;
-      font-size: 1.2rem;
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    color: #000;
 
-      ion-icon {
-        margin-right: 8px;
-        font-size: 1.4rem;
-      }
+    ion-icon {
+      margin-right: 8px;
+      font-size: 1.4rem;
     }
   }
 
-  ion-card-content {
-    padding: 0;
+  ion-card-subtitle {
+    margin-top: 4px;
+    color: #000;
   }
+}
+
+.chart-card ion-card-content,
+.activity-card ion-card-content {
+  padding: 16px;
+  color: #000;
+}
+
+.activity-item ion-label h3,
+.activity-item .activity-description,
+.activity-item .activity-time {
+  color: #000 !important;
 }
 
 .activity-item {
@@ -129,7 +124,7 @@
   --padding-top: 12px;
   --padding-bottom: 12px;
   --background: transparent;
-  
+
   &:not(:last-child) {
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   }
@@ -207,4 +202,4 @@ ion-item {
     font-weight: 500;
     margin-bottom: 4px;
   }
-} 
+}
