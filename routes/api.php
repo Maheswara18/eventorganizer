@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FormTemplateController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CertificateTemplateController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -104,7 +105,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 });
 
-use App\Http\Controllers\AdminController;
 
 // Admin routes
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
@@ -112,6 +112,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::put('/events/{id}', [EventController::class, 'update']);
     Route::delete('/events/{id}', [EventController::class, 'destroy']);
     Route::post('/scan-qr', [AdminController::class, 'scanQr']);
+    Route::post('/scan-qr/check', [ParticipantController::class, 'verifyQrCode']);
 });
 
 ////////FORM TEMPLATES//////////

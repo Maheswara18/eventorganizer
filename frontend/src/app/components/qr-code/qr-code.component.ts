@@ -1,7 +1,14 @@
-import { Component, Input, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+/**
+ * QR Code Component
+ * Component untuk menampilkan QR code peserta event
+ * NOTE: Diubah untuk mengambil gambar QR code langsung dari backend (sebagai base64)
+ */
+
+import { Component, Input, OnInit } from '@angular/core';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { EventsService } from '../../services/events.service';
+import { environment } from '../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-qr-code',
@@ -9,11 +16,11 @@ import { EventsService } from '../../services/events.service';
   imports: [IonicModule, CommonModule],
   template: `
     <ion-header>
-      <ion-toolbar>
-        <ion-title>QR Code {{ eventTitle }}</ion-title>
+      <ion-toolbar color="primary">
+        <ion-title>QR Code: {{ eventTitle }}</ion-title>
         <ion-buttons slot="end">
           <ion-button (click)="dismissModal()">
-            <ion-icon name="close-outline"></ion-icon>
+            <ion-icon name="close-outline" color="light"></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -21,10 +28,21 @@ import { EventsService } from '../../services/events.service';
 
     <ion-content class="ion-padding">
       <div class="qr-container">
-        <div class="qr-code">
-          <canvas #qrCanvas width="300" height="300"></canvas>
+        <div *ngIf="qrCodeImageSource" class="qr-code-wrapper">
+          <img [src]="qrCodeImageSource" alt="QR Code Peserta" />
         </div>
-        <p class="ion-text-center">Tunjukkan QR code ini kepada panitia saat check-in event</p>
+        <div *ngIf="!qrCodeImageSource && !errorMessage" class="qr-code-placeholder">
+            <ion-spinner name="crescent"></ion-spinner>
+            <p>Mengambil QR Code...</p>
+        </div>
+        <div *ngIf="errorMessage" class="qr-code-placeholder error">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <p>{{ errorMessage }}</p>
+        </div>
+        <div class="qr-info">
+          <p class="ion-text-center">Tunjukkan QR code ini kepada panitia saat check-in.</p>
+          <ion-note *ngIf="qrData" color="medium" class="ion-text-center qr-data">Data: {{ qrData }}</ion-note>
+        </div>
       </div>
     </ion-content>
   `,
@@ -37,53 +55,91 @@ import { EventsService } from '../../services/events.service';
       height: 100%;
       padding: 20px;
     }
-    .qr-code {
+    .qr-code-wrapper {
       background: white;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       margin-bottom: 20px;
+    }
+    .qr-code-wrapper img {
+      display: block;
+    }
+      
+    .qr-code-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 290px;
+      height: 290px;
+      background: #f0f0f0;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      color: #666;
+    }
+    .qr-code-placeholder.error {
+        background-color: #fbe9e7;
+        color: #c92a2a;
+    }
+    .qr-code-placeholder.error ion-icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+    .qr-info {
+      text-align: center;
+    }
+    .qr-data {
+      font-family: monospace;
+      font-size: 12px;
+      margin-top: 10px;
+      word-break: break-all;
     }
   `]
 })
-export class QrCodeComponent implements OnInit, AfterViewInit {
+export class QrCodeComponent implements OnInit {
   @Input() eventId!: number;
   @Input() eventTitle!: string;
-  @ViewChild('qrCanvas') qrCanvas!: ElementRef<HTMLCanvasElement>;
+  
+  qrData: string = '';
+  qrCodeImageSource: string = '';
+  errorMessage: string = '';
 
   constructor(
     private modalController: ModalController,
-    private eventsService: EventsService
+    private http: HttpClient
   ) {}
 
-  ngOnInit() {}
-
-  ngAfterViewInit() {
-    this.generateQRCode();
+  ngOnInit() {
+    this.fetchParticipantAndQrCode();
   }
 
-  private async generateQRCode() {
+  private async fetchParticipantAndQrCode() {
     try {
-      const userId = await this.eventsService.getCurrentUserId();
-      const data = `participant-${userId}-${this.eventId}`; // ✅ Sesuai format scanner
-  
-      const QRCode = await import('qrcode'); // jangan pakai `.default`
+      const participant = await this.getParticipantData();
       
-      await QRCode.toCanvas(this.qrCanvas.nativeElement, data, {
-        errorCorrectionLevel: 'H',
-        margin: 2,
-        width: 300,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
-      });
-  
-      console.log('QR code content:', data); // optional: debug
-    } catch (error) {
-      console.error('Error generating QR code:', error);
+      if (participant && participant.qr_code_base64) {
+        this.qrCodeImageSource = participant.qr_code_base64;
+        this.qrData = participant.qr_code_data;
+        console.log('QR code image has been successfully received from the backend.');
+      } else {
+        this.errorMessage = 'QR Code tidak dapat ditemukan untuk pendaftaran ini.';
+        console.error('Participant data or QR code not found in backend response.');
+      }
+    } catch (error: any) {
+      this.errorMessage = 'Gagal mengambil data QR Code. Silakan coba lagi.';
+      console.error('Error fetching QR code:', error);
     }
-  }  
+  }
+
+  private async getParticipantData(): Promise<any> {
+    try {
+      return await this.http.get(`${environment.apiUrl}/participants/event/${this.eventId}/me`).toPromise();
+    } catch (error) {
+      console.error('Error getting participant data:', error);
+      throw error;
+    }
+  }
 
   dismissModal() {
     this.modalController.dismiss();

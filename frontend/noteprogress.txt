@@ -189,3 +189,24 @@
 - **Performance monitoring**
 
 ---
+
+[Selesai] 22/6/2025
+- Merombak total halaman Event QR Scanner (`/event-qr`) dengan UI/UX yang lebih modern.
+- Memperbaiki backend API (`/api/scan-qr`) untuk validasi dan pencatatan kehadiran yang lebih andal.
+- Mengubah format pembuatan QR Code dari `user_id` menjadi `participant_id` agar konsisten.
+- Melakukan serangkaian debugging intensif pada fitur scanner, termasuk:
+  - Penyesuaian konfigurasi `html5-qrcode` (fps, qrbox).
+  - Investigasi masalah kamera dan izin akses.
+  - Mengidentifikasi bahwa masalah utama adalah pada proses pembuatan QR code di frontend.
+- Mengubah strategi pembuatan QR code secara fundamental:
+  - **Sebelumnya:** Frontend membuat QR code menggunakan library JavaScript.
+  - **Sekarang:** Backend membuat gambar QR code saat pendaftaran, menyimpannya, dan mengirimnya langsung ke frontend sebagai gambar (base64). Frontend hanya bertugas menampilkan gambar tersebut.
+- Mengoptimalkan performa scanner dengan mengizinkan penggunaan pemindai QR code bawaan (native) browser, yang jauh lebih cepat dan efisien.
+
+[Status Saat Ini]
+- Fitur pemindaian QR code sekarang seharusnya berfungsi dengan sangat andal di berbagai perangkat.
+- QR code yang ditampilkan kepada peserta dijamin valid karena dibuat langsung oleh server.
+- Semua masalah yang teridentifikasi terkait pemindaian telah ditangani.
+- Proyek siap untuk pengujian menyeluruh (end-to-end) pada fitur ini.
+
+---

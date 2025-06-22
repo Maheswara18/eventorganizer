@@ -251,9 +251,22 @@ class EventController extends Controller
 
             // Generate QR code dengan data unik
             \Log::info('Generating QR code');
-            $qrData = "participant-{$user->id}-{$event->id}";
+            
+            // Buat registrasi participant terlebih dahulu
+            \Log::info('Creating participant record');
+            $participant = Participant::create([
+                'user_id' => $user->id,
+                'event_id' => $event->id,
+                'qr_code_data' => '', // Akan diupdate setelah generate QR
+                'qr_code_path' => '', // Akan diupdate setelah generate QR
+                'attendance_status' => 'registered',
+                'payment_status' => 'belum_bayar'
+            ]);
+
+            // Generate QR code dengan format: participant-{participantId}-{eventId}
+            $qrData = "participant-{$participant->id}-{$event->id}";
             $uuid = Str::uuid();
-            $qrPath = "public/qrcodes/participant-{$user->id}-{$event->id}-{$uuid}.png";
+            $qrPath = "public/qrcodes/participant-{$participant->id}-{$event->id}-{$uuid}.png";
 
             // Setup QR code generator
             $generator = QrCode::format('png');
@@ -266,15 +279,10 @@ class EventController extends Controller
             $qrImage = $generator->generate($qrData);
             Storage::put($qrPath, $qrImage);
 
-            // Buat registrasi participant
-            \Log::info('Creating participant record');
-            $participant = Participant::create([
-                'user_id' => $user->id,
-                'event_id' => $event->id,
+            // Update participant dengan QR code data
+            $participant->update([
                 'qr_code_data' => $qrData,
-                'qr_code_path' => str_replace('public/', 'storage/', $qrPath),
-                'attendance_status' => 'registered',
-                'payment_status' => 'belum_bayar'
+                'qr_code_path' => str_replace('public/', 'storage/', $qrPath)
             ]);
 
             // Simpan jawaban form jika ada

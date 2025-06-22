@@ -1,30 +1,127 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home" text="Back" color="light"></ion-back-button>
+      <ion-back-button defaultHref="/home" text="Kembali" color="light"></ion-back-button>
     </ion-buttons>
-    <ion-title>Scan QR Peserta</ion-title>
+    <ion-title>Scanner QR Peserta</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="viewScanHistory()" fill="clear">
+        <ion-icon name="list-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- Container untuk QR Scanner, selalu ada tapi hidden saat tidak scanning -->
-  <div id="reader" [class.hidden]="!isScanning"></div>
+  <!-- QR Scanner Container -->
+  <div id="qr-reader" [class.hidden]="!isScanning || showParticipantInfo"></div>
 
-  <div *ngIf="!isScanning" class="scan-container">
-    <ion-icon name="qr-code-outline" class="qr-icon"></ion-icon>
-    <h2>Scan QR Code Peserta</h2>
-    <p>Arahkan kamera ke QR code peserta untuk mencatat kehadiran</p>
-    <ion-button expand="block" (click)="startScan()">
-      <ion-icon name="scan-outline" slot="start"></ion-icon>
-      Mulai Scan
-    </ion-button>
+  <!-- Participant Info Modal -->
+  <div *ngIf="showParticipantInfo && currentParticipant" class="participant-info-modal">
+    <div class="participant-card">
+      <div class="participant-header">
+        <ion-icon name="person-circle-outline" class="participant-avatar"></ion-icon>
+        <h2>{{ currentParticipant.name }}</h2>
+        <p class="participant-email">{{ currentParticipant.email }}</p>
+      </div>
+      
+      <div class="participant-details">
+        <div class="detail-item">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>Event: {{ currentParticipant.event_title }}</span>
+        </div>
+        
+        <div class="detail-item">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>Status: 
+            <span [class]="'status-' + currentParticipant.attendance_status">
+              {{ getStatusText(currentParticipant.attendance_status) }}
+            </span>
+          </span>
+        </div>
+        
+        <div class="detail-item">
+          <ion-icon name="card-outline"></ion-icon>
+          <span>Pembayaran: 
+            <span [class]="'payment-' + currentParticipant.payment_status">
+              {{ getPaymentText(currentParticipant.payment_status) }}
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <div class="participant-actions">
+        <ion-button 
+          *ngIf="currentParticipant.attendance_status !== 'present'"
+          expand="block" 
+          color="success" 
+          (click)="confirmAttendance()"
+          class="action-button">
+          <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+          Catat Kehadiran
+        </ion-button>
+        
+        <ion-button 
+          *ngIf="currentParticipant.attendance_status === 'present'"
+          expand="block" 
+          color="warning" 
+          disabled
+          class="action-button">
+          <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+          Sudah Hadir
+        </ion-button>
+        
+        <ion-button 
+          expand="block" 
+          color="medium" 
+          fill="outline"
+          (click)="cancelAttendance()"
+          class="action-button">
+          <ion-icon name="close-outline" slot="start"></ion-icon>
+          Batal
+        </ion-button>
+      </div>
+    </div>
   </div>
 
-  <div *ngIf="isScanning" class="scan-controls">
+  <!-- Scan Controls -->
+  <div *ngIf="!isScanning && !showParticipantInfo" class="scan-container">
+    <div class="scan-content">
+      <div class="scan-icon">
+        <ion-icon name="qr-code-outline"></ion-icon>
+      </div>
+      <h2>Scan QR Code Peserta</h2>
+      <p>Arahkan kamera ke QR code peserta untuk mencatat kehadiran</p>
+      
+      <ion-button expand="block" (click)="startScan()" class="start-button">
+        <ion-icon name="scan-outline" slot="start"></ion-icon>
+        Mulai Scan
+      </ion-button>
+    </div>
+  </div>
+
+  <div *ngIf="isScanning && !showParticipantInfo" class="scan-controls">
     <ion-button expand="block" color="danger" (click)="stopScan()" class="stop-button">
       <ion-icon name="close-outline" slot="start"></ion-icon>
       Berhenti Scan
     </ion-button>
+  </div>
+
+  <!-- Scan History Summary -->
+  <div *ngIf="scanHistory.length > 0" class="scan-summary">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Ringkasan Scan Hari Ini</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>Total scan: {{ scanHistory.length }} peserta</p>
+        <ion-button fill="clear" (click)="viewScanHistory()">
+          Lihat Detail
+        </ion-button>
+        <ion-button fill="clear" color="danger" (click)="clearScanHistory()">
+          Hapus Riwayat
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
   </div>
 </ion-content> 

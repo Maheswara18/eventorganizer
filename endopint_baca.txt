@@ -132,3 +132,183 @@ POST api/certificates/verify
 - QR Code disimpan di `public/storage/qrcodes/`
 - Sertifikat disimpan di `public/storage/certificates/`
 - Default image untuk event tersedia di `public/storage/images/default-event.jpg`
+
+## QR Scanner Endpoints
+
+### 1. Scan QR Code untuk Mencatat Kehadiran
+**POST** `/api/scan-qr`
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{
+  "qr_code_data": "participant-1-1"
+}
+```
+
+**Response Success (200):**
+```json
+{
+  "success": true,
+  "message": "Kehadiran berhasil dicatat",
+  "participant": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "event_title": "Tech Conference 2024",
+    "attendance_status": "present",
+    "registration_date": "2024-01-15T10:30:00Z",
+    "attendance_updated_at": "2024-01-15T14:30:00Z"
+  }
+}
+```
+
+**Response Error (404):**
+```json
+{
+  "success": false,
+  "message": "Peserta tidak ditemukan untuk event ini"
+}
+```
+
+**Response Error (409):**
+```json
+{
+  "success": false,
+  "message": "Peserta sudah hadir sebelumnya",
+  "participant": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "event_title": "Tech Conference 2024",
+    "attendance_status": "present",
+    "registration_date": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+### 2. Cek Data Peserta berdasarkan QR Code
+**POST** `/api/scan-qr/check`
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{
+  "qr_code_data": "participant-1-1"
+}
+```
+
+**Response Success (200):**
+```json
+{
+  "success": true,
+  "participant": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "event_title": "Tech Conference 2024",
+    "attendance_status": "registered",
+    "registration_date": "2024-01-15T10:30:00Z",
+    "payment_status": "sudah_bayar"
+  }
+}
+```
+
+## Format QR Code
+
+QR Code menggunakan format: `participant-{participantId}-{eventId}`
+
+Contoh:
+- `participant-1-1` = Participant ID 1, Event ID 1
+- `participant-5-3` = Participant ID 5, Event ID 3
+
+## Frontend QR Scanner Features
+
+### Halaman Event QR Scanner (`/event-qr`)
+
+**Fitur:**
+1. **Scan QR Code** - Menggunakan kamera untuk scan QR code peserta
+2. **Validasi Peserta** - Mengecek apakah peserta terdaftar untuk event
+3. **Konfirmasi Kehadiran** - Dialog konfirmasi sebelum mencatat kehadiran
+4. **Riwayat Scan** - Menyimpan dan menampilkan riwayat scan hari ini
+5. **Informasi Peserta** - Menampilkan detail peserta yang di-scan
+
+**UI Components:**
+- Scanner container dengan overlay
+- Modal informasi peserta
+- Tombol kontrol scan
+- Ringkasan scan harian
+
+### QR Code Component
+
+**Fitur:**
+1. **Generate QR Code** - Membuat QR code untuk peserta event
+2. **Format Konsisten** - Menggunakan format yang sama dengan scanner
+3. **Display QR Data** - Menampilkan data QR code untuk debugging
+
+## Database Schema
+
+### Participants Table
+```sql
+CREATE TABLE participants (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    event_id BIGINT NOT NULL,
+    payment_id BIGINT NULL,
+    registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    qr_code_path VARCHAR(255) NOT NULL,
+    qr_code_data VARCHAR(255) UNIQUE NOT NULL,
+    attendance_status ENUM('registered', 'present', 'absent') DEFAULT 'registered',
+    payment_status ENUM('belum_bayar', 'sudah_bayar', 'pending') DEFAULT 'belum_bayar',
+    attendance_updated_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_participation (user_id, event_id)
+);
+```
+
+## Security Considerations
+
+1. **Admin Only Access** - Hanya admin yang bisa mengakses QR scanner
+2. **Token Authentication** - Semua endpoint memerlukan authentication
+3. **Input Validation** - Validasi format QR code sebelum diproses
+4. **Error Handling** - Proper error handling untuk semua kasus
+
+## Testing
+
+### Test QR Code Generation
+```bash
+php test_qr.php
+```
+
+File test akan menghasilkan QR code yang bisa di-scan untuk testing.
+
+### Manual Testing Steps
+1. Register user untuk event
+2. Generate QR code di halaman registered events
+3. Scan QR code menggunakan halaman event-qr
+4. Verifikasi kehadiran tercatat di database
+
+## Troubleshooting
+
+### Common Issues:
+1. **QR Code tidak terbaca** - Pastikan format QR code sesuai
+2. **Peserta tidak ditemukan** - Cek apakah participant ID dan event ID benar
+3. **Kamera tidak berfungsi** - Pastikan permission kamera diberikan
+4. **Network error** - Cek koneksi internet dan API endpoint
+
+### Debug Tips:
+1. Cek console browser untuk error JavaScript
+2. Cek network tab untuk API calls
+3. Cek Laravel logs untuk backend errors
+4. Gunakan QR code test untuk validasi scanner
