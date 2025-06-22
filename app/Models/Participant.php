@@ -11,7 +11,7 @@ class Participant extends Model
 
     protected $fillable = [
         'user_id', 'event_id', 'payment_id',
-        'registration_date', 'qr_code_path', 'qr_code_data', 'attendance_status', 'payment_status'
+        'registration_date', 'qr_code_path', 'qr_code_data', 'attendance_status', 'payment_status', 'attendance_updated_at'
     ];
 
     protected $with = ['formResponses.field'];
@@ -22,7 +22,8 @@ class Participant extends Model
     ];
 
     protected $casts = [
-        'registration_date' => 'datetime'
+        'registration_date' => 'datetime',
+        'attendance_updated_at' => 'datetime'
     ];
 
     public function user()
