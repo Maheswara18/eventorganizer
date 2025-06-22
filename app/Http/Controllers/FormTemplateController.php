@@ -23,6 +23,10 @@ class FormTemplateController extends Controller
         return response()->json($template);
     }
 
+    public function create($eventId)
+    {
+        return view('admin.formtemplate.create', ['eventId' => $eventId]);
+    }
     public function store(Request $request, Event $event)
     {
         $validator = Validator::make($request->all(), [

@@ -15,6 +15,9 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\FormResponse;
+use App\Models\FormTemplate;
+use App\Models\FormField;
+use Illuminate\Support\Facades\Validator;
 
 class EventController extends Controller
 {
@@ -28,6 +31,68 @@ class EventController extends Controller
             return response()->json(['message' => 'Error fetching events', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function create()
+    {
+        return view('admin.createEvent'); // Sesuaikan dengan nama view kamu
+    }
+
+    public function storeWithForm(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'location' => 'required|string',
+            'date' => 'required|date',
+            'form.name' => 'required|string|max:255',
+            'form.description' => 'nullable|string',
+            'form.fields' => 'required|array|min:1',
+            'form.fields.*.label' => 'required|string|max:255',
+            'form.fields.*.type' => 'required|string|in:text,number,email,select,radio,checkbox',
+            'form.fields.*.options' => 'required_if:form.fields.*.type,select,radio,checkbox|array',
+            'form.fields.*.is_required' => 'required|boolean',
+            'form.fields.*.order' => 'required|integer|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Simpan event
+            $event = Event::create([
+                'title' => $request->title,
+                'location' => $request->location,
+                'date' => $request->date,
+            ]);
+
+            // Simpan form template
+            $form = FormTemplate::create([
+                'event_id' => $event->id,
+                'name' => $request->form['name'],
+                'description' => $request->form['description'],
+            ]);
+
+            foreach ($request->form['fields'] as $field) {
+                FormField::create([
+                    'form_template_id' => $form->id,
+                    'label' => $field['label'],
+                    'type' => $field['type'],
+                    'options' => $field['options'] ?? null,
+                    'is_required' => $field['is_required'],
+                    'order' => $field['order'],
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('admin.dashboard')->with('success', 'Event dan form berhasil dibuat.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+        }
+    }
+
 
 
     // ✅ Detail satu event
