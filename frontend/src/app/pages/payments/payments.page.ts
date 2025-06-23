@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
-import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { IonicModule, ToastController, LoadingController, ModalController } from '@ionic/angular';
+import { RouterModule, ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { PaymentService, Payment, RegisteredEvent } from '../../services/payment.service';
 import { AuthService } from '../../services/auth.service';
-import { ToastController, LoadingController, ModalController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 
@@ -38,7 +37,6 @@ export class PaymentsPage implements OnInit {
   showProofModal = false;
   selectedProofUrl: string | null = null;
 
-  // Form pembayaran
   showPaymentModal = false;
   selectedEvent: RegisteredEvent | null = null;
   paymentData: PaymentFormData = {
@@ -52,6 +50,9 @@ export class PaymentsPage implements OnInit {
 
   eventId: number | null = null;
   returnUrl: string | null = null;
+
+  // ✅ Tambahan untuk deteksi tab aktif
+  activePath: string = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -70,6 +71,13 @@ export class PaymentsPage implements OnInit {
         this.returnUrl = params['returnUrl'];
       }
     });
+
+    // ✅ Deteksi path aktif dari URL
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.activePath = event.urlAfterRedirects;
+      }
+    });
   }
 
   ngOnInit() {
@@ -86,7 +94,6 @@ export class PaymentsPage implements OnInit {
     try {
       const registeredEvents = await this.paymentService.getRegisteredEvents();
       this.registeredEvents = registeredEvents;
-      console.log('Loaded events:', this.registeredEvents);
     } catch (error) {
       console.error('Error loading data:', error);
       this.showToast('Gagal memuat data', 'danger');
@@ -95,28 +102,15 @@ export class PaymentsPage implements OnInit {
     }
   }
 
-  async loadRegisteredEvents() {
-    this.isLoading = true;
-    try {
-      const events = await this.paymentService.getRegisteredEvents();
-      this.registeredEvents = events;
-    } catch (error) {
-      console.error('Error loading registered events:', error);
-      this.showToast('Gagal memuat event terdaftar', 'danger');
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
   get unpaidEvents(): RegisteredEvent[] {
-    return this.registeredEvents.filter(event => 
+    return this.registeredEvents.filter(event =>
       event.payment_status === 'belum_bayar'
     );
   }
 
   get paymentHistory(): RegisteredEvent[] {
-    return this.registeredEvents.filter(event => 
-      event.payment_status === 'completed' || 
+    return this.registeredEvents.filter(event =>
+      event.payment_status === 'completed' ||
       event.payment_status === 'pending' ||
       event.payment_status === 'failed'
     );
@@ -187,14 +181,13 @@ export class PaymentsPage implements OnInit {
       formData.append('amount', this.selectedEvent.price.toString());
       formData.append('payment_method', this.paymentData.payment_method);
       formData.append('payment_proof_path', this.selectedFile);
-      
+
       const response = await this.paymentService.submitPayment(this.selectedEvent.id, formData);
-      
+
       this.showToast('Bukti pembayaran berhasil diunggah', 'success');
       this.closePaymentModal();
-      this.loadRegisteredEvents();
-      
-      // Navigasi kembali ke halaman sebelumnya jika ada returnUrl
+      this.loadData();
+
       if (this.returnUrl) {
         this.router.navigate([this.returnUrl]);
       }
@@ -263,4 +256,4 @@ export class PaymentsPage implements OnInit {
     });
     await toast.present();
   }
-} 
+}

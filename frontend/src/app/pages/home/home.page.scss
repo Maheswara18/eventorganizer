@@ -279,3 +279,12 @@ ion-tab-bar {
   font-size: 24px;
   color: #007bff;
 }
+
+ion-tab-button.active {
+  color: var(--ion-color-primary) !important;
+
+  ion-icon,
+  ion-label {
+    color: var(--ion-color-primary) !important;
+  }
+}
