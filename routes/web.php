@@ -37,16 +37,39 @@ Route::middleware(['auth:sanctum'])->group(function () {
     })->name('admin.dashboard');
 
     Route::get('/events/create', [EventController::class, 'create'])->name('event.create');
+    Route::get('/events/qr', [EventController::class, 'qr'])->name('event.qr');
+
     Route::get('/form-template/create/{event}', [FormTemplateController::class, 'create'])->name('formtemplate.create');
+    Route::post('/form-template/store', [FormTemplateController::class, 'store'])->name('formtemplate.store');
+    Route::get('/form-template/{event}', [FormTemplateController::class, 'show'])->name('formtemplate.show');
+    Route::get('/form-template/{event}/edit', [FormTemplateController::class, 'edit'])->name('formtemplate.edit');
+    Route::put('/form-template/{event}', [FormTemplateController::class, 'update'])->name('formtemplate.update');
+    Route::delete('/form-template/{event}', [FormTemplateController::class, 'destroy'])->name('formtemplate.destroy');
     Route::post('/events-with-form', [EventController::class, 'storeWithForm'])->name('events.storeWithForm');
 
+    // Ini yang sekarang bikin konflik (JSON):
+    Route::get('/admin/payment', [PaymentController::class, 'index']);
+    Route::get('/admin/pembayaran', [PaymentController::class, 'adminIndex'])->name('admin.pembayaran');
+    
 
     Route::post('/events', [EventController::class, 'store'])->name('event.store');
     Route::get('/events/qr', [EventController::class, 'qr'])->name('event.qr');
-    Route::get('/admin/payments', [PaymentController::class, 'index'])->name('admin.payments');
-    Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates.index');
-    Route::get('/participants', [ParticipantController::class, 'index'])->name('participants.index');
-    Route::get('/admin/statistics', [EventController::class, 'getStatistics'])->name('admin.statistics');
+    
+    
+    Route::get('/admin/certificate', [CertificateController::class, 'adminIndex'])->name('admin.certificates.index');
+
+    Route::get('/admin/peserta', [ParticipantController::class, 'adminIndex'])->name('admin.peserta');
+    Route::get('/admin/participants', [ParticipantController::class, 'adminIndex'])->name('admin.participants.index');
+    
+    Route::get('/admin/statistics', [EventController::class, 'showStatistics'])->name('admin.statistics');
+
+    
+
+
+    Route::get('/certificates/download/{id}', [CertificateController::class, 'download'])->name('certificate.download');
+    Route::get('/certificates/verify/{id}', [CertificateController::class, 'verify'])->name('certificate.verify');
+    Route::get('/certificate-templates', [CertificateController::class, 'index'])->name('certificate.templates');
+    Route::get('/create-certificate', [CertificateController::class, 'create'])->name('certificate.create');
 });
 
 

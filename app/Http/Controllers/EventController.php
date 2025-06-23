@@ -32,6 +32,67 @@ class EventController extends Controller
         }
     }
 
+    public function showStatistics()
+    {
+        // Ambil statistik umum untuk semua event
+        $dashboardStats = [
+            'totalEvents' => Event::count(),
+            'totalParticipants' => Participant::count(),
+            'pendingPayments' => Participant::where('payment_status', 'pending')->count(),
+        ];
+
+        // Data chart (dummy, bisa diubah sesuai kebutuhan)
+        $registrationChartData = [
+            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            'datasets' => [[
+                'label' => 'Pendaftaran',
+                'data' => [100, 120, 90, 140, 130, 110],
+                'backgroundColor' => 'rgba(54, 162, 235, 0.6)',
+            ]]
+        ];
+
+        $revenueChartData = [
+            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            'datasets' => [[
+                'label' => 'Pendapatan (Rp)',
+                'data' => [1200000, 900000, 1500000, 1000000, 1700000, 800000],
+                'backgroundColor' => 'rgba(255, 206, 86, 0.6)',
+            ]]
+        ];
+
+        // Aktivitas terakhir (opsional dummy)
+        $recentActivities = [
+            [
+                'icon' => 'fa-user-plus',
+                'title' => 'Peserta Baru Terdaftar',
+                'description' => 'Rizky mendaftar pada event Laravel Workshop',
+                'time' => '2 jam yang lalu',
+                'color' => 'info'
+            ],
+            [
+                'icon' => 'fa-credit-card',
+                'title' => 'Pembayaran Berhasil',
+                'description' => 'Pembayaran untuk event VueJS telah dikonfirmasi',
+                'time' => '5 jam yang lalu',
+                'color' => 'success'
+            ]
+        ];
+
+        return view('admin.statistics', compact(
+            'dashboardStats',
+            'registrationChartData',
+            'revenueChartData',
+            'recentActivities'
+        ));
+    }
+
+
+    public function qr()
+    {
+        return view('admin.qr');
+    }
+
+
     public function create()
     {
         return view('admin.createEvent'); // Sesuaikan dengan nama view kamu

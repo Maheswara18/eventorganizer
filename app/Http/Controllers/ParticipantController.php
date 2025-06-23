@@ -12,6 +12,15 @@ use Illuminate\Support\Facades\Storage;
 
 class ParticipantController extends Controller
 {
+
+    public function adminIndex(Request $request)
+    {
+        $participants = Participant::with(['user', 'event'])->get();
+        $events = Event::all();
+
+        return view('admin.peserta', compact('participants', 'events'));
+    }
+    
     // ✅ Lihat semua partisipasi
     public function index(Request $request)
     {

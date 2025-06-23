@@ -14,6 +14,18 @@ use App\Notifications\CertificateGenerated;
 
 class CertificateController extends Controller
 {
+
+    public function adminIndex()
+    {
+        $certificates = Certificate::with(['participant.user', 'event'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('admin.certificate', compact('certificates'));
+    }
+
+
+
     // ✅ Lihat semua sertifikat
     public function index()
     {

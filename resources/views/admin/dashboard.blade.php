@@ -27,57 +27,28 @@
 
     <div class="row g-3">
         <div class="col-md-4">
-            <a href="/admin/scanqr" class="text-decoration-none">
-                <div class="card text-center p-4">
-                    <i class="bi bi-qr-code fs-1 mb-2"></i>
-                    <div>Scan QR Event</div>
-                </div>
-            </a>
+            <a href="{{ route('event.qr') }}">QR Event</a>
         </div>
 
         <div class="col-md-4">
-            <a href="/admin/createEvent" class="text-decoration-none">
-                <div class="card text-center p-4">
-                    <i class="bi bi-plus-circle fs-1 mb-2"></i>
-                    <div>Buat Event</div>
-                </div>
-            </a>
+            <a href="{{ route('event.create') }}">Buat Event</a>
         </div>
 
         <div class="col-md-4">
-            <a href="/admin/payments" class="text-decoration-none">
-                <div class="card text-center p-4">
-                    <i class="bi bi-cash-stack fs-1 mb-2"></i>
-                    <div>Manajemen Pembayaran</div>
-                </div>
-            </a>
+            <a href="{{ route('admin.pembayaran') }}">Pembayaran</a>
         </div>
 
         <div class="col-md-4">
-            <a href="/admin/sertifikat" class="text-decoration-none">
-                <div class="card text-center p-4">
-                    <i class="bi bi-award fs-1 mb-2"></i>
-                    <div>Sertifikat</div>
-                </div>
-            </a>
+            <a href="{{ route('admin.certificates.index') }}">sertifikat</a>
         </div>
 
         <div class="col-md-4">
-            <a href="/admin/peserta" class="text-decoration-none">
-                <div class="card text-center p-4">
-                    <i class="bi bi-people fs-1 mb-2"></i>
-                    <div>Manajemen Peserta</div>
-                </div>
-            </a>
+            <a href="{{ route('admin.peserta') }}">manajemen peserta</a>
         </div>
 
         <div class="col-md-4">
-            <a href="/admin/statistik" class="text-decoration-none">
-                <div class="card text-center p-4">
-                    <i class="bi bi-bar-chart fs-1 mb-2"></i>
-                    <div>Statistik Event</div>
-                </div>
-            </a>
+            <a href="{{ route('admin.statistics') }}">Lihat Statistik</a>
+
         </div>
     </div>
 </div>

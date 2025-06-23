@@ -12,6 +12,13 @@ use Illuminate\Support\Facades\Storage;
 
 class PaymentController extends Controller
 {
+    public function adminIndex()
+    {
+        $payments = Payment::with(['user', 'event'])->get();
+    
+        return view('admin.payment', compact('payments'));
+    }
+    
     // ✅ List semua pembayaran (admin lihat semua, user hanya miliknya)
     public function index()
     {
