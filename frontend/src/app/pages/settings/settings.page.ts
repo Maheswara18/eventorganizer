@@ -2,29 +2,42 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
+import { Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.page.html',
   styleUrls: ['./settings.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule]
+  imports: [CommonModule, IonicModule, FormsModule, RouterModule]
 })
 export class SettingsPage implements OnInit {
   darkMode = false;
   notificationsEnabled = true;
   language = 'id';
 
-  constructor(private authService: AuthService) {}
+  // ✅ Untuk deteksi tab aktif di footer
+  activePath: string = '';
+
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {
+    // ✅ Update activePath setiap kali route berubah
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.activePath = event.urlAfterRedirects;
+      }
+    });
+  }
 
   ngOnInit() {
-    // Load saved settings
     this.loadSettings();
   }
 
   private loadSettings() {
-    // Load settings from localStorage
     this.darkMode = localStorage.getItem('darkMode') === 'true';
     this.notificationsEnabled = localStorage.getItem('notifications') !== 'false';
     this.language = localStorage.getItem('language') || 'id';
@@ -43,10 +56,10 @@ export class SettingsPage implements OnInit {
 
   changeLanguage() {
     localStorage.setItem('language', this.language);
-    // Implement language change logic here
+    // Tambahkan logika penggantian bahasa jika diperlukan
   }
 
   async logout() {
     await this.authService.logout();
   }
-} 
+}

@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, IonContent } from '@ionic/angular';
-import { RouterLink } from '@angular/router';
+import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { Subscription } from 'rxjs';
+import { Subscription, filter } from 'rxjs';
 import { PaymentService } from '../../services/payment.service';
 import { EventsService } from '../../services/events.service';
 import { Event } from '../../interfaces/event.interface';
@@ -24,6 +24,8 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   isAdmin: boolean = false;
   unpaidEventsCount = 0;
   scrolled: boolean = false;
+  activePath: string = '';
+
   private userSubscription: Subscription | undefined;
   recommendedEvents: Event[] = [];
   isLoading = false;
@@ -33,8 +35,15 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private authService: AuthService,
     private paymentService: PaymentService,
-    private eventsService: EventsService
-  ) {}
+    private eventsService: EventsService,
+    private router: Router
+  ) {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.activePath = event.urlAfterRedirects;
+    });
+  }
 
   async ngOnInit() {
     await this.loadUserData();

@@ -108,24 +108,24 @@
 <ion-footer>
   <div class="footer-wrapper">
     <ion-tab-bar slot="bottom" class="custom-tab-bar">
-      <ion-tab-button tab="beranda" routerLink="/home">
+      <ion-tab-button tab="beranda" routerLink="/home" [class.active]="activePath === '/home'">
         <ion-icon name="home-outline"></ion-icon>
         <ion-label>Beranda</ion-label>
       </ion-tab-button>
 
-      <ion-tab-button tab="event-saya" routerLink="/registered-events">
+      <ion-tab-button tab="event-saya" routerLink="/registered-events" [class.active]="activePath === '/registered-events'">
         <ion-icon name="bookmark-outline"></ion-icon>
         <ion-label>Event Saya</ion-label>
       </ion-tab-button>
 
       <ion-tab-button disabled class="empty-tab"></ion-tab-button>
 
-      <ion-tab-button tab="pembayaran" routerLink="/payments">
+      <ion-tab-button tab="pembayaran" routerLink="/payments" [class.active]="activePath === '/payments'">
         <ion-icon name="wallet-outline"></ion-icon>
         <ion-label>Pembayaran</ion-label>
       </ion-tab-button>
 
-      <ion-tab-button tab="pengaturan" routerLink="/settings">
+      <ion-tab-button tab="pengaturan" routerLink="/settings" [class.active]="activePath === '/settings'">
         <ion-icon name="settings-outline"></ion-icon>
         <ion-label>Pengaturan</ion-label>
       </ion-tab-button>

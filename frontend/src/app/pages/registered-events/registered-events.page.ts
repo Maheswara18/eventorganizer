@@ -1,7 +1,8 @@
 export type FrontendPaymentStatus = 'belum_bayar' | 'pending' | 'completed' | 'failed';
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
 import { IonicModule, LoadingController, ToastController, AlertController, ModalController } from '@ionic/angular';
 import { EventsService } from '../../services/events.service';
 import { PaymentService, BackendPaymentStatus } from '../../services/payment.service';
@@ -10,11 +11,9 @@ import { RegisteredEvent } from '../../interfaces/event.interface';
 import { RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { QrCodeComponent } from '../../components/qr-code/qr-code.component';
-import { Subscription } from 'rxjs';
 import { ParticipantService } from '../../services/participant.service';
 import { CertificateService } from '../../services/certificate.service';
 
-// Tambahkan di luar class
 export interface ParticipantStatus {
   attendance_status: string;
   attendance_updated_at?: string;
@@ -39,6 +38,10 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
   private paymentStatusSubscription: Subscription;
   participantStatuses: { [eventId: number]: ParticipantStatus | null } = {};
 
+  // Tambahan: untuk deteksi tab aktif
+  activePath: string = '';
+  private routerSubscription?: Subscription;
+
   constructor(
     private router: Router,
     private eventsService: EventsService,
@@ -50,6 +53,7 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
     private participantService: ParticipantService,
     private certificateService: CertificateService
   ) {
+    // Subscription untuk perubahan status pembayaran
     this.paymentStatusSubscription = this.paymentService.paymentStatus$.subscribe(
       status => {
         if (status) {
@@ -58,6 +62,13 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
         }
       }
     );
+
+    // Subscription untuk deteksi URL aktif
+    this.routerSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.activePath = event.urlAfterRedirects;
+      });
   }
 
   ngOnInit() {
@@ -67,6 +78,9 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.paymentStatusSubscription) {
       this.paymentStatusSubscription.unsubscribe();
+    }
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
     }
   }
 
@@ -107,7 +121,7 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
         ...event,
         payment_status: event.payment_status || 'belum_bayar'
       }));
-      // Ambil status peserta untuk setiap event
+
       await Promise.all(this.registeredEvents.map(async (event) => {
         try {
           const status = await this.participantService.getParticipantStatus(event.id).toPromise();
