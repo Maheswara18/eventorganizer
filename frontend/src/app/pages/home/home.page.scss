@@ -10,7 +10,6 @@ ion-content {
 }
 
 .page-container {
-  height: 110%;
   width: 100%;
   padding: 16px;
   box-sizing: border-box;
@@ -43,7 +42,7 @@ ion-toolbar {
     --background: rgba(0, 93, 164, 0.95) !important;
     --ion-color-base: rgba(0, 93, 164, 0.95) !important;
     background: rgba(0, 93, 164, 0.95) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: none !important;
   }
 }
 
@@ -51,21 +50,28 @@ ion-toolbar.scrolled {
   --background: rgba(0, 93, 164, 0.95) !important;
   --ion-color-base: rgba(0, 93, 164, 0.95) !important;
   background: rgba(0, 93, 164, 0.95) !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-/* Pseudo-elements kadang dipakai oleh Ionic untuk shadow */
-ion-header::before,
-ion-toolbar::before,
-ion-header::after,
-ion-toolbar::after {
-  display: none !important;
-  content: none !important;
   box-shadow: none !important;
-  border: none !important;
-  background: transparent !important;
 }
 
+/* ===== FINAL FIX GARIS HITAM TOOLBAR ===== */
+ion-toolbar {
+  --border-width: 0 !important;
+  --ion-border-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+ion-toolbar::before,
+ion-toolbar::after {
+  content: '' !important;
+  display: none !important;
+  height: 0 !important;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* Logo dan ikon toolbar */
 ion-toolbar ion-icon,
 ion-toolbar .logo-text {
   color: white !important;
@@ -83,7 +89,7 @@ ion-toolbar .logo-text {
 }
 
 .logo-text {
-  font-family: 'Engebrechtre', sans-serif;
+  font-family: 'Engebrechtre', sans-serif, Arial, sans-serif;
   font-size: 18px;
   font-weight: normal;
   color: white;
@@ -94,9 +100,11 @@ ion-toolbar .logo-text {
   background: white;
   border-radius: 12px;
   padding: 16px;
-  margin-top: 16px;
+  margin: 16px auto 0 auto;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: calc(100% - 32px); /* Jarak kiri-kanan */
 }
 
 .welcome-card h2 {
@@ -165,35 +173,25 @@ ion-toolbar .logo-text {
   }
 }
 
+/* Footer bawah (tab bar) */
 ion-tab-bar {
   background: #ffffff !important;
   --background: #ffffff !important;
   --ion-color-base: #ffffff !important;
   --color: #666 !important;
   --color-selected: #000 !important;
-  border-top: 1px solid #ccc;
+  border-top: none !important;
+  box-shadow: none !important;
 }
 
-/* ===== ANIMASI KLIK GLOBAL ===== */
-.animate-click {
-  transition: transform 0.2s ease-in-out;
-}
-.animate-click:active {
-  transform: scale(0.95);
-}
-
-/* Custom bottom tab bar layout */
 .footer-wrapper {
   position: relative;
 }
 
 .custom-tab-bar {
-  background: #000;
-  border-top: 1px solid #444;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  position: relative;
+  background: #ffffff !important;
+  border-top: none !important;
+  box-shadow: none !important;
 }
 
 .empty-tab {
@@ -215,8 +213,6 @@ ion-tab-bar {
   text-decoration: none;
   background: none;
   box-shadow: none;
-
-  /* === EFEK KLIK UNTUK LIHAT EVENT === */
   transition: transform 0.2s ease-in-out;
 }
 .floating-button:active {
@@ -228,8 +224,6 @@ ion-tab-bar {
   height: 75px;
   background: url('/assets/tab-ticket.png') no-repeat center center;
   background-size: contain;
-
-  /* === EFEK KLIK UNTUK LIHAT EVENT === */
   transition: box-shadow 0.2s ease-in-out;
 }
 .floating-button:active .ticket-bg {
@@ -287,4 +281,12 @@ ion-tab-button.active {
   ion-label {
     color: var(--ion-color-primary) !important;
   }
+}
+
+/* ===== ANIMASI KLIK GLOBAL ===== */
+.animate-click {
+  transition: transform 0.2s ease-in-out;
+}
+.animate-click:active {
+  transform: scale(0.95);
 }
