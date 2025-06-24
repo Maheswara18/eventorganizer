@@ -8,6 +8,7 @@ import { IonicModule } from '@ionic/angular';
 import { FormBuilderComponent } from '../../components/form-builder/form-builder.component';
 import { FormTemplateService } from '../../services/form-template.service';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -94,7 +95,7 @@ export class CreateEventPage {
       }
 
       const response: any = await firstValueFrom(
-        this.http.post('http://localhost:8000/api/events', formData, { headers })
+        this.http.post(`${environment.apiUrl}/events`, formData, { headers })
       );
 
       // 2. Setelah event berhasil dibuat, buat form template

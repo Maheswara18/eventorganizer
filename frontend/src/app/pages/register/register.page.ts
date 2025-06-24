@@ -6,6 +6,7 @@ import { ToastController, IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -51,7 +52,7 @@ export class RegisterPage {
     };
 
     try {
-      const res = await this.http.post<any>('http://localhost:8000/api/register', body).toPromise();
+      const res = await this.http.post<any>(`${environment.apiUrl}/register`, body).toPromise();
       await this.showToast('Registrasi berhasil! Silakan login', 'success');
       this.router.navigate(['/login']);
     } catch (err) {

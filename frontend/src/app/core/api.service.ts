@@ -1,9 +1,10 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private baseUrl = 'http://localhost:8000/api'; // Ganti sesuai server backend
+  private baseUrl = environment.apiUrl; // Ganti sesuai server backend
 
   constructor(private http: HttpClient) {}
 
