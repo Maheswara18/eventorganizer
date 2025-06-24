@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Rundexo</string>
+    <string name="title_activity_main">Rundexo</string>
+    <string name="package_name">com.rundexo.app</string>
+    <string name="custom_url_scheme">com.rundexo.app</string>
+</resources>

@@ -80,7 +80,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
+});
+
+Route::get('/event', function () {
+    return view('event');
 });
 
 Route::get('/test-qr', function() {
@@ -99,3 +103,7 @@ Route::get('/test-qr', function() {
         ->header('Content-Type', 'image/png')
         ->header('Content-Disposition', 'inline; filename="qr-code.png"');
 });
+
+Route::get('/app/{any}', function () {
+    return file_get_contents(public_path('app/index.html'));
+})->where('any', '.*');
