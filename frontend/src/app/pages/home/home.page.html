@@ -1,21 +1,20 @@
 <ion-content #pageContent fullscreen scrollEvents="true">
   <ion-header>
-    <ion-toolbar [class.scrolled]="scrolled">
-      <ion-buttons slot="start">
-        <ion-button [routerLink]="['/profile']">
-          <ion-icon name="person-circle-outline"></ion-icon>
-        </ion-button>
-      </ion-buttons>
+  <ion-toolbar [class.scrolled]="scrolled">
+    <ion-buttons slot="start">
+      <ion-button [routerLink]="['/profile']">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <!-- Tambahkan wrapper untuk memosisikan logo di tengah -->
+    <div class="toolbar-center">
       <div class="logo-container">
         <img src="assets/logo-rundexo.png" class="logo" />
         <span class="logo-text">Rundexo</span>
       </div>
-      <ion-buttons slot="end">
-        <ion-button (click)="logout()">
-          <ion-icon name="log-out-outline"></ion-icon>
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
+    </div>
+  </ion-toolbar>
   </ion-header>
 
     <div class="welcome-card" *ngIf="isAdmin; else userWelcome">

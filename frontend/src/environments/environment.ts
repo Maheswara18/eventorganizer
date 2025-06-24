@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://rundexo.site/api'
+  apiUrl: 'https://rundexo.site/api',
+  baseUrl: 'https://rundexo.site' // ✅ tambahkan ini
 };
 
 /*
