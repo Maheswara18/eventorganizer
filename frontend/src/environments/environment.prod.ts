@@ -1,5 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://rundexo.site/api',
-  baseUrl: 'https://rundexo.site'
+  apiUrl: 'https://rundexo.site/api'
 };

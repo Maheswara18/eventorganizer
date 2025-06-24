@@ -7,6 +7,12 @@ ion-content {
   background:
     linear-gradient(to bottom, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.9) 80%, #ffffff 100%),
     url('/assets/wave.jpg') no-repeat center center / cover;
+
+  padding-bottom: calc(env(safe-area-inset-bottom) + 90px); // supaya tidak ketabrak footer
+}
+
+ion-content.has-footer {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 90px);
 }
 
 .page-container {
@@ -77,10 +83,23 @@ ion-toolbar .logo-text {
   color: white !important;
 }
 
+.toolbar-center {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none; // agar tombol di slot="start"/"end" tetap bisa diklik
+}
+
 .logo-container {
   display: flex;
   align-items: center;
   gap: 6px;
+  pointer-events: auto; // agar logo masih bisa diinteraksi jika diperlukan
 }
 
 .logo {
@@ -104,7 +123,7 @@ ion-toolbar .logo-text {
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: calc(100% - 32px); /* Jarak kiri-kanan */
+  max-width: calc(100% - 32px);
 }
 
 .welcome-card h2 {
@@ -199,13 +218,14 @@ ion-tab-bar {
   opacity: 0;
 }
 
+/* Floating button di tengah tab bar */
 .floating-button {
   position: absolute;
   top: -45px;
   left: 50%;
   transform: translateX(-50%);
-  width: 72px;
-  height: auto;
+  width: 20vw;
+  max-width: 72px;
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -220,8 +240,8 @@ ion-tab-bar {
 }
 
 .ticket-bg {
-  width: 75px;
-  height: 75px;
+  width: 100%;
+  aspect-ratio: 1/1;
   background: url('/assets/tab-ticket.png') no-repeat center center;
   background-size: contain;
   transition: box-shadow 0.2s ease-in-out;
@@ -238,6 +258,7 @@ ion-tab-bar {
   text-align: center;
 }
 
+/* Admin grid */
 .admin-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -274,6 +295,7 @@ ion-tab-bar {
   color: #007bff;
 }
 
+/* Tab button aktif */
 ion-tab-button.active {
   color: var(--ion-color-primary) !important;
 
@@ -283,7 +305,7 @@ ion-tab-button.active {
   }
 }
 
-/* ===== ANIMASI KLIK GLOBAL ===== */
+/* Animasi klik */
 .animate-click {
   transition: transform 0.2s ease-in-out;
 }
