@@ -206,11 +206,11 @@ class CertificateController extends Controller
             Storage::put('public/' . $filename, $pdf->output());
 
             // Create certificate record
-            $certificate = Certificate::create([
-                'participant_id' => $validated['participant_id'],
-                'event_id' => $validated['event_id'],
+        $certificate = Certificate::create([
+            'participant_id' => $validated['participant_id'],
+            'event_id' => $validated['event_id'],
                 'certificate_path' => $filename,
-                'verification_code' => $code,
+            'verification_code' => $code,
                 'issued_at' => now(),
             ]);
             
@@ -218,7 +218,7 @@ class CertificateController extends Controller
                 'participant_id' => $validated['participant_id'],
                 'event_id' => $validated['event_id'],
                 'certificate_id' => $certificate->id
-            ]);
+        ]);
 
             // Send notification to participant
             $participant->user->notify(new CertificateGenerated($certificate));

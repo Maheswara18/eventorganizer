@@ -163,14 +163,43 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
         await loading.dismiss();
         return;
       }
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `sertifikat-event-${this.selectedEvent?.id}.pdf`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-      this.showToast('Sertifikat berhasil diunduh', 'success');
+      const isCordova = !!(window as any).cordova;
+      if (isCordova) {
+        // Dynamic import plugin hanya jika di device
+        const { File } = await import('@awesome-cordova-plugins/file/ngx');
+        const { AndroidPermissions } = await import('@awesome-cordova-plugins/android-permissions/ngx');
+        const file = new File();
+        const androidPermissions = new AndroidPermissions();
+        await androidPermissions.requestPermissions([
+          androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE,
+          androidPermissions.PERMISSION.READ_EXTERNAL_STORAGE
+        ]);
+        const hasPerm = await androidPermissions.checkPermission(androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE);
+        if (!hasPerm.hasPermission) {
+          alert('Izin penyimpanan tidak diberikan. Tidak bisa menyimpan file.');
+          this.showToast('Izin penyimpanan tidak diberikan', 'danger');
+          return;
+        }
+        const filename = `sertifikat-event-${this.selectedEvent?.id}.pdf`;
+        const arrayBuffer = await blob.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        await file.writeFile(file.externalRootDirectory + 'Download/', filename, uint8Array, {replace: true});
+        alert('Sertifikat berhasil disimpan di: ' + file.externalRootDirectory + 'Download/' + filename);
+        this.showToast('Sertifikat berhasil disimpan di Download', 'success');
+      } else {
+        // Cara download di browser, tanpa plugin native
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sertifikat-event-${this.selectedEvent?.id}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.showToast('Sertifikat berhasil diunduh', 'success');
+      }
     } catch (err) {
+      if (!!(window as any).cordova) {
+        alert('Gagal menyimpan sertifikat: ' + JSON.stringify(err));
+      }
       this.showToast('Gagal mengunduh sertifikat', 'danger');
     } finally {
       await loading.dismiss();

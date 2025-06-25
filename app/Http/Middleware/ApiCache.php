@@ -32,9 +32,9 @@ class ApiCache
         // Hanya cache response jika tipe response adalah JsonResponse atau Response
         if ($response instanceof JsonResponse || $response instanceof Response) {
             $status = $response->status();
-            // Cache response if it's successful
+        // Cache response if it's successful
             if ($status === 200) {
-                Cache::put($cacheKey, $response->getData(), $ttl);
+            Cache::put($cacheKey, $response->getData(), $ttl);
             }
         } else if ($response instanceof StreamedResponse) {
             // Untuk download file, skip cache dan jangan akses status()

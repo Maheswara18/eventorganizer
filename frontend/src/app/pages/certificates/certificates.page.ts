@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CertificateService } from '../../services/certificate.service';
-import { LoadingController, IonicModule, ToastController, AlertController } from '@ionic/angular';
+import { LoadingController, IonicModule, ToastController, AlertController, Platform } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 @Component({
   selector: 'app-certificates',
@@ -26,7 +29,8 @@ export class CertificatesPage implements OnInit {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private authService: AuthService,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private platform: Platform
   ) { }
 
   ngOnInit() {
@@ -97,27 +101,64 @@ export class CertificatesPage implements OnInit {
 
     try {
       const blob = await this.certificateService.downloadCertificate(certificateId).toPromise();
+      if (!blob) throw new Error('File tidak ditemukan');
 
-      if (!blob) {
-        throw new Error('File tidak ditemukan');
+      const isCordova = !!(window as any).cordova;
+      if (isCordova) {
+        // Dynamic import plugin hanya jika di device
+        const { File } = await import('@awesome-cordova-plugins/file/ngx');
+        const { AndroidPermissions } = await import('@awesome-cordova-plugins/android-permissions/ngx');
+        const file = new File();
+        const androidPermissions = new AndroidPermissions();
+        await androidPermissions.requestPermissions([
+          androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE,
+          androidPermissions.PERMISSION.READ_EXTERNAL_STORAGE
+        ]);
+        const hasPerm = await androidPermissions.checkPermission(androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE);
+        if (!hasPerm.hasPermission) {
+          alert('Izin penyimpanan tidak diberikan. Tidak bisa menyimpan file.');
+          this.showToast('Izin penyimpanan tidak diberikan', 'danger');
+          return;
+        }
+        const filename = `sertifikat-${certificateId}.pdf`;
+        const arrayBuffer = await blob.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        await file.writeFile(file.externalRootDirectory + 'Download/', filename, uint8Array, {replace: true});
+        alert('Sertifikat berhasil disimpan di: ' + file.externalRootDirectory + 'Download/' + filename);
+        this.showToast('Sertifikat berhasil disimpan di Download', 'success');
+      } else {
+        // Cara download di browser, tanpa plugin native
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `sertifikat-${certificateId}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        this.showToast('Sertifikat berhasil diunduh', 'success');
       }
-
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `sertifikat-${certificateId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      this.showToast('Sertifikat berhasil diunduh', 'success');
     } catch (error) {
-      console.error('Error downloading certificate:', error);
+      // Hanya tampilkan alert error di device
+      if (!!(window as any).cordova) {
+        alert('Gagal menyimpan sertifikat: ' + JSON.stringify(error));
+      }
       this.showToast('Gagal mengunduh sertifikat', 'danger');
     } finally {
       loading.dismiss();
     }
+  }
+
+  private blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = (reader.result as string).split(',')[1];
+        resolve(base64data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   }
 
   private async showToast(message: string, color: string) {

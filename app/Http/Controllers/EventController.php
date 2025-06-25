@@ -383,7 +383,7 @@ class EventController extends Controller
             $qrData = "participant-{$user->id}-{$event->id}";
             $uuid = Str::uuid();
             $qrPath = "public/qrcodes/participant-{$user->id}-{$event->id}-{$uuid}.png";
-
+            
             // Generate dan simpan QR code
             \Log::info('Saving QR code to: ' . $qrPath);
             $qrImage = QrCode::format('png')->size(300)->generate($qrData);
