@@ -136,6 +136,9 @@
     <ng-template>
       <ion-header>
         <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-back-button defaultHref="/payments" (click)="closeProofModal()" text=""></ion-back-button>
+          </ion-buttons>
           <ion-title>Bukti Pembayaran</ion-title>
           <ion-buttons slot="end">
             <ion-button (click)="closeProofModal()">
@@ -157,6 +160,9 @@
     <ng-template>
       <ion-header>
         <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-back-button defaultHref="/payments" (click)="closeProofModal()" text=""></ion-back-button>
+          </ion-buttons>
           <ion-title>Form Pembayaran</ion-title>
           <ion-buttons slot="end">
             <ion-button (click)="closePaymentModal()">
