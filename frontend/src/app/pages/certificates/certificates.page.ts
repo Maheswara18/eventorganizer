@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { Device } from '@capacitor/device';
 
 @Component({
   selector: 'app-certificates',
@@ -105,27 +106,43 @@ export class CertificatesPage implements OnInit {
 
       const isCordova = !!(window as any).cordova;
       if (isCordova) {
-        // Dynamic import plugin hanya jika di device
-        const { File } = await import('@awesome-cordova-plugins/file/ngx');
-        const { AndroidPermissions } = await import('@awesome-cordova-plugins/android-permissions/ngx');
-        const file = new File();
-        const androidPermissions = new AndroidPermissions();
-        await androidPermissions.requestPermissions([
-          androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE,
-          androidPermissions.PERMISSION.READ_EXTERNAL_STORAGE
-        ]);
-        const hasPerm = await androidPermissions.checkPermission(androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE);
-        if (!hasPerm.hasPermission) {
-          alert('Izin penyimpanan tidak diberikan. Tidak bisa menyimpan file.');
-          this.showToast('Izin penyimpanan tidak diberikan', 'danger');
-          return;
+        // Deteksi versi Android
+        const info = await Device.getInfo();
+        const isAndroid = info.platform === 'android';
+        const androidVersion = parseInt((info.osVersion || '0').split('.')[0]);
+        if (isAndroid && androidVersion >= 11) {
+          // Android 11+ gunakan penyimpanan internal aplikasi
+          const base64 = await this.blobToBase64(blob);
+          const filename = `sertifikat-${certificateId}.pdf`;
+          await Filesystem.writeFile({
+            path: filename,
+            data: base64,
+            directory: Directory.Documents
+          });
+          this.showToast('Sertifikat berhasil disimpan di folder aplikasi (Documents)', 'success');
+        } else {
+          // Android < 11, tetap gunakan plugin file dan izin eksternal
+          const { File } = await import('@awesome-cordova-plugins/file/ngx');
+          const { AndroidPermissions } = await import('@awesome-cordova-plugins/android-permissions/ngx');
+          const file = new File();
+          const androidPermissions = new AndroidPermissions();
+          await androidPermissions.requestPermissions([
+            androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE,
+            androidPermissions.PERMISSION.READ_EXTERNAL_STORAGE
+          ]);
+          const hasPerm = await androidPermissions.checkPermission(androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE);
+          if (!hasPerm.hasPermission) {
+            alert('Izin penyimpanan tidak diberikan. Tidak bisa menyimpan file.');
+            this.showToast('Izin penyimpanan tidak diberikan', 'danger');
+            return;
+          }
+          const filename = `sertifikat-${certificateId}.pdf`;
+          const arrayBuffer = await blob.arrayBuffer();
+          const uint8Array = new Uint8Array(arrayBuffer);
+          await file.writeFile(file.externalRootDirectory + 'Download/', filename, uint8Array, {replace: true});
+          alert('Sertifikat berhasil disimpan di: ' + file.externalRootDirectory + 'Download/' + filename);
+          this.showToast('Sertifikat berhasil disimpan di Download', 'success');
         }
-        const filename = `sertifikat-${certificateId}.pdf`;
-        const arrayBuffer = await blob.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        await file.writeFile(file.externalRootDirectory + 'Download/', filename, uint8Array, {replace: true});
-        alert('Sertifikat berhasil disimpan di: ' + file.externalRootDirectory + 'Download/' + filename);
-        this.showToast('Sertifikat berhasil disimpan di Download', 'success');
       } else {
         // Cara download di browser, tanpa plugin native
         const url = window.URL.createObjectURL(blob);

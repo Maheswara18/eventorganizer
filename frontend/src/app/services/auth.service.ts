@@ -144,8 +144,11 @@ export class AuthService {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      localStorage.clear();
+      sessionStorage.clear();
       await this.removeToken();
       this.currentUserSubject.next(null);
+      this.initialized = false;
       this.router.navigate(['/login']);
     }
   }

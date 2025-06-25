@@ -73,23 +73,27 @@ ion-content {
 
   .participant-card {
     margin: 0;
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    background: #d0e7ff !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    border: 1.5px solid #e0e7ef;
     display: flex;
     flex-direction: column;
+    color: #222;
 
     ion-card-header {
       padding-bottom: 8px;
-    }
-
-    ion-card-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-    }
-
-    ion-card-subtitle {
-      font-size: 0.9rem;
-      color: var(--ion-color-medium);
+      ion-card-title {
+        color: #1a237e;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+      ion-card-subtitle {
+        color: #333;
+        font-size: 1rem;
+        font-weight: 400;
+      }
     }
 
     ion-card-content {
@@ -101,7 +105,8 @@ ion-content {
         align-items: center;
         gap: 8px;
         margin-bottom: 12px;
-        color: var(--ion-color-dark);
+        color: #1a237e;
+        font-weight: 600;
 
         ion-icon {
           font-size: 1.2rem;
@@ -109,11 +114,18 @@ ion-content {
 
         p {
           margin: 0;
+          color: #1a237e;
+          font-weight: 600;
+        }
+
+        strong {
+          color: #1a237e;
+          font-weight: 700;
         }
       }
 
       .notes {
-        color: var(--ion-color-medium);
+        color: #444;
         font-size: 14px;
         margin-top: 4px;
       }
@@ -146,6 +158,7 @@ ion-content {
         --padding-start: 6px;
         --padding-end: 6px;
         font-size: 1.4rem;
+        color: #1a237e;
       }
 
       ion-icon {

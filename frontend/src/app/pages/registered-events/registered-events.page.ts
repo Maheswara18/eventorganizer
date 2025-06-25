@@ -165,27 +165,46 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
       }
       const isCordova = !!(window as any).cordova;
       if (isCordova) {
-        // Dynamic import plugin hanya jika di device
-        const { File } = await import('@awesome-cordova-plugins/file/ngx');
-        const { AndroidPermissions } = await import('@awesome-cordova-plugins/android-permissions/ngx');
-        const file = new File();
-        const androidPermissions = new AndroidPermissions();
-        await androidPermissions.requestPermissions([
-          androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE,
-          androidPermissions.PERMISSION.READ_EXTERNAL_STORAGE
-        ]);
-        const hasPerm = await androidPermissions.checkPermission(androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE);
-        if (!hasPerm.hasPermission) {
-          alert('Izin penyimpanan tidak diberikan. Tidak bisa menyimpan file.');
-          this.showToast('Izin penyimpanan tidak diberikan', 'danger');
-          return;
+        // Deteksi versi Android
+        const { Device } = await import('@capacitor/device');
+        const info = await Device.getInfo();
+        const isAndroid = info.platform === 'android';
+        const androidVersion = parseInt((info.osVersion || '0').split('.')[0]);
+        if (isAndroid && androidVersion >= 11) {
+          // Android 11+ gunakan penyimpanan internal aplikasi
+          const { Filesystem, Directory } = await import('@capacitor/filesystem');
+          const arrayBuffer = await blob.arrayBuffer();
+          const base64 = await this.blobToBase64(blob);
+          const filename = `sertifikat-event-${this.selectedEvent?.id}.pdf`;
+          await Filesystem.writeFile({
+            path: filename,
+            data: base64,
+            directory: Directory.Documents
+          });
+          this.showToast('Sertifikat berhasil disimpan di folder aplikasi (Documents)', 'success');
+        } else {
+          // Android < 11, tetap gunakan plugin file dan izin eksternal
+          const { File } = await import('@awesome-cordova-plugins/file/ngx');
+          const { AndroidPermissions } = await import('@awesome-cordova-plugins/android-permissions/ngx');
+          const file = new File();
+          const androidPermissions = new AndroidPermissions();
+          await androidPermissions.requestPermissions([
+            androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE,
+            androidPermissions.PERMISSION.READ_EXTERNAL_STORAGE
+          ]);
+          const hasPerm = await androidPermissions.checkPermission(androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE);
+          if (!hasPerm.hasPermission) {
+            alert('Izin penyimpanan tidak diberikan. Tidak bisa menyimpan file.');
+            this.showToast('Izin penyimpanan tidak diberikan', 'danger');
+            return;
+          }
+          const filename = `sertifikat-event-${this.selectedEvent?.id}.pdf`;
+          const arrayBuffer = await blob.arrayBuffer();
+          const uint8Array = new Uint8Array(arrayBuffer);
+          await file.writeFile(file.externalRootDirectory + 'Download/', filename, uint8Array, {replace: true});
+          alert('Sertifikat berhasil disimpan di: ' + file.externalRootDirectory + 'Download/' + filename);
+          this.showToast('Sertifikat berhasil disimpan di Download', 'success');
         }
-        const filename = `sertifikat-event-${this.selectedEvent?.id}.pdf`;
-        const arrayBuffer = await blob.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        await file.writeFile(file.externalRootDirectory + 'Download/', filename, uint8Array, {replace: true});
-        alert('Sertifikat berhasil disimpan di: ' + file.externalRootDirectory + 'Download/' + filename);
-        this.showToast('Sertifikat berhasil disimpan di Download', 'success');
       } else {
         // Cara download di browser, tanpa plugin native
         const url = window.URL.createObjectURL(blob);
@@ -204,6 +223,18 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
     } finally {
       await loading.dismiss();
     }
+  }
+
+  private blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = (reader.result as string).split(',')[1];
+        resolve(base64data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   }
 
   async unregisterFromEvent(eventId: number) {
@@ -226,12 +257,16 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
 
             try {
               await this.eventsService.unregisterFromEvent(eventId);
+              // Optimistic update: hapus event dari list dan status
               this.registeredEvents = this.registeredEvents.filter(event => event.id !== eventId);
+              delete this.participantStatuses[eventId];
               if (this.selectedEvent && this.selectedEvent.id === eventId) {
                 this.selectedEvent = null;
                 this.selectedParticipant = null;
               }
               this.showToast('Pendaftaran berhasil dibatalkan', 'success');
+              // Force reload data dari backend
+              await this.loadRegisteredEvents();
             } catch (error) {
               console.error('Error unregistering from event:', error);
               this.showToast('Gagal membatalkan pendaftaran', 'danger');

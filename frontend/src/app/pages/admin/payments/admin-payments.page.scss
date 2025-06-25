@@ -48,14 +48,16 @@ ion-list {
 
 /* Item pembayaran */
 ion-item {
-  --background: #ffffff;
-  margin-bottom: 8px;
-  border-radius: 8px;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --padding-top: 8px;
-  --padding-bottom: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --background: #d0e7ff !important; /* Biru sangat muda agar kontras */
+  background-color: #f4faff !important;
+  margin-bottom: 18px;
+  border-radius: 16px;
+  border: 1.5px solid #e0e7ef;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10) !important;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --padding-top: 14px;
+  --padding-bottom: 14px;
 
   h2 {
     font-weight: bold;
@@ -70,8 +72,9 @@ ion-item {
   }
 
   strong {
-    color: var(--ion-color-dark);
-    font-size: 16px;
+    color: #1a7f37; /* Hijau tua, bisa diganti biru tua jika ingin */
+    font-size: 18px;
+    font-weight: bold;
   }
 }
 

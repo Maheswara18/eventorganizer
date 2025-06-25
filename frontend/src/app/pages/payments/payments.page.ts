@@ -184,9 +184,20 @@ export class PaymentsPage implements OnInit {
 
       const response = await this.paymentService.submitPayment(this.selectedEvent.id, formData);
 
+      // Optimistic update: update status event di registeredEvents
+      const idx = this.registeredEvents.findIndex(e => e.id === this.selectedEvent?.id);
+      if (idx !== -1) {
+        this.registeredEvents[idx] = {
+          ...this.registeredEvents[idx],
+          payment_status: 'pending', // atau 'completed' jika backend langsung verifikasi
+          payment_proof_path: this.selectedFile.name
+        };
+      }
+
       this.showToast('Bukti pembayaran berhasil diunggah', 'success');
       this.closePaymentModal();
-      this.loadData();
+      // Force reload data dari backend agar status benar-benar fresh
+      await this.loadData();
 
       if (this.returnUrl) {
         this.router.navigate([this.returnUrl]);
