@@ -13,18 +13,18 @@
                 <i class="bi bi-person-circle"></i> Profil
             </a>
             <form action="/logout" method="POST" style="display: inline;">
-                @csrf
+            @csrf
                 <button type="submit" class="btn btn-outline-danger" title="Logout">
                     <i class="bi bi-box-arrow-right"></i> Logout
-                </button>
-            </form>
+            </button>
+        </form>
         </div>
     </div>
 
     <div class="alert alert-info text-center mb-4">
         <h4 style="margin-bottom: 0.5rem;">Halo Admin, <b>{{ auth()->user()->name }}</b></h4>
         <p style="margin-bottom: 0;">Kelola event dan pantau aktivitas peserta dengan mudah!</p>
-    </div>
+        </div>
 
     <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
         <div class="card text-center">

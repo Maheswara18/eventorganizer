@@ -380,35 +380,22 @@ class EventController extends Controller
             
             // Buat registrasi participant terlebih dahulu
             \Log::info('Creating participant record');
+            $qrData = "participant-{$user->id}-{$event->id}";
+            $uuid = Str::uuid();
+            $qrPath = "public/qrcodes/participant-{$user->id}-{$event->id}-{$uuid}.png";
+
+            // Generate dan simpan QR code
+            \Log::info('Saving QR code to: ' . $qrPath);
+            $qrImage = QrCode::format('png')->size(300)->generate($qrData);
+            Storage::put($qrPath, $qrImage);
+
             $participant = Participant::create([
                 'user_id' => $user->id,
                 'event_id' => $event->id,
-                'qr_code_data' => '', // Akan diupdate setelah generate QR
-                'qr_code_path' => '', // Akan diupdate setelah generate QR
+                'qr_code_data' => $qrData,
+                'qr_code_path' => str_replace('public/', 'storage/', $qrPath),
                 'attendance_status' => 'registered',
                 'payment_status' => 'belum_bayar'
-            ]);
-
-            // Generate QR code dengan format: participant-{participantId}-{eventId}
-            $qrData = "participant-{$participant->id}-{$event->id}";
-            $uuid = Str::uuid();
-            $qrPath = "public/qrcodes/participant-{$participant->id}-{$event->id}-{$uuid}.png";
-
-            // Setup QR code generator
-            $generator = QrCode::format('png');
-            $generator->size(300);
-            $generator->backgroundColor(255,255,255);
-            $generator->color(0,0,0);
-            
-            // Generate dan simpan QR code
-            \Log::info('Saving QR code to: ' . $qrPath);
-            $qrImage = $generator->generate($qrData);
-            Storage::put($qrPath, $qrImage);
-
-            // Update participant dengan QR code data
-            $participant->update([
-                'qr_code_data' => $qrData,
-                'qr_code_path' => str_replace('public/', 'storage/', $qrPath)
             ]);
 
             // Simpan jawaban form jika ada

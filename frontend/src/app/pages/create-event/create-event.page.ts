@@ -26,7 +26,8 @@ export class CreateEventPage {
     max_participants: 0,
     start_datetime: '',
     end_datetime: '',
-    isFree: false
+    isFree: false,
+    provides_certificate: false
   };
 
   selectedImage: File | null = null;
@@ -89,6 +90,7 @@ export class CreateEventPage {
       formData.append('max_participants', this.event.max_participants.toString());
       formData.append('start_datetime', this.event.start_datetime);
       formData.append('end_datetime', this.event.end_datetime);
+      formData.append('provides_certificate', this.event.provides_certificate ? '1' : '0');
 
       if (this.selectedImage) {
         formData.append('image_path', this.selectedImage);

@@ -67,6 +67,11 @@
         </ion-item>
 
         <ion-item class="mb-3">
+          <ion-checkbox slot="start" [(ngModel)]="event.provides_certificate" name="provides_certificate"></ion-checkbox>
+          <ion-label>Dapat Sertifikat</ion-label>
+        </ion-item>
+
+        <ion-item class="mb-3">
           <ion-label position="stacked">Event Image</ion-label>
           <input type="file" (change)="onImageSelected($event)" accept="image/*">
           <ion-thumbnail *ngIf="imagePreview" slot="end">

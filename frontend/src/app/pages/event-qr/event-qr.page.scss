@@ -38,7 +38,7 @@ ion-content {
     width: 100% !important;
     height: auto !important;
     border-radius: var(--border-radius);
-  }
+}
 
   // Scanner overlay
   &::before {
@@ -75,21 +75,21 @@ ion-content {
 
     .scan-icon {
       font-size: 80px;
-      color: var(--primary-color);
-      margin-bottom: 20px;
+    color: var(--primary-color);
+    margin-bottom: 20px;
       animation: pulse 2s infinite;
-    }
+  }
 
-    h2 {
-      font-size: 24px;
-      font-weight: bold;
+  h2 {
+    font-size: 24px;
+    font-weight: bold;
       margin-bottom: 15px;
       color: var(--dark-color);
-    }
+  }
 
-    p {
+  p {
       color: var(--medium-color);
-      margin-bottom: 30px;
+    margin-bottom: 30px;
       line-height: 1.5;
     }
 
@@ -123,7 +123,7 @@ ion-content {
     border-radius: var(--border-radius);
     padding: 30px;
     max-width: 400px;
-    width: 100%;
+  width: 100%;
     box-shadow: var(--shadow-lg);
     animation: slideIn 0.3s ease-out;
 
@@ -212,8 +212,8 @@ ion-content {
         --box-shadow: var(--shadow);
         height: 45px;
         font-weight: 600;
-      }
-    }
+  }
+}
   }
 }
 
@@ -260,13 +260,13 @@ ion-content {
       p {
         color: var(--medium-color);
         margin-bottom: 15px;
-      }
+  }
 
-      ion-button {
+  ion-button {
         --color: var(--primary-color);
         font-weight: 600;
-      }
-    }
+  }
+}
   }
 }
 

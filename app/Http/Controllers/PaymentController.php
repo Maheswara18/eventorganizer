@@ -74,7 +74,10 @@ class PaymentController extends Controller
         $paymentProofPath = null;
         if ($request->hasFile('payment_proof_path')) {
             $file = $request->file('payment_proof_path');
-            $paymentProofPath = $file->store('payment_proofs', 'public');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            // Simpan langsung ke public/storage/payment_proofs
+            $file->move(public_path('storage/payment_proofs'), $filename);
+            $paymentProofPath = 'payment_proofs/' . $filename;
         }
 
         // Cek apakah participant sudah ada

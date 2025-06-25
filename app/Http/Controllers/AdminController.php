@@ -17,9 +17,9 @@ class AdminController extends Controller
     public function scanQr(Request $request)
     {
         try {
-            $request->validate([
+        $request->validate([
                 'qr_code_data' => 'required|string'
-            ]);
+        ]);
 
             Log::info('QR Scan attempt with data: ' . $request->qr_code_data);
 
@@ -43,12 +43,12 @@ class AdminController extends Controller
                 ->where('event_id', $eventId)
                 ->first();
 
-            if (!$participant) {
+        if (!$participant) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Peserta tidak ditemukan untuk event ini'
                 ], 404);
-            }
+        }
 
             // Cek apakah sudah hadir
             if ($participant->attendance_status === 'present') {
@@ -67,9 +67,37 @@ class AdminController extends Controller
             }
 
             // Update status kehadiran
-            $participant->attendance_status = 'present';
+        $participant->attendance_status = 'present';
             $participant->attendance_updated_at = now();
-            $participant->save();
+        $participant->save();
+
+        // Generate sertifikat otomatis jika event menyediakan sertifikat
+        if ($participant->event && $participant->event->provides_certificate) {
+            Log::info('Mencoba generate sertifikat otomatis', [
+                'participant_id' => $participant->id,
+                'event_id' => $participant->event->id
+            ]);
+            $existingCertificate = \App\Models\Certificate::where('participant_id', $participant->id)
+                ->where('event_id', $participant->event->id)
+                ->first();
+            if (!$existingCertificate) {
+                try {
+                    $certRequest = new \Illuminate\Http\Request();
+                    $certRequest->replace([
+                        'participant_id' => $participant->id,
+                        'event_id' => $participant->event->id
+                    ]);
+                    Log::info('Memanggil CertificateController@store', $certRequest->all());
+                    $response = app(\App\Http\Controllers\CertificateController::class)->store($certRequest);
+                    Log::info('Response CertificateController@store', ['response' => $response]);
+                } catch (\Exception $ex) {
+                    Log::error('Gagal generate sertifikat otomatis', [
+                        'error' => $ex->getMessage(),
+                        'trace' => $ex->getTraceAsString()
+                    ]);
+                }
+            }
+        }
 
             Log::info('Attendance recorded for participant: ' . $participant->id);
 

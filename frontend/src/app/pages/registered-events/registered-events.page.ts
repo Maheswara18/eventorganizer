@@ -152,7 +152,12 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
     const loading = await this.loadingController.create({ message: 'Mengunduh sertifikat...' });
     await loading.present();
     try {
-      const blob = await this.certificateService.downloadCertificate(this.selectedParticipant.id).toPromise();
+      // Ambil data sertifikat dari backend
+      const certificates = await this.certificateService.getAllCertificates().toPromise();
+      // Temukan sertifikat milik user untuk event ini
+      const myCertificate = certificates.find((c: any) => c.event_id === this.selectedEvent?.id && c.participant_id === this.selectedParticipant.id);
+      if (!myCertificate) throw new Error('Sertifikat tidak ditemukan');
+      const blob = await this.certificateService.downloadCertificate(myCertificate.id).toPromise();
       if (!blob) {
         this.showToast('File sertifikat tidak ditemukan', 'danger');
         await loading.dismiss();

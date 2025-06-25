@@ -138,15 +138,15 @@ export class EventQrPage implements OnInit, OnDestroy {
         };
         
         await loading.dismiss();
-        await this.qrScanner.start(
+      await this.qrScanner.start(
           cameraId, // Use specific camera ID
-          {
+        {
             fps: 5, // Reduce FPS to improve performance on some devices
             qrbox: qrboxFunction,
             disableFlip: false,
-          },
-          this.processQrCode.bind(this),
-          (errorMessage: string) => {
+        },
+        this.processQrCode.bind(this),
+        (errorMessage: string) => {
             // Ignore errors, they happen constantly when no QR is in view
           }
         );
@@ -203,7 +203,7 @@ export class EventQrPage implements OnInit, OnDestroy {
       const checkResponse = await this.http.post(`${environment.apiUrl}/scan-qr/check`, {
         qr_code_data: decodedText
       }).toPromise();
-
+      
       if (checkResponse && (checkResponse as any).success) {
         this.currentParticipant = (checkResponse as any).participant;
         this.showParticipantInfo = true;

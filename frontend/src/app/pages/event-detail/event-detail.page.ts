@@ -243,13 +243,15 @@ export class EventDetailPage implements OnInit {
     await loading.present();
 
     try {
-      const eventId = this.route.snapshot.params['id'];
-      const blob = await this.certificateService.downloadCertificate(eventId).toPromise();
-      
+      // Ambil data sertifikat dari backend
+      const certificates = await this.certificateService.getAllCertificates().toPromise();
+      // Temukan sertifikat milik user untuk event ini
+      const myCertificate = certificates.find((c: any) => c.event_id === this.event.id && c.participant_id === this.participant?.id);
+      if (!myCertificate) throw new Error('Sertifikat tidak ditemukan');
+      const blob = await this.certificateService.downloadCertificate(myCertificate.id).toPromise();
       if (!blob) {
         throw new Error('File tidak ditemukan');
       }
-
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -258,7 +260,6 @@ export class EventDetailPage implements OnInit {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-
       this.showToast('Sertifikat berhasil diunduh', 'success');
     } catch (error) {
       console.error('Error downloading certificate:', error);

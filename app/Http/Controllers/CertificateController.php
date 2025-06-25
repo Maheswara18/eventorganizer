@@ -59,10 +59,6 @@ class CertificateController extends Controller
     // ✅ Generate sertifikat
     public function store(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
-            return response()->json(['message' => 'Only admin can issue certificate'], 403);
-        }
-
         $validated = $request->validate([
             'participant_id' => 'required|exists:participants,id',
             'event_id' => 'required|exists:events,id',
@@ -210,12 +206,19 @@ class CertificateController extends Controller
             Storage::put('public/' . $filename, $pdf->output());
 
             // Create certificate record
-        $certificate = Certificate::create([
-            'participant_id' => $validated['participant_id'],
-            'event_id' => $validated['event_id'],
+            $certificate = Certificate::create([
+                'participant_id' => $validated['participant_id'],
+                'event_id' => $validated['event_id'],
                 'certificate_path' => $filename,
-            'verification_code' => $code,
-        ]);
+                'verification_code' => $code,
+                'issued_at' => now(),
+            ]);
+            
+            \Log::info('DEBUG: Sertifikat berhasil dibuat', [
+                'participant_id' => $validated['participant_id'],
+                'event_id' => $validated['event_id'],
+                'certificate_id' => $certificate->id
+            ]);
 
             // Send notification to participant
             $participant->user->notify(new CertificateGenerated($certificate));
