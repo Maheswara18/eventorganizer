@@ -68,7 +68,12 @@ export class AdminPaymentsPage implements OnInit {
 
   viewPaymentProof(payment: any) {
     if (payment.payment_proof_path) {
-      this.selectedPaymentProof = `${environment.baseUrl}/storage/${payment.payment_proof_path}`;
+      let proofPath = payment.payment_proof_path;
+      if (proofPath.startsWith('payment_proofs/')) {
+        this.selectedPaymentProof = `${environment.baseUrl}/storage/${proofPath}`;
+      } else {
+        this.selectedPaymentProof = `${environment.baseUrl}/storage/payment_proofs/${proofPath}`;
+      }
       this.isModalOpen = true;
     }
   }

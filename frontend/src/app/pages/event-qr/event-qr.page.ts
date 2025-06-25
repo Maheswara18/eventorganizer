@@ -12,6 +12,8 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { Camera } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-event-qr',
@@ -76,8 +78,32 @@ export class EventQrPage implements OnInit, OnDestroy {
     }
   }
 
+  // Fungsi untuk meminta izin kamera secara eksplisit (Android)
+  private async requestCameraPermission() {
+    if (Capacitor.getPlatform() === 'android') {
+      try {
+        const result = await Camera.requestPermissions();
+        if (result.camera !== 'granted') {
+          const toast = await this.toastController.create({
+            message: 'Akses kamera diperlukan untuk scan QR. Silakan izinkan kamera.',
+            duration: 3000,
+            color: 'danger'
+          });
+          await toast.present();
+          throw new Error('Izin kamera tidak diberikan');
+        }
+      } catch (err) {
+        console.error('Gagal meminta izin kamera:', err);
+        throw err;
+      }
+    }
+  }
+
   async startScan() {
     try {
+      // Minta izin kamera sebelum inisialisasi scanner
+      await this.requestCameraPermission();
+
       if (!this.qrScanner) {
         this.initializeScanner();
       }
