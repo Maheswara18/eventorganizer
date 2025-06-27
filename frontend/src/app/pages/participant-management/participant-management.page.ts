@@ -111,6 +111,12 @@ export class ParticipantManagementPage implements OnInit {
     this.loadParticipants();
   }
 
+  async ionViewWillEnter() {
+    await this.loadEvents();
+    this.currentPage = 1;
+    await this.loadParticipants();
+  }
+
   async loadEvents() {
     try {
       const loading = await this.loadingCtrl.create({

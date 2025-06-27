@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, IonContent } from '@ionic/angular';
+import { IonicModule, IonContent, Platform, AlertController } from '@ionic/angular';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Subscription, filter } from 'rxjs';
@@ -36,7 +36,9 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private authService: AuthService,
     private paymentService: PaymentService,
     private eventsService: EventsService,
-    private router: Router
+    private router: Router,
+    private platform: Platform,
+    private alertController: AlertController
   ) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)

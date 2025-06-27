@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { IonicModule, LoadingController, ToastController, AlertController, ModalController } from '@ionic/angular';
+import { IonicModule, LoadingController, ToastController, AlertController, ModalController, Platform } from '@ionic/angular';
 import { EventsService } from '../../services/events.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +12,8 @@ import { AuthService } from '../../services/auth.service';
 import { CertificateService } from '../../services/certificate.service';
 import { ParticipantService } from '../../services/participant.service';
 import { Participant } from '../../interfaces/participant.interface';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Device } from '@capacitor/device';
 
 interface Event {
   id: number;
@@ -61,7 +63,6 @@ interface ParticipantStatus {
 export class EventDetailPage implements OnInit {
   event: any;
   isLoading = true;
-  isRegistered = false;
   isAdmin = false;
   environment = environment;
   participant: Participant | null = null;
@@ -79,7 +80,8 @@ export class EventDetailPage implements OnInit {
     private formTemplateService: FormTemplateService,
     private authService: AuthService,
     private certificateService: CertificateService,
-    private participantService: ParticipantService
+    private participantService: ParticipantService,
+    private platform: Platform
   ) {}
 
   async ngOnInit() {
@@ -108,7 +110,7 @@ export class EventDetailPage implements OnInit {
 
       this.event = await this.eventsService.getEvent(Number(id));
       if (this.event) {
-        this.isRegistered = await this.eventsService.checkRegistration(this.event.id);
+        // this.isRegistered = await this.eventsService.checkRegistration(this.event.id);
       }
       await this.loadParticipantStatus(Number(id));
     } catch (error) {
@@ -149,15 +151,11 @@ export class EventDetailPage implements OnInit {
 
       const { data } = await modal.onWillDismiss();
       if (data?.responses) {
-        // Register the participant with the form responses
         await this.eventsService.registerForEvent(this.event.id, { responses: data.responses });
-        this.isRegistered = true;
-        const toast = await this.toastController.create({
-          message: 'Berhasil mendaftar event',
-          duration: 2000,
-          color: 'success'
-        });
-        await toast.present();
+        this.showToast('Berhasil mendaftar event', 'success');
+        await this.loadParticipant();
+        await this.loadParticipantStatus(this.event.id);
+        await this.loadEvent();
       }
     } catch (error: any) {
       console.error('Error showing registration form:', error);
@@ -235,38 +233,113 @@ export class EventDetailPage implements OnInit {
   }
 
   async downloadCertificate() {
+    // Catatan: Fallback Android 11+ ke Documents, lalu Downloads, lalu Share jika gagal. Log dan toast di setiap step.
     if (!this.participantStatus?.certificate_download_url) return;
 
     const loading = await this.loadingController.create({
       message: 'Mengunduh sertifikat...'
     });
     await loading.present();
-
+    let timeoutHandle: any;
+    let timeoutOccured = false;
     try {
-      // Ambil data sertifikat dari backend
+      console.log('[Download] Mulai proses download sertifikat');
       const certificates = await this.certificateService.getAllCertificates().toPromise();
-      // Temukan sertifikat milik user untuk event ini
       const myCertificate = certificates.find((c: any) => c.event_id === this.event.id && c.participant_id === this.participant?.id);
       if (!myCertificate) throw new Error('Sertifikat tidak ditemukan');
       const blob = await this.certificateService.downloadCertificate(myCertificate.id).toPromise();
-      if (!blob) {
-        throw new Error('File tidak ditemukan');
+      if (!blob) throw new Error('File tidak ditemukan');
+      console.log('[Download] Blob didapat, size:', blob.size);
+      const isCordova = !!(window as any).cordova;
+      if (isCordova) {
+        const info = await Device.getInfo();
+        const isAndroid = info.platform === 'android';
+        const androidVersion = parseInt((info.osVersion || '0').split('.')[0]);
+        console.log('[Download] isCordova:', isCordova, 'isAndroid:', isAndroid, 'androidVersion:', androidVersion);
+        if (isAndroid && androidVersion >= 11) {
+          // Android 11+ buka file di browser eksternal, tanpa konversi base64
+          const fileUrl = (myCertificate?.certificate_download_url || this.participantStatus?.certificate_download_url);
+          console.log('[Download] fileUrl:', fileUrl, 'participantStatus:', this.participantStatus, 'myCertificate:', myCertificate);
+          if (fileUrl) {
+            window.open(fileUrl, '_system'); // Cordova: _system, fallback: _blank
+            this.showToast('Sertifikat dibuka di browser. Silakan simpan dari sana.', 'success');
+          } else {
+            this.showToast('Link download sertifikat tidak ditemukan.', 'danger');
+          }
+          await loading.dismiss();
+          return;
+        } else if (isAndroid) {
+          // Android < 11 gunakan Cordova File + Android Permissions
+          const { File } = await import('@awesome-cordova-plugins/file/ngx');
+          const { AndroidPermissions } = await import('@awesome-cordova-plugins/android-permissions/ngx');
+          const file = new File();
+          const androidPermissions = new AndroidPermissions();
+          await androidPermissions.requestPermissions([
+            androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE,
+            androidPermissions.PERMISSION.READ_EXTERNAL_STORAGE
+          ]);
+          const hasPerm = await androidPermissions.checkPermission(androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE);
+          if (!hasPerm.hasPermission) {
+            alert('Izin penyimpanan tidak diberikan. Tidak bisa menyimpan file.');
+            this.showToast('Izin penyimpanan tidak diberikan', 'danger');
+            return;
+          }
+          const filename = `sertifikat-${this.event.title}.pdf`;
+          const arrayBuffer = await blob.arrayBuffer();
+          const uint8Array = new Uint8Array(arrayBuffer);
+          await file.writeFile(file.externalRootDirectory + 'Download/', filename, uint8Array, {replace: true});
+          alert('Sertifikat berhasil disimpan di: ' + file.externalRootDirectory + 'Download/' + filename);
+          this.showToast('Sertifikat berhasil disimpan di Download', 'success');
+          console.log('[Download] Sukses simpan di Download Android <11');
+        }
+      } else {
+        // Cara download di browser, tanpa plugin native
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `sertifikat-${this.event.title}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        this.showToast('Sertifikat berhasil diunduh', 'success');
+        console.log('[Download] Sukses download di web');
       }
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `sertifikat-${this.event.title}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      this.showToast('Sertifikat berhasil diunduh', 'success');
     } catch (error) {
-      console.error('Error downloading certificate:', error);
-      this.showToast('Gagal mengunduh sertifikat', 'danger');
+      if (timeoutOccured) {
+        this.showToast('Timeout saat mengunduh sertifikat', 'danger');
+        console.log('[Download] Timeout error:', error);
+      } else {
+        this.showToast('Gagal mengunduh sertifikat: ' + String(error), 'danger');
+        console.log('Error utama download:', error);
+      }
     } finally {
+      clearTimeout(timeoutHandle);
       loading.dismiss();
+      console.log('[Download] Selesai proses download');
     }
+  }
+
+  private blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      let timeout = setTimeout(() => {
+        reject(new Error('Timeout konversi blob ke base64'));
+      }, 10000);
+      reader.onloadend = () => {
+        clearTimeout(timeout);
+        const base64data = (reader.result as string).split(',')[1];
+        console.log('[Download] blobToBase64 selesai');
+        resolve(base64data);
+      };
+      reader.onerror = (err) => {
+        clearTimeout(timeout);
+        console.log('[Download] blobToBase64 error:', err);
+        reject(err);
+      };
+      console.log('[Download] blobToBase64 mulai');
+      reader.readAsDataURL(blob);
+    });
   }
 
   private async showToast(message: string, color: string = 'primary') {
@@ -291,24 +364,52 @@ export class EventDetailPage implements OnInit {
         },
         {
           text: 'Ya, Batalkan',
-          role: 'confirm',
           handler: async () => {
-            const loading = await this.loadingController.create({ message: 'Membatalkan pendaftaran...' });
-            await loading.present();
             try {
               await this.eventsService.unregisterFromEvent(this.event.id);
-              this.isRegistered = false;
-              await this.loadParticipant();
-              this.showToast('Pendaftaran berhasil dibatalkan', 'success');
-            } catch (err) {
+              this.showToast('Pendaftaran sedang diproses, mohon tunggu...');
+              this.pollParticipantStatus();
+            } catch (error) {
               this.showToast('Gagal membatalkan pendaftaran', 'danger');
-            } finally {
-              await loading.dismiss();
             }
           }
         }
       ]
     });
     await alert.present();
+  }
+
+  pollParticipantStatus() {
+    const interval = setInterval(async () => {
+      try {
+        await this.loadParticipant();
+        if (!this.participant) {
+          clearInterval(interval);
+          this.showToast('Pendaftaran berhasil dibatalkan', 'success');
+          await this.loadParticipantStatus(this.event.id);
+          await this.loadEvent();
+        }
+      } catch (err) {
+        // ignore
+      }
+    }, 2000); // cek setiap 2 detik
+  }
+
+  get isRegistered(): boolean {
+    return !!this.participant;
+  }
+
+  get isPaid(): boolean {
+    return this.participant?.payment_status === 'completed';
+  }
+
+  get isUnpaid(): boolean {
+    return this.participant?.payment_status === 'belum_bayar' || this.participant?.payment_status === 'pending';
+  }
+
+  goToPaymentPage() {
+    if (this.event) {
+      this.router.navigate(['/payments'], { queryParams: { eventId: this.event.id } });
+    }
   }
 } 

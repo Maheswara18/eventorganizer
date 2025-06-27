@@ -108,6 +108,10 @@ export class StatisticsPage implements OnInit {
     this.loadData();
   }
 
+  ionViewWillEnter() {
+    this.loadData();
+  }
+
   async refreshData() {
     const refresher = document.createElement('ion-refresher');
     refresher.complete();

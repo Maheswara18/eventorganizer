@@ -128,14 +128,20 @@
             {{ participant?.attendance_status === 'present' ? 'Hadir' : (isRegistered ? 'Terdaftar' : 'Belum Terdaftar') }}
           </ion-badge>
         </div>
-        <ion-button *ngIf="participant?.attendance_status === 'present'" (click)="downloadCertificate()" expand="block" color="success">
-          Download Sertifikat
+        <ion-button *ngIf="!isRegistered" (click)="showRegistrationForm()" expand="block">
+          Daftar Sekarang
         </ion-button>
-        <ion-button *ngIf="isRegistered && participant?.attendance_status !== 'present'" color="danger" expand="block" (click)="batalkanPendaftaran()">
+        <ion-button *ngIf="isRegistered && isUnpaid" color="warning" expand="block" (click)="goToPaymentPage()">
+          Bayar Sekarang
+        </ion-button>
+        <ion-button *ngIf="isRegistered && isPaid" color="success" expand="block">
+          Sudah Bayar
+        </ion-button>
+        <ion-button *ngIf="isRegistered && participant?.attendance_status !== 'present' && isUnpaid" color="danger" expand="block" (click)="batalkanPendaftaran()">
           Batalkan Daftar
         </ion-button>
-        <ion-button *ngIf="!isRegistered && (!participant || participant?.attendance_status !== 'present')" (click)="showRegistrationForm()" expand="block">
-          Daftar Sekarang
+        <ion-button *ngIf="participant?.attendance_status === 'present'" (click)="downloadCertificate()" expand="block" color="success">
+          Download Sertifikat
         </ion-button>
       </div>
     </ion-toolbar>

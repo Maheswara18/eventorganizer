@@ -13,6 +13,8 @@ import { environment } from '../../../environments/environment';
 import { QrCodeComponent } from '../../components/qr-code/qr-code.component';
 import { ParticipantService } from '../../services/participant.service';
 import { CertificateService } from '../../services/certificate.service';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Device } from '@capacitor/device';
 
 export interface ParticipantStatus {
   attendance_status: string;
@@ -148,13 +150,15 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
   }
 
   async downloadCertificate() {
+    // Catatan: Fallback Android 11+ ke Documents, lalu Downloads, lalu Share jika gagal. Log dan toast di setiap step.
     if (!this.selectedParticipant) return;
     const loading = await this.loadingController.create({ message: 'Mengunduh sertifikat...' });
     await loading.present();
+    let timeoutHandle: any;
+    let timeoutOccured = false;
     try {
-      // Ambil data sertifikat dari backend
+      console.log('[Download] Mulai proses download sertifikat');
       const certificates = await this.certificateService.getAllCertificates().toPromise();
-      // Temukan sertifikat milik user untuk event ini
       const myCertificate = certificates.find((c: any) => c.event_id === this.selectedEvent?.id && c.participant_id === this.selectedParticipant.id);
       if (!myCertificate) throw new Error('Sertifikat tidak ditemukan');
       const blob = await this.certificateService.downloadCertificate(myCertificate.id).toPromise();
@@ -163,27 +167,26 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
         await loading.dismiss();
         return;
       }
+      console.log('[Download] Blob didapat, size:', blob.size);
       const isCordova = !!(window as any).cordova;
       if (isCordova) {
-        // Deteksi versi Android
-        const { Device } = await import('@capacitor/device');
         const info = await Device.getInfo();
         const isAndroid = info.platform === 'android';
         const androidVersion = parseInt((info.osVersion || '0').split('.')[0]);
+        console.log('[Download] isCordova:', isCordova, 'isAndroid:', isAndroid, 'androidVersion:', androidVersion);
         if (isAndroid && androidVersion >= 11) {
-          // Android 11+ gunakan penyimpanan internal aplikasi
-          const { Filesystem, Directory } = await import('@capacitor/filesystem');
-          const arrayBuffer = await blob.arrayBuffer();
-          const base64 = await this.blobToBase64(blob);
-          const filename = `sertifikat-event-${this.selectedEvent?.id}.pdf`;
-          await Filesystem.writeFile({
-            path: filename,
-            data: base64,
-            directory: Directory.Documents
-          });
-          this.showToast('Sertifikat berhasil disimpan di folder aplikasi (Documents)', 'success');
-        } else {
-          // Android < 11, tetap gunakan plugin file dan izin eksternal
+          // Android 11+ buka file di browser eksternal, tanpa konversi base64
+          const fileUrl = myCertificate?.certificate_download_url;
+          console.log('[Download] fileUrl:', fileUrl, 'myCertificate:', myCertificate);
+          if (fileUrl) {
+            window.open(fileUrl, '_system'); // Cordova: _system, fallback: _blank
+            this.showToast('Sertifikat dibuka di browser. Silakan simpan dari sana.', 'success');
+          } else {
+            this.showToast('Link download sertifikat tidak ditemukan.', 'danger');
+          }
+          await loading.dismiss();
+          return;
+        } else if (isAndroid) {
           const { File } = await import('@awesome-cordova-plugins/file/ngx');
           const { AndroidPermissions } = await import('@awesome-cordova-plugins/android-permissions/ngx');
           const file = new File();
@@ -204,9 +207,9 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
           await file.writeFile(file.externalRootDirectory + 'Download/', filename, uint8Array, {replace: true});
           alert('Sertifikat berhasil disimpan di: ' + file.externalRootDirectory + 'Download/' + filename);
           this.showToast('Sertifikat berhasil disimpan di Download', 'success');
+          console.log('[Download] Sukses simpan di Download Android <11');
         }
       } else {
-        // Cara download di browser, tanpa plugin native
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -214,25 +217,41 @@ export class RegisteredEventsPage implements OnInit, OnDestroy {
         a.click();
         window.URL.revokeObjectURL(url);
         this.showToast('Sertifikat berhasil diunduh', 'success');
+        console.log('[Download] Sukses download di web');
       }
-    } catch (err) {
-      if (!!(window as any).cordova) {
-        alert('Gagal menyimpan sertifikat: ' + JSON.stringify(err));
+    } catch (error) {
+      if (timeoutOccured) {
+        this.showToast('Timeout saat mengunduh sertifikat', 'danger');
+        console.log('[Download] Timeout error:', error);
+      } else {
+        this.showToast('Gagal mengunduh sertifikat: ' + String(error), 'danger');
+        console.log('Error utama download:', error);
       }
-      this.showToast('Gagal mengunduh sertifikat', 'danger');
     } finally {
+      clearTimeout(timeoutHandle);
       await loading.dismiss();
+      console.log('[Download] Selesai proses download');
     }
   }
 
   private blobToBase64(blob: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
+      let timeout = setTimeout(() => {
+        reject(new Error('Timeout konversi blob ke base64'));
+      }, 10000);
       reader.onloadend = () => {
+        clearTimeout(timeout);
         const base64data = (reader.result as string).split(',')[1];
+        console.log('[Download] blobToBase64 selesai');
         resolve(base64data);
       };
-      reader.onerror = reject;
+      reader.onerror = (err) => {
+        clearTimeout(timeout);
+        console.log('[Download] blobToBase64 error:', err);
+        reject(err);
+      };
+      console.log('[Download] blobToBase64 mulai');
       reader.readAsDataURL(blob);
     });
   }

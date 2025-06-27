@@ -80,9 +80,12 @@ export class PaymentsPage implements OnInit {
     });
   }
 
-  ngOnInit() {
-    this.isAdmin = this.authService.isAdmin();
-    this.loadData();
+  async ngOnInit() {
+    if (this.eventId) {
+      await this.pollForNewEvent(this.eventId);
+    } else {
+      await this.loadData();
+    }
   }
 
   ionViewWillEnter() {
@@ -196,8 +199,8 @@ export class PaymentsPage implements OnInit {
 
       this.showToast('Bukti pembayaran berhasil diunggah', 'success');
       this.closePaymentModal();
-      // Force reload data dari backend agar status benar-benar fresh
-      await this.loadData();
+      // Polling status pembayaran agar UI langsung update
+      await this.pollForPaymentStatus(this.selectedEvent.id);
 
       if (this.returnUrl) {
         this.router.navigate([this.returnUrl]);
@@ -266,5 +269,42 @@ export class PaymentsPage implements OnInit {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  async pollForNewEvent(eventId: number) {
+    let attempts = 0;
+    const maxAttempts = 5;
+    const interval = 2000;
+    while (attempts < maxAttempts) {
+      await this.loadData();
+      if (this.registeredEvents.some(e => e.id === eventId && e.payment_status === 'belum_bayar')) {
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, interval));
+      attempts++;
+    }
+    if (!this.registeredEvents.some(e => e.id === eventId && e.payment_status === 'belum_bayar')) {
+      this.showToast('Event baru akan muncul di pembayaran dalam beberapa detik. Silakan refresh jika belum muncul.', 'warning');
+    }
+  }
+
+  async pollForPaymentStatus(eventId: number) {
+    let attempts = 0;
+    const maxAttempts = 5;
+    const interval = 2000;
+    while (attempts < maxAttempts) {
+      await this.loadData();
+      const event = this.registeredEvents.find(e => e.id === eventId);
+      if (event && event.payment_status !== 'belum_bayar') {
+        this.showToast('Pembayaran berhasil dikirim, status akan diperbarui setelah diverifikasi admin.', 'success');
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, interval));
+      attempts++;
+    }
+    const event = this.registeredEvents.find(e => e.id === eventId);
+    if (!event || event.payment_status === 'belum_bayar') {
+      this.showToast('Status pembayaran akan diperbarui dalam beberapa detik. Silakan refresh jika belum berubah.', 'warning');
+    }
   }
 }
