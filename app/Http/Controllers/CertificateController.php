@@ -32,16 +32,30 @@ class CertificateController extends Controller
         $user = Auth::user();
 
         if ($user->role === 'admin') {
-            return response()->json(Certificate::with(['participant', 'event'])->get());
+            $certificates = Certificate::with(['participant', 'event'])->get();
+            $certificates = $certificates->map(function($cert) {
+                return array_merge($cert->toArray(), [
+                    'certificate_download_url' => $cert->certificate_path
+                        ? url('storage/certificates/' . basename($cert->certificate_path))
+                        : null,
+                ]);
+            });
+            return response()->json($certificates);
         }
 
-        return response()->json(
-            Certificate::with('event')
-                ->whereHas('participant', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                })
-                ->get()
-        );
+        $certificates = Certificate::with('event')
+            ->whereHas('participant', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->get();
+        $certificates = $certificates->map(function($cert) {
+            return array_merge($cert->toArray(), [
+                'certificate_download_url' => $cert->certificate_path
+                    ? url('storage/certificates/' . basename($cert->certificate_path))
+                    : null,
+            ]);
+        });
+        return response()->json($certificates);
     }
 
     // ✅ Lihat 1 sertifikat
@@ -53,7 +67,11 @@ class CertificateController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return response()->json($certificate);
+        $data = $certificate->toArray();
+        $data['certificate_download_url'] = $certificate->certificate_path
+            ? url('storage/certificates/' . basename($certificate->certificate_path))
+            : null;
+        return response()->json($data);
     }
 
     // ✅ Generate sertifikat

@@ -18,6 +18,9 @@ use App\Models\FormResponse;
 use App\Models\FormTemplate;
 use App\Models\FormField;
 use Illuminate\Support\Facades\Validator;
+use App\Jobs\ProcessEventRegistrationJob;
+use App\Jobs\CancelEventRegistrationJob;
+use App\Services\ImageOptimizationService;
 
 class EventController extends Controller
 {
@@ -25,7 +28,7 @@ class EventController extends Controller
     public function index()
     {
         try {
-            $events = Event::with('admin')->get();
+            $events = Event::with(['admin', 'participants', 'payments', 'certificates', 'formTemplate'])->get();
             return response()->json($events);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error fetching events', 'error' => $e->getMessage()], 500);
@@ -160,7 +163,7 @@ class EventController extends Controller
     public function show($id)
     {
         try {
-            $event = Event::with('admin')->findOrFail($id);
+            $event = Event::with(['admin', 'participants', 'payments', 'certificates', 'formTemplate'])->findOrFail($id);
             return response()->json($event);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Event not found', 'error' => $e->getMessage()], 404);
@@ -192,11 +195,11 @@ class EventController extends Controller
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
             ]);
 
-            // ✅ Upload gambar jika ada
+            // Optimasi upload gambar jika ada
             if ($request->hasFile('image_path')) {
-                $imageName = time() . '_' . uniqid() . '.' . $request->file('image_path')->extension();
-                $request->file('image_path')->move(public_path('storage/images'), $imageName);
-                $validated['image_path'] = 'storage/images/' . $imageName;
+                $imageService = new ImageOptimizationService();
+                $optimizedPath = $imageService->optimize($request->file('image_path'), 'images');
+                $validated['image_path'] = 'storage/' . $optimizedPath;
             }
 
             $validated['admin_id'] = Auth::id();
@@ -238,17 +241,15 @@ class EventController extends Controller
 
             \Log::info('Validated data:', $validated);
 
-            // Handle image upload if new image is provided
+            // Optimasi upload gambar jika ada
             if ($request->hasFile('image_path')) {
-                \Log::info('Processing new image upload');
-                    // Delete old image if exists
-                if ($event->image_path && Storage::exists('public/' . str_replace('storage/', '', $event->image_path))) {
-                    Storage::delete('public/' . str_replace('storage/', '', $event->image_path));
-                    }
-
-                    $imageName = time() . '_' . uniqid() . '.' . $request->file('image_path')->extension();
-                    $request->file('image_path')->move(public_path('storage/images'), $imageName);
-                    $validated['image_path'] = 'storage/images/' . $imageName;
+                // Hapus gambar lama jika ada
+                if ($event->image_path && \Storage::exists('public/' . str_replace('storage/', '', $event->image_path))) {
+                    \Storage::delete('public/' . str_replace('storage/', '', $event->image_path));
+                }
+                $imageService = new ImageOptimizationService();
+                $optimizedPath = $imageService->optimize($request->file('image_path'), 'images');
+                $validated['image_path'] = 'storage/' . $optimizedPath;
             }
 
             // Convert provides_certificate to boolean
@@ -338,87 +339,31 @@ class EventController extends Controller
     public function register(Request $request, $event)
     {
         try {
-            \Log::info('Starting event registration for event ID: ' . $event);
-            
             $event = Event::findOrFail($event);
-            \Log::info('Event found: ' . $event->title);
-            
             $user = Auth::user();
-            \Log::info('User authenticated: ' . $user->name);
-
-            // Validate incoming request for responses
             $request->validate([
                 'responses' => 'array',
                 'responses.*.field_id' => 'required|exists:form_fields,id',
                 'responses.*.value' => 'nullable|string',
             ]);
-
-            // Cek apakah event masih aktif
             if ($event->status !== 'active') {
-                \Log::info('Event not active');
                 return response()->json(['message' => 'Event is not active'], 400);
             }
-
-            // Cek apakah masih ada slot tersedia
             if ($event->max_participants !== null) {
                 $currentParticipants = $event->participants()->count();
-                \Log::info('Current participants: ' . $currentParticipants . ' of ' . $event->max_participants);
                 if ($currentParticipants >= $event->max_participants) {
                     return response()->json(['message' => 'Event is full'], 400);
                 }
             }
-
-            // Cek apakah user sudah terdaftar
             $alreadyRegistered = $event->participants()->where('user_id', $user->id)->exists();
-            \Log::info('Already registered: ' . ($alreadyRegistered ? 'yes' : 'no'));
             if ($alreadyRegistered) {
                 return response()->json(['message' => 'Already registered for this event'], 409);
             }
-
-            // Generate QR code dengan data unik
-            \Log::info('Generating QR code');
-            
-            // Buat registrasi participant terlebih dahulu
-            \Log::info('Creating participant record');
-            $qrData = "participant-{$user->id}-{$event->id}";
-            $uuid = Str::uuid();
-            $qrPath = "public/qrcodes/participant-{$user->id}-{$event->id}-{$uuid}.png";
-            
-            // Generate dan simpan QR code
-            \Log::info('Saving QR code to: ' . $qrPath);
-            $qrImage = QrCode::format('png')->size(300)->generate($qrData);
-            Storage::put($qrPath, $qrImage);
-
-            $participant = Participant::create([
-                'user_id' => $user->id,
-                'event_id' => $event->id,
-                'qr_code_data' => $qrData,
-                'qr_code_path' => str_replace('public/', 'storage/', $qrPath),
-                'attendance_status' => 'registered',
-                'payment_status' => 'belum_bayar'
-            ]);
-
-            // Simpan jawaban form jika ada
-            if ($request->has('responses') && is_array($request->responses)) {
-                foreach ($request->responses as $formResponseData) {
-                    FormResponse::create([
-                        'participant_id' => $participant->id,
-                        'form_field_id' => $formResponseData['field_id'],
-                        'value' => $formResponseData['value'] ?? null,
-                    ]);
-                }
-                \Log::info('Form responses saved for participant: ' . $participant->id);
-            }
-
-            \Log::info('Registration successful');
-            return response()->json([
-                'message' => 'Successfully registered for event',
-                'participant' => $participant
-            ], 201);
-
+            // Dispatch job ke queue
+            ProcessEventRegistrationJob::dispatch($user, $event, $request->responses ?? []);
+            return response()->json(['message' => 'Pendaftaran sedang diproses, silakan cek beberapa saat lagi.'], 202);
         } catch (\Exception $e) {
             \Log::error('Error in event registration: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
             return response()->json(['message' => 'Error registering for event', 'error' => $e->getMessage()], 500);
         }
     }
@@ -536,127 +481,40 @@ class EventController extends Controller
     public function cancelRegistration($id)
     {
         try {
-            Log::info('Starting registration cancellation', [
-                'event_id' => $id,
-                'user_id' => auth()->id()
-            ]);
-
             $user = auth()->user();
-            Log::info('User authenticated', [
-                'user_id' => $user->id,
-                'name' => $user->name
-            ]);
-
-            // Find the registration
             $registration = Participant::where('user_id', $user->id)
                 ->where('event_id', $id)
                 ->first();
 
-            Log::info('Registration found', [
-                'registration' => $registration ? $registration->toArray() : null
-            ]);
-
             if (!$registration) {
-                Log::warning('Registration not found', [
-                    'event_id' => $id,
-                    'user_id' => $user->id
-                ]);
-                return response()->json([
-                    'message' => 'Registrasi tidak ditemukan'
-                ], 404);
+                return response()->json(['message' => 'Registrasi tidak ditemukan'], 404);
             }
-
-            // Check if already paid
             if ($registration->payment && $registration->payment->status === 'paid') {
-                Log::warning('Cannot cancel paid registration', [
-                    'registration_id' => $registration->id,
-                    'payment_status' => $registration->payment->status
-                ]);
-                return response()->json([
-                    'message' => 'Tidak dapat membatalkan registrasi yang sudah dibayar'
-                ], 400);
+                return response()->json(['message' => 'Tidak dapat membatalkan registrasi yang sudah dibayar'], 400);
             }
-
-            // Delete payment if exists
-            if ($registration->payment) {
-                Log::info('Deleting payment', [
-                    'payment_id' => $registration->payment->id
-                ]);
-                $registration->payment->delete();
-            }
-
-            // Delete QR code if exists
-            if ($registration->qr_code_path) {
-                Log::info('Attempting to delete QR code', [
-                    'qr_path' => $registration->qr_code_path
-                ]);
-                $qrPath = 'public/' . $registration->qr_code_path;
-                if (Storage::exists($qrPath)) {
-                    Storage::delete($qrPath);
-                    Log::info('QR code deleted successfully');
-                } else {
-                    Log::warning('QR code file not found', [
-                        'qr_path' => $qrPath
-                    ]);
-                }
-            }
-
-            // Delete registration
-            $registration->delete();
-            Log::info('Registration cancelled successfully', [
-                'registration_id' => $registration->id
-            ]);
-
-            return response()->json([
-                'message' => 'Registrasi berhasil dibatalkan'
-            ]);
+            // Dispatch job ke queue
+            CancelEventRegistrationJob::dispatch($registration->id);
+            return response()->json(['message' => 'Pembatalan sedang diproses, silakan cek beberapa saat lagi.'], 202);
         } catch (\Exception $e) {
-            Log::error('Error in cancelRegistration', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'event_id' => $id,
-                'user_id' => auth()->id()
-            ]);
-            return response()->json([
-                'message' => 'Terjadi kesalahan saat membatalkan registrasi: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['message' => 'Terjadi kesalahan saat membatalkan registrasi: ' . $e->getMessage()], 500);
         }
     }
 
     public function unregister($event)
     {
         try {
-            \Log::info('Starting event unregistration for event ID: ' . $event);
-            
             $user = Auth::user();
-            \Log::info('User authenticated: ' . $user->name);
-
-            // Cari participant record
             $participant = Participant::where('event_id', $event)
                 ->where('user_id', $user->id)
                 ->first();
-
             if (!$participant) {
                 return response()->json(['message' => 'You are not registered for this event'], 404);
             }
-
-            // Hapus QR code jika ada
-            if ($participant->qr_code_path) {
-                $qrPath = str_replace('storage/', 'public/', $participant->qr_code_path);
-                if (Storage::exists($qrPath)) {
-                    Storage::delete($qrPath);
-                    \Log::info('Deleted QR code: ' . $qrPath);
-                }
-            }
-
-            // Hapus participant record
-            $participant->delete();
-            \Log::info('Successfully unregistered from event');
-
-            return response()->json(['message' => 'Successfully unregistered from event']);
+            // Dispatch job ke queue
+            CancelEventRegistrationJob::dispatch($participant->id);
+            return response()->json(['message' => 'Pembatalan sedang diproses, silakan cek beberapa saat lagi.'], 202);
         } catch (\Exception $e) {
             \Log::error('Error in event unregistration: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
             return response()->json(['message' => 'Error unregistering from event', 'error' => $e->getMessage()], 500);
         }
     }

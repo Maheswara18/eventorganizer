@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageManager;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -19,24 +19,23 @@ class ImageOptimizationService
 
         $options = array_merge($defaultOptions, $options);
 
-        // Create image instance
-        $img = Image::make($image);
+        // Kembali ke cara lama: gunakan Imagick langsung
+        $img = new \Imagick();
+        $img->readImageBlob(file_get_contents($image));
+        $img->setImageFormat($options['format']);
+        $img->setImageCompressionQuality($options['quality']);
 
-        // Resize if needed
-        if ($img->width() > $options['maxWidth'] || $img->height() > $options['maxHeight']) {
-            $img->resize($options['maxWidth'], $options['maxHeight'], function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            });
+        // Resize jika perlu
+        if ($img->getImageWidth() > $options['maxWidth'] || $img->getImageHeight() > $options['maxHeight']) {
+            $img->resizeImage($options['maxWidth'], $options['maxHeight'], \Imagick::FILTER_LANCZOS, 1, true);
         }
 
         // Generate unique filename
         $filename = Str::random(40) . '.' . $options['format'];
         $fullPath = $path . '/' . $filename;
 
-        // Save optimized image
-        $img->encode($options['format'], $options['quality']);
-        Storage::put('public/' . $fullPath, $img->encode());
+        // Simpan gambar hasil optimasi
+        Storage::put('public/' . $fullPath, $img->getImagesBlob());
 
         return $fullPath;
     }
