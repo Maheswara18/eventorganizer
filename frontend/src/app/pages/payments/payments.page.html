@@ -59,6 +59,16 @@
           <ion-badge [color]="getStatusColor(event.payment_status || 'belum_bayar')">
             {{ getStatusText(event.payment_status || 'belum_bayar') }}
           </ion-badge>
+          <div *ngIf="pollingCountdown > 0 && event.id === eventId">
+            <ion-spinner name="dots" style="width:20px;height:20px;"></ion-spinner>
+            <span style="margin-left:8px;">Menunggu event muncul... ({{ pollingCountdown }} detik)</span>
+          </div>
+          <div *ngIf="!isPollingPaymentStatus && pollingEventId === event.id">
+            <ion-button size="small" color="primary" (click)="manualCheckPaymentStatus(event.id)">
+              <ion-icon name="refresh-outline" slot="start"></ion-icon>
+              Cek Status
+            </ion-button>
+          </div>
         </ion-label>
         <ion-button 
           (click)="openPaymentModal(event)" 

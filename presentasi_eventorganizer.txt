@@ -1,0 +1,172 @@
+# CATATAN PRESENTASI EVENT ORGANIZER
+
+## 1. Poin Penting yang Harus Dijelaskan Saat Presentasi
+
+### a. Gambaran Umum Aplikasi
+- Event Organizer adalah aplikasi berbasis web dan mobile untuk manajemen event, pendaftaran peserta, pembayaran, kehadiran (QR code), dan sertifikat digital.
+- Terdiri dari dua bagian utama: Backend (Laravel) dan Frontend (Ionic + Angular).
+
+### b. Teknologi yang Digunakan
+- **Backend:** Laravel (PHP), RESTful API, MySQL, Laravel Storage, Laravel Sanctum (auth), SimpleSoftwareIO/QrCode, DomPDF.
+- **Frontend:** Ionic + Angular (mobile-first), Chart.js (statistik), HTML5 QR Scanner.
+- **File Storage:** Menggunakan Laravel Storage dengan symbolic link ke public/storage.
+
+### c. Fitur Utama
+- **Admin:**
+  - CRUD event, upload gambar, form builder, pengaturan sertifikat.
+  - Manajemen peserta (daftar, filter, update kehadiran, export data).
+  - Verifikasi kehadiran via QR code (scan & update otomatis/manual).
+  - Dashboard statistik (grafik, monitoring kapasitas, visualisasi data).
+  - Manajemen pembayaran (konfirmasi, update status, riwayat, upload bukti).
+  - Generate sertifikat otomatis saat peserta hadir, download & verifikasi QR.
+- **Peserta:**
+  - Register/login, profile, riwayat event.
+  - Pendaftaran event, upload bukti pembayaran, status pembayaran real-time.
+  - QR code tiket, status kehadiran, download & verifikasi sertifikat.
+
+### d. Alur Kerja Utama
+1. **Admin membuat event** (isi detail, upload gambar, atur form pendaftaran).
+2. **Peserta mendaftar event** (isi form, dapat QR code).
+3. **Peserta melakukan pembayaran** (upload bukti, admin konfirmasi).
+4. **Kehadiran diverifikasi** (scan QR code saat event, status kehadiran update otomatis).
+5. **Sertifikat otomatis digenerate** jika peserta hadir, bisa diunduh & diverifikasi QR.
+
+### e. Keamanan & Best Practice
+- Autentikasi token (Sanctum), validasi input, proteksi CSRF & XSS, rate limiting.
+- File upload divalidasi, semua file publik disimpan di storage/app/public lalu diakses via public/storage (symbolic link).
+- Hanya admin yang bisa akses fitur sensitif (scan QR, manajemen event, pembayaran).
+
+### f. Catatan Pengembangan & Saran
+- Fitur utama sudah berjalan end-to-end.
+- Saran pengembangan: UI/UX improvement, notifikasi real-time, integrasi payment gateway, optimasi performa, dokumentasi API, sistem backup & monitoring.
+
+---
+
+## 2. Kemungkinan Pertanyaan Dosen & Saran Jawaban
+
+### a. **Teknologi & Arsitektur**
+- Q: Kenapa pilih Laravel dan Ionic?
+  - A: Laravel kuat untuk backend API, keamanan, dan manajemen database. Ionic + Angular mudah untuk mobile dan web, UI modern, dan integrasi API mudah.
+- Q: Bagaimana komunikasi frontend-backend?
+  - A: Menggunakan RESTful API dengan autentikasi token (Sanctum), semua data dikirim dalam format JSON.
+
+### b. **Fitur & Alur**
+- Q: Bagaimana proses generate sertifikat?
+  - A: Sertifikat digenerate otomatis saat peserta hadir (status present), file PDF disimpan di storage, bisa diunduh & diverifikasi QR code.
+- Q: Bagaimana sistem QR code bekerja?
+  - A: QR code dibuat backend, berisi kode unik participant-event, discan saat event untuk update kehadiran.
+- Q: Bagaimana keamanan file upload?
+  - A: Validasi tipe & ukuran file, file disimpan di storage/app/public, hanya bisa diakses via public/storage (symbolic link).
+
+### c. **Keamanan & Validasi**
+- Q: Bagaimana mencegah user tidak berhak mengakses data?
+  - A: Setiap endpoint dicek role user, hanya admin bisa akses fitur sensitif, peserta hanya bisa akses data sendiri.
+- Q: Bagaimana validasi input dilakukan?
+  - A: Backend menggunakan Laravel validation, frontend juga ada validasi form sebelum submit.
+
+### d. **Deployment & Maintenance**
+- Q: Bagaimana deployment aplikasi ini?
+  - A: Backend dihosting di server (Linux), frontend bisa dihosting di web server atau build ke Android/iOS. Pastikan storage:link sudah dijalankan dan permission benar.
+- Q: Bagaimana backup data dilakukan?
+  - A: Database bisa di-backup dengan mysqldump, file upload di-backup dari storage/app/public.
+
+### e. **Pengembangan Lanjutan**
+- Q: Apa rencana pengembangan selanjutnya?
+  - A: Integrasi payment gateway, notifikasi real-time, optimasi performa, dokumentasi API, sistem monitoring & backup otomatis.
+
+### f. **Troubleshooting**
+- Q: Bagaimana jika QR code tidak bisa discan?
+  - A: Cek format QR code, cek kamera & permission, cek koneksi API, cek log error backend.
+- Q: Bagaimana jika file sertifikat tidak bisa diakses?
+  - A: Pastikan storage:link sudah benar, permission folder benar, path file di database sesuai.
+
+---
+
+**Saran presentasi:**
+- Tunjukkan demo alur utama (buat event, daftar, pembayaran, scan QR, download sertifikat).
+- Jelaskan keunggulan dan keamanan aplikasi.
+- Siapkan jawaban singkat untuk pertanyaan teknis dan pengembangan lanjutan.
+
+# Tambahan untuk Presentasi
+
+## 3. Contoh Demo Alur Penggunaan (Step by Step)
+
+### a. Admin
+1. Login sebagai admin.
+2. Buat event baru, upload gambar, atur form pendaftaran.
+3. Lihat daftar peserta, konfirmasi pembayaran, update kehadiran.
+4. Scan QR code peserta saat event berlangsung.
+5. Cek dan download sertifikat peserta.
+
+### b. Peserta
+1. Register dan login.
+2. Pilih event, isi form pendaftaran.
+3. Upload bukti pembayaran.
+4. Dapatkan QR code tiket.
+5. Hadir ke event, scan QR code.
+6. Download sertifikat setelah hadir.
+
+---
+
+## 4. Penjelasan Diagram Alur Sistem (Flowchart)
+- **Alur data:**
+  - Frontend mengirim request ke backend (API Laravel).
+  - Backend memproses, validasi, simpan ke database, dan kirim response ke frontend.
+- **Proses QR code:**
+  - Backend generate QR code unik untuk tiap peserta-event.
+  - QR code discan saat event, backend update status kehadiran.
+- **Proses sertifikat:**
+  - Backend generate PDF sertifikat otomatis jika peserta hadir.
+  - Sertifikat bisa diunduh dan diverifikasi QR code.
+- **Relasi entitas:**
+  - User → Participant → Event → Payment → Certificate.
+
+---
+
+## 5. Penjelasan Database (Ringkas)
+- **Tabel utama:**
+  - users, events, participants, payments, certificates, form_templates, form_fields.
+- **Relasi:**
+  - Satu event punya banyak peserta (participants).
+  - Satu peserta punya satu pembayaran dan satu sertifikat per event.
+  - Satu event punya satu form pendaftaran (form_template).
+
+---
+
+## 6. Keunggulan Aplikasi
+- **Mobile-first:** Bisa diakses dari HP dan web.
+- **Otomatisasi:** Sertifikat dan QR code dibuat otomatis.
+- **Keamanan:** Token-based auth, validasi input, proteksi file upload.
+- **User Experience:** statistik real-time, form builder dinamis.
+- **Mudah dikembangkan:** Struktur kode modular, dokumentasi API jelas.
+
+---
+
+## 7. Tips Presentasi
+- Jelaskan masalah yang diselesaikan aplikasi ini (misal: ribetnya absensi manual, sertifikat manual, dsb).
+- Tunjukkan keunggulan dibanding sistem manual atau aplikasi lain.
+- Sampaikan kendala yang dihadapi dan bagaimana kamu mengatasinya (misal: masalah storage, QR code, deployment).
+- Sampaikan rencana pengembangan ke depan (misal: payment gateway, notifikasi real-time, dsb).
+- Tunjukkan demo alur utama secara urut dan jelas.
+
+---
+
+## 8. Contoh Jawaban untuk Pertanyaan "Kenapa Fitur Ini Penting?"
+- **QR Code:** Mempercepat proses absensi, mengurangi human error.
+- **Sertifikat Otomatis:** Menghemat waktu panitia, mengurangi risiko sertifikat palsu.
+- **Dashboard Statistik:** Memudahkan monitoring event secara real-time.
+- **Form Builder:** Memudahkan admin menyesuaikan kebutuhan data pendaftaran.
+
+---
+
+## 9. Catatan Troubleshooting Praktis
+- **QR code tidak bisa discan:**
+  - Cek kamera, format QR, koneksi internet, permission browser.
+- **Sertifikat tidak bisa diakses:**
+  - Pastikan storage:link sudah benar, permission folder benar, path file di database sesuai.
+- **API error:**
+  - Cek log Laravel di storage/logs/laravel.log, cek koneksi database, cek environment variable.
+- **Gambar tidak muncul:**
+  - Cek path file, permission folder, pastikan file sudah diupload dengan benar.
+
+--- 

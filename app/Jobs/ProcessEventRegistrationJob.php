@@ -30,17 +30,10 @@ class ProcessEventRegistrationJob implements ShouldQueue
 
     public function handle()
     {
-        $qrData = "participant-{$this->user->id}-{$this->event->id}";
-        $uuid = \Str::uuid();
-        $qrPath = "public/qrcodes/participant-{$this->user->id}-{$this->event->id}-{$uuid}.png";
-        $qrImage = QrCode::format('png')->size(300)->generate($qrData);
-        Storage::put($qrPath, $qrImage);
-
+        // Hapus proses generate QR code, hanya buat participant tanpa qr_code_data dan qr_code_path
         $participant = Participant::create([
             'user_id' => $this->user->id,
             'event_id' => $this->event->id,
-            'qr_code_data' => $qrData,
-            'qr_code_path' => str_replace('public/', 'storage/', $qrPath),
             'attendance_status' => 'registered',
             'payment_status' => 'belum_bayar'
         ]);

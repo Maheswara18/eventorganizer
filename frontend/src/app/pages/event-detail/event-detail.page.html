@@ -127,6 +127,16 @@
           <ion-badge [color]="participant?.attendance_status === 'present' ? 'success' : (isRegistered ? 'primary' : 'medium')">
             {{ participant?.attendance_status === 'present' ? 'Hadir' : (isRegistered ? 'Terdaftar' : 'Belum Terdaftar') }}
           </ion-badge>
+          <div *ngIf="isPollingParticipantStatus" class="polling-status">
+            <ion-spinner name="dots" style="width:20px;height:20px;"></ion-spinner>
+            <span style="margin-left:8px;">Memeriksa status pendaftaran...</span>
+          </div>
+          <div *ngIf="!isPollingParticipantStatus && pollingType && ((pollingType === 'register' && !participant) || (pollingType === 'unregister' && participant))">
+            <ion-button size="small" color="primary" (click)="manualCheckParticipantStatus(pollingType)">
+              <ion-icon name="refresh-outline" slot="start"></ion-icon>
+              Cek Status
+            </ion-button>
+          </div>
         </div>
         <ion-button *ngIf="!isRegistered" (click)="showRegistrationForm()" expand="block">
           Daftar Sekarang

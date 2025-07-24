@@ -53,6 +53,9 @@ export class PaymentsPage implements OnInit {
 
   // ✅ Tambahan untuk deteksi tab aktif
   activePath: string = '';
+  isPollingPaymentStatus = false; // <--- Tambahan: status polling
+  pollingEventId: number | null = null; // <--- Tambahan: event yang sedang dipolling
+  pollingCountdown: number = 0; // <--- Tambahan: countdown polling
 
   constructor(
     private route: ActivatedRoute,
@@ -187,31 +190,43 @@ export class PaymentsPage implements OnInit {
 
       const response = await this.paymentService.submitPayment(this.selectedEvent.id, formData);
 
-      // Optimistic update: update status event di registeredEvents
-      const idx = this.registeredEvents.findIndex(e => e.id === this.selectedEvent?.id);
-      if (idx !== -1) {
-        this.registeredEvents[idx] = {
-          ...this.registeredEvents[idx],
-          payment_status: 'pending', // atau 'completed' jika backend langsung verifikasi
-          payment_proof_path: this.selectedFile.name
-        };
-      }
-
-      this.showToast('Bukti pembayaran berhasil diunggah', 'success');
-      this.closePaymentModal();
-      // Polling status pembayaran agar UI langsung update
-      await this.pollForPaymentStatus(this.selectedEvent.id);
-
-      if (this.returnUrl) {
-        this.router.navigate([this.returnUrl]);
+      // Cek response sukses
+      if (response && response.id) {
+        // Optimistic update: update status event di registeredEvents
+        const idx = this.registeredEvents.findIndex(e => e.id === this.selectedEvent?.id);
+        if (idx !== -1) {
+          this.registeredEvents[idx] = {
+            ...this.registeredEvents[idx],
+            payment_status: 'pending',
+            payment_proof_path: this.selectedFile.name
+          };
+        }
+        this.showToast('Bukti pembayaran berhasil diunggah', 'success');
+        this.closePaymentModal();
+        // Polling status pembayaran agar UI langsung update
+        this.isPollingPaymentStatus = true;
+        this.pollingEventId = this.selectedEvent.id;
+        await this.pollForPaymentStatus(this.selectedEvent.id);
+        this.isPollingPaymentStatus = false;
+        this.pollingEventId = null;
+        if (this.returnUrl) {
+          this.router.navigate([this.returnUrl]);
+        }
+      } else {
+        // Jika response tidak sesuai ekspektasi
+        this.showToast('Gagal mengunggah bukti pembayaran (response tidak valid)', 'danger');
       }
     } catch (error: any) {
       console.error('Error submitting payment:', error);
       if (error.error && error.error.errors) {
         const errorMessages = Object.values(error.error.errors).flat();
         this.showToast(errorMessages.join(', '), 'danger');
+      } else if (error.error && error.error.message) {
+        this.showToast(error.error.message, 'danger');
+      } else if (error.message) {
+        this.showToast('Gagal mengunggah bukti pembayaran: ' + error.message, 'danger');
       } else {
-        this.showToast('Gagal mengunggah bukti pembayaran', 'danger');
+        this.showToast('Gagal mengunggah bukti pembayaran (unknown error)', 'danger');
       }
     } finally {
       await loading.dismiss();
@@ -273,19 +288,26 @@ export class PaymentsPage implements OnInit {
 
   async pollForNewEvent(eventId: number) {
     let attempts = 0;
-    const maxAttempts = 5;
+    const maxAttempts = 15; // polling 15x (30 detik)
     const interval = 2000;
+    this.pollingCountdown = interval / 1000;
     while (attempts < maxAttempts) {
       await this.loadData();
       if (this.registeredEvents.some(e => e.id === eventId && e.payment_status === 'belum_bayar')) {
         break;
       }
-      await new Promise(resolve => setTimeout(resolve, interval));
+      // Countdown polling
+      this.pollingCountdown = interval / 1000;
+      for (let i = this.pollingCountdown; i > 0; i--) {
+        this.pollingCountdown = i;
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
       attempts++;
     }
     if (!this.registeredEvents.some(e => e.id === eventId && e.payment_status === 'belum_bayar')) {
-      this.showToast('Event baru akan muncul di pembayaran dalam beberapa detik. Silakan refresh jika belum muncul.', 'warning');
+      this.showToast('Event baru akan muncul di pembayaran dalam beberapa detik. Silakan cek status atau refresh jika belum muncul.', 'warning');
     }
+    this.pollingCountdown = 0;
   }
 
   async pollForPaymentStatus(eventId: number) {
@@ -304,7 +326,22 @@ export class PaymentsPage implements OnInit {
     }
     const event = this.registeredEvents.find(e => e.id === eventId);
     if (!event || event.payment_status === 'belum_bayar') {
-      this.showToast('Status pembayaran akan diperbarui dalam beberapa detik. Silakan refresh jika belum berubah.', 'warning');
+      // Tambahan: polling selesai tapi status belum berubah
+      this.showToast('Status pembayaran akan diperbarui dalam beberapa detik. Silakan cek status manual jika belum berubah.', 'warning');
+    }
+  }
+
+  async manualCheckPaymentStatus(eventId: number) {
+    this.isPollingPaymentStatus = true;
+    this.pollingEventId = eventId;
+    await this.loadData();
+    this.isPollingPaymentStatus = false;
+    this.pollingEventId = null;
+    const event = this.registeredEvents.find(e => e.id === eventId);
+    if (event && event.payment_status !== 'belum_bayar') {
+      this.showToast('Status pembayaran sudah diperbarui.', 'success');
+    } else {
+      this.showToast('Status pembayaran masih belum berubah. Silakan cek lagi beberapa saat.', 'warning');
     }
   }
 }

@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://rundexo.site/api',
-  baseUrl: 'https://rundexo.site' // ✅ tambahkan ini
+  apiUrl: 'http://localhost:8000/api',
+  baseUrl: 'http://localhost:8000' // ✅ tambahkan ini
 };
 
 /*

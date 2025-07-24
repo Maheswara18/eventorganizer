@@ -117,11 +117,13 @@ export class QrCodeComponent implements OnInit {
   private async fetchParticipantAndQrCode() {
     try {
       const participant = await this.getParticipantData();
-      
-      if (participant && participant.qr_code_base64) {
+      // Tambahan: cek status pembayaran
+      if (participant && participant.payment_status === 'completed' && participant.qr_code_base64) {
         this.qrCodeImageSource = participant.qr_code_base64;
         this.qrData = participant.qr_code_data;
         console.log('QR code image has been successfully received from the backend.');
+      } else if (participant && participant.payment_status !== 'completed') {
+        this.errorMessage = 'QR Code hanya tersedia setelah pembayaran berhasil.';
       } else {
         this.errorMessage = 'QR Code tidak dapat ditemukan untuk pendaftaran ini.';
         console.error('Participant data or QR code not found in backend response.');

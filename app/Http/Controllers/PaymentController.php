@@ -154,6 +154,17 @@ class PaymentController extends Controller
         $participant = Participant::where('payment_id', $payment->id)->first();
         if ($participant) {
             $participant->updatePaymentStatus();
+            // Tambahkan: generate QR code jika pembayaran completed dan participant belum punya QR
+            if ($payment->payment_status === 'completed' && (empty($participant->qr_code_data) || empty($participant->qr_code_path))) {
+                $qrData = "participant-{$participant->user_id}-{$participant->event_id}";
+                $uuid = \Str::uuid();
+                $qrPath = "public/qrcodes/participant-{$participant->user_id}-{$participant->event_id}-{$uuid}.png";
+                $qrImage = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')->size(300)->generate($qrData);
+                \Storage::put($qrPath, $qrImage);
+                $participant->qr_code_data = $qrData;
+                $participant->qr_code_path = str_replace('public/', 'storage/', $qrPath);
+                $participant->save();
+            }
         }
 
         return response()->json([

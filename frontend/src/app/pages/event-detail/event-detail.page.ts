@@ -68,6 +68,9 @@ export class EventDetailPage implements OnInit {
   participant: Participant | null = null;
   isPresent: boolean = false;
   participantStatus: ParticipantStatus | null = null;
+  isPollingParticipantStatus = false; // <--- Tambahan: status polling
+  pollingType: 'register' | 'unregister' | null = null; // <--- Tambahan: tipe polling
+  pollingInterval: any = null; // <--- Tambahan: simpan interval polling
 
   constructor(
     private route: ActivatedRoute,
@@ -151,9 +154,15 @@ export class EventDetailPage implements OnInit {
 
       const { data } = await modal.onWillDismiss();
       if (data?.responses) {
+        // Optimistic UI: status langsung berubah
+        this.participant = { ...this.participant, payment_status: 'belum_bayar', attendance_status: 'registered' } as any;
+        this.isPollingParticipantStatus = true;
+        this.pollingType = 'register';
         await this.eventsService.registerForEvent(this.event.id, { responses: data.responses });
         this.showToast('Berhasil mendaftar event', 'success');
-        await this.loadParticipant();
+        await this.pollParticipantStatus('register');
+        this.isPollingParticipantStatus = false;
+        this.pollingType = null;
         await this.loadParticipantStatus(this.event.id);
         await this.loadEvent();
       }
@@ -366,9 +375,17 @@ export class EventDetailPage implements OnInit {
           text: 'Ya, Batalkan',
           handler: async () => {
             try {
+              // Optimistic UI: status langsung hilang
+              this.participant = null;
+              this.isPollingParticipantStatus = true;
+              this.pollingType = 'unregister';
               await this.eventsService.unregisterFromEvent(this.event.id);
               this.showToast('Pendaftaran sedang diproses, mohon tunggu...');
-              this.pollParticipantStatus();
+              await this.pollParticipantStatus('unregister');
+              this.isPollingParticipantStatus = false;
+              this.pollingType = null;
+              await this.loadParticipantStatus(this.event.id);
+              await this.loadEvent();
             } catch (error) {
               this.showToast('Gagal membatalkan pendaftaran', 'danger');
             }
@@ -379,20 +396,44 @@ export class EventDetailPage implements OnInit {
     await alert.present();
   }
 
-  pollParticipantStatus() {
-    const interval = setInterval(async () => {
-      try {
-        await this.loadParticipant();
-        if (!this.participant) {
-          clearInterval(interval);
-          this.showToast('Pendaftaran berhasil dibatalkan', 'success');
-          await this.loadParticipantStatus(this.event.id);
-          await this.loadEvent();
-        }
-      } catch (err) {
-        // ignore
+  async pollParticipantStatus(type: 'register' | 'unregister') {
+    this.isPollingParticipantStatus = true;
+    this.pollingType = type;
+    let attempts = 0;
+    const maxAttempts = 5;
+    const interval = 2000;
+    if (this.pollingInterval) clearInterval(this.pollingInterval);
+    this.pollingInterval = setInterval(async () => {
+      attempts++;
+      await this.loadParticipant();
+      if ((type === 'register' && this.participant) || (type === 'unregister' && !this.participant)) {
+        clearInterval(this.pollingInterval);
+        this.isPollingParticipantStatus = false;
+        this.pollingType = null;
+        if (type === 'unregister') this.showToast('Pendaftaran berhasil dibatalkan', 'success');
+        await this.loadParticipantStatus(this.event.id);
+        await this.loadEvent();
+      } else if (attempts >= maxAttempts) {
+        clearInterval(this.pollingInterval);
+        this.isPollingParticipantStatus = false;
+        this.pollingType = null;
       }
-    }, 2000); // cek setiap 2 detik
+    }, interval);
+  }
+
+  async manualCheckParticipantStatus(type: 'register' | 'unregister') {
+    this.isPollingParticipantStatus = true;
+    this.pollingType = type;
+    await this.loadParticipant();
+    this.isPollingParticipantStatus = false;
+    this.pollingType = null;
+    if ((type === 'register' && this.participant) || (type === 'unregister' && !this.participant)) {
+      this.showToast('Status pendaftaran sudah diperbarui.', 'success');
+      await this.loadParticipantStatus(this.event.id);
+      await this.loadEvent();
+    } else {
+      this.showToast('Status pendaftaran masih belum berubah. Silakan cek lagi beberapa saat.', 'warning');
+    }
   }
 
   get isRegistered(): boolean {
