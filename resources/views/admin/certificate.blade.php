@@ -3,6 +3,19 @@
 @section('title', 'Daftar Sertifikat')
 
 @section('content')
+<style>
+    body {
+        background: url("{{ asset('bg-pattern.png') }}") center center / cover no-repeat !important;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
 <div class="container">
     <h2 class="my-4">Daftar Sertifikat</h2>
 

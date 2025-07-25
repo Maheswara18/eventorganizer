@@ -1,8 +1,32 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    body {
+        background: url("{{ asset('bg-pattern.png') }}") center center / cover no-repeat !important;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .card {
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+    
+</style>
+
 <div class="container mt-4">
     <h3>Daftar Pembayaran</h3>
+    <p>Berikut adalah daftar pembayaran yang telah dilakukan oleh peserta event.</p>
     <table class="table table-bordered table-hover">
         <thead class="table-light">
             <tr>
