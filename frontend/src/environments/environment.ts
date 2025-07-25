@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8000/api',
-  baseUrl: 'http://localhost:8000' // ✅ tambahkan ini
+  apiUrl: 'https://noticeably-welcome-kitten.ngrok-free.app/api',
+  baseUrl: 'https://noticeably-welcome-kitten.ngrok-free.app' // ✅ tambahkan ini
 };
 
 /*
