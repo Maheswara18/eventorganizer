@@ -1,13 +1,57 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+     body {
+        background: url("{{ asset('bg-pattern.png') }}") center center / cover no-repeat !important;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .card {
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+    
+    #qr-reader {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    #scan-controls {
+        margin-top: 2rem;
+    }
+
+    #scan-placeholder {
+        text-align: center;
+    }
+
+    #scan-summary {
+        margin-top: 2rem;
+    }
+</style>
+
+
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">← Kembali</a>
         <h4>Scanner QR Peserta</h4>
-        <button class="btn btn-outline-primary" onclick="viewScanHistory()">
-            <i class="bi bi-list"></i> <!-- Bootstrap Icon -->
-        </button>
+        
     </div>
 
     <!-- QR Scanner Container -->

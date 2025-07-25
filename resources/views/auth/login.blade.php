@@ -5,12 +5,13 @@
     <title>Login Admin - Rundexo</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}"> <!-- jika kamu pakai Tailwind -->
     <style>
-        body {
-            background: #f3f4f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        
+         body {
+        background: url("{{ asset('bg-pattern.png') }}") center center / cover no-repeat !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
         }
 
         .login-container {
@@ -23,8 +24,13 @@
         }
 
         .logo-img {
-            width: 60px;
-            height: auto;
+        width: 80px;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        background-color: #2563eb;
+        padding: 8px;
+        border-radius: 8px;
         }
 
         .logo-container {
@@ -118,10 +124,7 @@
             </div>
 
             <button type="submit" class="login-button">LOGIN</button>
-
-            <div class="register-link">
-                Tidak punya akun? <a href="#">Register</a>
-            </div>
+<!--  -->
         </form>
     </div>
 </body>
